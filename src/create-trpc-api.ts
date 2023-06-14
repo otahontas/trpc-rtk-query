@@ -4,16 +4,18 @@ import type {
   QueryDefinition,
 } from "@reduxjs/toolkit/query/react";
 import type { CreateTRPCClientOptions } from "@trpc/client";
-import type {
-  AnyProcedure,
-  AnyRouter,
-  Procedure,
-  inferProcedureInput,
-  inferProcedureOutput,
+import {
+  TRPCError,
+  type AnyProcedure,
+  type AnyRouter,
+  type Procedure,
+  type inferProcedureInput,
+  type inferProcedureOutput,
 } from "@trpc/server";
 
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { createTRPCUntypedClient } from "@trpc/client";
+import { TRPCClientError, createTRPCUntypedClient } from "@trpc/client";
+import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 
 // Follows trpc internal infer type pattern
 type inferProcedureType<TProcedure extends AnyProcedure> = TProcedure extends Procedure<
@@ -56,6 +58,42 @@ type CreateTRPCApiEndpointDefinitions<
     : never;
 };
 
+export type TRPCBaseQueryError =
+  | {
+      /**
+       * * `"TRPC_CLIENT_ERROR"`:
+       *   An error that happened on trpc client. Original error is stringified in error
+       *   attribute.
+       **/
+      status: "TRPC_CLIENT_ERROR";
+      data?: undefined;
+      name: string;
+      message: string;
+      error: string;
+    }
+  | {
+      /**
+       * * `"TRPC_ERROR"`:
+       *   An error that was returned by trpc backend. Original error is stringified in
+       *   error attribute.
+       **/
+      status: "TRPC_ERROR";
+      data?: undefined;
+      name: string;
+      statusCode: number;
+      message: string;
+      error: string;
+    }
+  | {
+      /**
+       * * `"CUSTOM_ERROR"`:
+       *   A custom error type that you can return from your `queryFn` where another error might not make sense.
+       **/
+      status: "CUSTOM_ERROR";
+      data?: unknown;
+      error: string;
+    };
+
 const deCapitalize = (string_: string) => {
   const firstChar = string_[0];
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
@@ -69,8 +107,9 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
   const client = createTRPCUntypedClient(options);
 
   // RTK Query api
+
+  // This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
   // TODO: allow passing original api from outside and inject endpoints instead of
-  // generating the api from scratch
   const baseQuery = async ({
     procedureArgs,
     procedureName,
@@ -85,16 +124,43 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
         data: await client[procedureType](procedureName, procedureArgs),
       };
     } catch (error) {
-      // TODO: proper error typings for query results (i.e. TRPCClientError)
-      // TODO: Try to catch non-serializable errors here, and turn them serializable
-      console.log("error", error);
-      return { error: "Error when calling client" };
+      let properlyShapedError: {
+        error: TRPCBaseQueryError;
+      };
+      if (error instanceof TRPCClientError) {
+        properlyShapedError = {
+          error: {
+            status: "TRPC_CLIENT_ERROR",
+            name: error.name,
+            message: error.message,
+            error: String(error),
+          },
+        };
+      } else if (error instanceof TRPCError) {
+        properlyShapedError = {
+          error: {
+            status: "TRPC_ERROR",
+            name: error.name,
+            statusCode: getHTTPStatusCodeFromError(error),
+            message: error.message,
+            error: String(error),
+          },
+        };
+      } else {
+        properlyShapedError = {
+          error: {
+            status: "CUSTOM_ERROR",
+            error: String(error),
+          },
+        };
+      }
+      return properlyShapedError;
     }
   };
   const reducerPath = "TRPCApi" as const;
-  type BaseQuery = typeof baseQuery;
   type TagTypes = never; // No tags
   type ReducerPath = typeof reducerPath;
+  type BaseQuery = typeof baseQuery;
   // Create underlying api that can be proxyed
   const nonProxyApi = createApi<
     BaseQuery,
