@@ -4,17 +4,17 @@ import type {
   QueryDefinition,
 } from "@reduxjs/toolkit/query/react";
 import type { CreateTRPCClientOptions } from "@trpc/client";
-import {
-  TRPCError,
-  type AnyProcedure,
-  type AnyRouter,
-  type Procedure,
-  type inferProcedureInput,
-  type inferProcedureOutput,
-} from "@trpc/server";
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { TRPCClientError, createTRPCUntypedClient } from "@trpc/client";
+import {
+  type AnyProcedure,
+  type AnyRouter,
+  type Procedure,
+  TRPCError,
+  type inferProcedureInput,
+  type inferProcedureOutput,
+} from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 
 // Follows trpc internal infer type pattern
@@ -60,44 +60,52 @@ type CreateTRPCApiEndpointDefinitions<
 
 export type TRPCBaseQueryError =
   | {
+      data?: undefined;
+      error: string;
+      message: string;
+      name: string;
       /**
        * * `"TRPC_CLIENT_ERROR"`:
        *   An error that happened on trpc client. Original error is stringified in error
        *   attribute.
        **/
       status: "TRPC_CLIENT_ERROR";
-      data?: undefined;
-      name: string;
-      message: string;
-      error: string;
     }
   | {
+      data?: undefined;
+      error: string;
+      message: string;
+      name: string;
       /**
        * * `"TRPC_ERROR"`:
        *   An error that was returned by trpc backend. Original error is stringified in
        *   error attribute.
        **/
       status: "TRPC_ERROR";
-      data?: undefined;
-      name: string;
       statusCode: number;
-      message: string;
-      error: string;
     }
   | {
+      data?: unknown;
+      error: string;
       /**
        * * `"CUSTOM_ERROR"`:
        *   A custom error type that you can return from your `queryFn` where another error might not make sense.
        **/
       status: "CUSTOM_ERROR";
-      data?: unknown;
-      error: string;
     };
 
 const deCapitalize = (string_: string) => {
   const firstChar = string_[0];
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
 };
+
+// Note that assertions can't be declared with arrow functions. Otherwise we're
+// following arrow function style here.
+function assertPropertyIsString(property: string | symbol): asserts property is string {
+  if (typeof property === "symbol") {
+    throw new TypeError("Calling api with new symbol properties is not supported");
+  }
+}
 
 export const createTRPCApi = <TRouter extends AnyRouter>(
   options: CreateTRPCClientOptions<TRouter>,
@@ -111,17 +119,17 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
   // This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
   // TODO: allow passing original api from outside and inject endpoints instead of
   const baseQuery = async ({
-    procedureArgs,
+    procedureArguments,
     procedureName,
     procedureType,
   }: {
-    procedureArgs: unknown;
+    procedureArguments: unknown;
     procedureName: string;
     procedureType: "mutation" | "query";
   }) => {
     try {
       return {
-        data: await client[procedureType](procedureName, procedureArgs),
+        data: await client[procedureType](procedureName, procedureArguments),
       };
     } catch (error) {
       let properlyShapedError: {
@@ -130,27 +138,27 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
       if (error instanceof TRPCClientError) {
         properlyShapedError = {
           error: {
-            status: "TRPC_CLIENT_ERROR",
-            name: error.name,
-            message: error.message,
             error: String(error),
+            message: error.message,
+            name: error.name,
+            status: "TRPC_CLIENT_ERROR",
           },
         };
       } else if (error instanceof TRPCError) {
         properlyShapedError = {
           error: {
-            status: "TRPC_ERROR",
-            name: error.name,
-            statusCode: getHTTPStatusCodeFromError(error),
-            message: error.message,
             error: String(error),
+            message: error.message,
+            name: error.name,
+            status: "TRPC_ERROR",
+            statusCode: getHTTPStatusCodeFromError(error),
           },
         };
       } else {
         properlyShapedError = {
           error: {
-            status: "CUSTOM_ERROR",
             error: String(error),
+            status: "CUSTOM_ERROR",
           },
         };
       }
@@ -193,22 +201,105 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
     },
   ] as const;
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  /* eslint-disable no-prototype-builtins */
   return new Proxy(nonProxyApi, {
     get(target, property) {
-      // === Always call the property if it's already defined
+      // If property was endpoints, user might want to call endpoint that isn't
+      // yet generated. Return proxy that handles generating
+      // TODO: can this be made cleaner, maybe recursion here?
+      if (property === "endpoints") {
+        console.log("endpoints property called");
+        return new Proxy((target as any)[property as any], {
+          get(endpointTarget, endpointProperty) {
+            // Validate & call the property if is already defined
+            console.log("endpoint property inside endpoints", endpointProperty);
+            if (endpointTarget.hasOwnProperty(property)) {
+              console.log("endpoint target has property, calling it");
+              return (endpointTarget as any)[property as any];
+            }
+            assertPropertyIsString(endpointProperty);
 
-      // eslint-disable-next-line no-prototype-builtins
+            // Return one more proxy that can actually inject the endpoint
+            // We can't do it at this level yet, since we need to know the type of
+            // operation (query or mutation) that's being called for the endpoint
+            //
+            // Since endpoint in endpoints object might be undefined, we pass default
+            // to empty object
+            return new Proxy((endpointTarget as any)[endpointProperty as any] ?? {}, {
+              get(operationTarget, operationProperty) {
+                console.log("operation property", operationProperty);
+                if (operationTarget.hasOwnProperty(property)) {
+                  console.log("operation target has property, calling it");
+                  return (operationTarget as any)[property as any];
+                }
+                assertPropertyIsString(operationProperty);
+                const mutationOperation = "useMutation";
+                const queryOperations = [
+                  "useQuery",
+                  "useQueryState",
+                  "useQuerySubscription",
+                  "useLazyQuery",
+                  "useLazyQuerySubscription",
+                ];
+
+                // default to state where we don't find operationProperty
+                let procedureTypeResult:
+                  | {
+                      data: "mutation" | "query";
+                      success: true;
+                    }
+                  | {
+                      error: string;
+                      success: false;
+                    } = {
+                  error: `Property ${property}.${endpointProperty}.${operationProperty} is not defined and could not be generated`,
+                  success: false,
+                };
+                if (operationProperty === mutationOperation) {
+                  procedureTypeResult = {
+                    data: "mutation",
+                    success: true,
+                  };
+                } else if (queryOperations.includes(operationProperty)) {
+                  procedureTypeResult = {
+                    data: "query",
+                    success: true,
+                  };
+                }
+
+                if (!procedureTypeResult.success) {
+                  throw new TypeError(procedureTypeResult.error);
+                }
+                const { data: procedureType } = procedureTypeResult;
+                // procedureName is the endpoint name
+                const procedureName = endpointProperty;
+                target.injectEndpoints({
+                  endpoints: (builder) => ({
+                    [procedureName]: builder[procedureType]({
+                      query: (procedureArguments: unknown) => ({
+                        procedureArguments,
+                        procedureName,
+                        procedureType,
+                      }),
+                    }),
+                  }),
+                });
+                // endpoint injected, return it from the correct path
+                return (target as any)["endpoints"][procedureName][operationProperty];
+              },
+            });
+          },
+        });
+      }
+
+      // TODO: should we use Reflect instead?
       if (target.hasOwnProperty(property)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (target as any)[property as any];
       }
-
-      // === Othewise, try to generate property
-
-      // Can't really do anything here if symbol is not already part of api
-      if (typeof property === "symbol") {
-        throw new TypeError("Calling api with new symbol properties is not supported");
-      }
+      /* eslint-enable @typescript-eslint/no-explicit-any */
+      /* eslint-enable no-prototype-builtins */
+      assertPropertyIsString(property);
 
       for (const { procedureType, regex } of regexesWithProcedureType) {
         const match = regex.exec(property);
@@ -221,14 +312,14 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
         if (!capitalizedEndpointName) {
           continue;
         }
-        const procedure = deCapitalize(capitalizedEndpointName);
+        const procedureName = deCapitalize(capitalizedEndpointName);
         target.injectEndpoints({
           endpoints: (builder) => ({
-            [procedure]: builder[procedureType]({
+            [procedureName]: builder[procedureType]({
               query: (procedureArguments: unknown) => ({
-                procedureArgs: procedureArguments,
-                procedureName: procedure,
-                procedureType: "query",
+                procedureArguments,
+                procedureName,
+                procedureType,
               }),
             }),
           }),

@@ -46,8 +46,8 @@ export const createReactTestApp = () => {
     );
   return {
     api,
-    store,
     createComponentWrapper,
+    store,
   };
 };
 
@@ -74,7 +74,7 @@ describe("create-trpc-api", () => {
   });
 
   it("Generates 1st level mutations with correct typings", () => {
-    const { useUpdateNameMutation, useCreateUserMutation } =
+    const { useCreateUserMutation, useUpdateNameMutation } =
       createTRPCApi<FlatAppRouter>(tRPCClientOptions);
 
     expect(useUpdateNameMutation).toBeDefined();
@@ -101,6 +101,20 @@ describe("create-trpc-api", () => {
       // @ts-expect-error Should not be possible to pass number here
       Assert<Equals<useUserCreateMutationTriggerArgument, number>>,
     ];
+  });
+
+  it.each([
+    "useQuery",
+    "useMutation",
+    "useQueryState",
+    "useQuerySubscription",
+    "useLazyQuery",
+    "useLazyQuerySubscription",
+  ])("Generates %s hook correctly when accessing hooks through endpoint deeply", () => {
+    const api = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+    const query = api.endpoints.getUserById.useQuery;
+    expect(query).toBeDefined();
+    expectTypeOf(query).toBeFunction();
   });
 });
 
