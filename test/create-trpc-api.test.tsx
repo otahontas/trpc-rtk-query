@@ -6,7 +6,7 @@ import { Provider } from "react-redux";
 import renderer from "react-test-renderer";
 import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
 
-import type { FlatAppRouter } from "./fixtures";
+import type { AppRouter } from "./fixtures";
 
 import { createTRPCApi } from "../src/create-trpc-api";
 import { startTestServer, userFixtures } from "./fixtures";
@@ -30,7 +30,7 @@ export const renderedToJSon = (component: renderer.ReactTestRenderer) => {
 
 // generate api store and app creator for testing hooks
 export const createReactTestApp = () => {
-  const api = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+  const api = createTRPCApi<AppRouter>(tRPCClientOptions);
   const store = configureStore({
     middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), api.middleware],
     reducer: {
@@ -53,13 +53,13 @@ export const createReactTestApp = () => {
 
 describe("create-trpc-api", () => {
   it("Generates an api instance", () => {
-    const api = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+    const api = createTRPCApi<AppRouter>(tRPCClientOptions);
     expect(api).toBeDefined();
   });
 
   it("Generates queries with correct typings", () => {
     const { useGetUserByIdQuery, useListUsersQuery } =
-      createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+      createTRPCApi<AppRouter>(tRPCClientOptions);
 
     expect(useGetUserByIdQuery).toBeDefined();
     expectTypeOf(useGetUserByIdQuery).toBeFunction();
@@ -75,7 +75,7 @@ describe("create-trpc-api", () => {
 
   it("Generates mutations with correct typings", () => {
     const { useCreateUserMutation, useUpdateNameMutation } =
-      createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+      createTRPCApi<AppRouter>(tRPCClientOptions);
 
     expect(useUpdateNameMutation).toBeDefined();
     expect(useCreateUserMutation).toBeDefined();
@@ -113,7 +113,7 @@ describe("create-trpc-api", () => {
   ])(
     "Generates %s hook when accessing hooks through endpoints[endpoint] property",
     () => {
-      const api = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+      const api = createTRPCApi<AppRouter>(tRPCClientOptions);
       const query = api.endpoints.getUserById.useQuery;
       expect(query).toBeDefined();
       expectTypeOf(query).toBeFunction();
@@ -121,7 +121,7 @@ describe("create-trpc-api", () => {
   );
 
   it("Generates defined usePrefetch with typings", () => {
-    const { usePrefetch } = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+    const { usePrefetch } = createTRPCApi<AppRouter>(tRPCClientOptions);
     expect(usePrefetch).toBeDefined();
     expectTypeOf(usePrefetch).toBeFunction();
     expectTypeOf(usePrefetch).parameter(0).toMatchTypeOf<"getUserById" | "listUsers">();

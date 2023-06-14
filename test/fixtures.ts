@@ -23,7 +23,27 @@ export const userFixtures: Record<User["id"], User> = {
   3: { id: 3, name: "Yolo Swaggins" },
 };
 
-const flatAppRouter = router({
+const veryDeepRouter = router({
+  deep: router({
+    getVeryNestedMessage: procedure
+      .input(
+        z.object({
+          deepInput: z.string(),
+        }),
+      )
+      .query(async (options) => {
+        const {
+          input: { deepInput },
+        } = options;
+        return {
+          inputBack: deepInput,
+          messageFromDeep: "Hello from deep",
+        };
+      }),
+  }),
+});
+
+const appRouter = router({
   createUser: procedure.input(z.string()).mutation(async (options) => {
     const { input } = options;
     const id = Math.max(...Object.values(userFixtures).map(({ id }) => id)) + 1;
@@ -45,6 +65,7 @@ const flatAppRouter = router({
     return user;
   }),
   listUsers: procedure.query(async () => Object.values(userFixtures)),
+  nested: veryDeepRouter,
   updateName: procedure.input(userSchema).mutation(async (options) => {
     const { input } = options;
     if (!userFixtures[input.id]) {
@@ -57,11 +78,11 @@ const flatAppRouter = router({
   }),
 });
 
-export type FlatAppRouter = typeof flatAppRouter;
+export type AppRouter = typeof appRouter;
 
 const testPort = 3333;
 
-export const tRPCClientOptions: CreateTRPCClientOptions<FlatAppRouter> = {
+export const tRPCClientOptions: CreateTRPCClientOptions<AppRouter> = {
   links: [httpBatchLink({ url: `http://localhost:${testPort}` })],
 };
 interface TestServer {
@@ -71,7 +92,7 @@ interface TestServer {
 export const startTestServer = (): Promise<TestServer> =>
   new Promise((resolveCreate) => {
     const { server } = createHTTPServer({
-      router: flatAppRouter,
+      router: appRouter,
     });
 
     const closePromise = (): Promise<void> =>
