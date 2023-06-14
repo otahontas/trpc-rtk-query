@@ -205,17 +205,14 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
   /* eslint-disable no-prototype-builtins */
   return new Proxy(nonProxyApi, {
     get(target, property) {
-      // If property was endpoints, user might want to call endpoint that isn't
+      // If property was endpoints , user might want to call endpoint that isn't
       // yet generated. Return proxy that handles generating
       // TODO: can this be made cleaner, maybe recursion here?
       if (property === "endpoints") {
-        console.log("endpoints property called");
         return new Proxy((target as any)[property as any], {
           get(endpointTarget, endpointProperty) {
             // Validate & call the property if is already defined
-            console.log("endpoint property inside endpoints", endpointProperty);
             if (endpointTarget.hasOwnProperty(property)) {
-              console.log("endpoint target has property, calling it");
               return (endpointTarget as any)[property as any];
             }
             assertPropertyIsString(endpointProperty);
@@ -228,9 +225,7 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
             // to empty object
             return new Proxy((endpointTarget as any)[endpointProperty as any] ?? {}, {
               get(operationTarget, operationProperty) {
-                console.log("operation property", operationProperty);
                 if (operationTarget.hasOwnProperty(property)) {
-                  console.log("operation target has property, calling it");
                   return (operationTarget as any)[property as any];
                 }
                 assertPropertyIsString(operationProperty);
@@ -274,6 +269,8 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
                 const { data: procedureType } = procedureTypeResult;
                 // procedureName is the endpoint name
                 const procedureName = endpointProperty;
+                // TODO: refactor injecting endpoint to external function, it's called
+                // always similarly
                 target.injectEndpoints({
                   endpoints: (builder) => ({
                     [procedureName]: builder[procedureType]({
@@ -292,6 +289,38 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
           },
         });
       }
+
+      // if property is usePrefetch we need to wrap it with it's arguments, so
+      // we can inject endpoint if needed
+      if (property === "usePrefetch") {
+        return (...arguments_: any[]) => {
+          const [endpointName] = arguments_;
+          if (!endpointName) {
+            throw new TypeError(
+              "usePrefetch must be called with endpoint name as first arg",
+            );
+          }
+          // If endpoint hasn't been yet injected, inject it. UsePrefetch handles
+          // only queries
+          if (!(target as any)["endpoints"][endpointName]) {
+            const procedureName = endpointName;
+            target.injectEndpoints({
+              endpoints: (builder) => ({
+                [procedureName]: builder.query({
+                  query: (procedureArguments: unknown) => ({
+                    procedureArguments,
+                    procedureName,
+                    procedureType: "query",
+                  }),
+                }),
+              }),
+            });
+          }
+          return (target as any).usePrefetch(...arguments_);
+        };
+      }
+
+      // Generate the endpoint
 
       // TODO: should we use Reflect instead?
       if (target.hasOwnProperty(property)) {

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { CreateTRPCClientOptions } from "@trpc/client";
-import { z } from "zod";
 
 import { httpBatchLink } from "@trpc/client";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { z } from "zod";
 
 const t = initTRPC.create();
 
@@ -24,15 +24,13 @@ export const userFixtures: Record<User["id"], User> = {
 };
 
 const flatAppRouter = router({
-  updateName: procedure.input(userSchema).mutation(async (options) => {
+  createUser: procedure.input(z.string()).mutation(async (options) => {
     const { input } = options;
-    if (!userFixtures[input.id]) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "User not found",
-      });
-    }
-    userFixtures[input.id]!.name = input.name;
+    const id = Math.max(...Object.values(userFixtures).map(({ id }) => id)) + 1;
+    userFixtures[id] = {
+      id,
+      name: input,
+    };
   }),
   getUserById: procedure.input(z.number()).query(async (options) => {
     const { input } = options;
@@ -46,15 +44,17 @@ const flatAppRouter = router({
     }
     return user;
   }),
-  createUser: procedure.input(z.string()).mutation(async (options) => {
-    const { input } = options;
-    const id = Math.max(...Object.values(userFixtures).map(({ id }) => id)) + 1;
-    userFixtures[id] = {
-      id,
-      name: input,
-    };
-  }),
   listUsers: procedure.query(async () => Object.values(userFixtures)),
+  updateName: procedure.input(userSchema).mutation(async (options) => {
+    const { input } = options;
+    if (!userFixtures[input.id]) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+    userFixtures[input.id]!.name = input.name;
+  }),
 });
 
 export type FlatAppRouter = typeof flatAppRouter;

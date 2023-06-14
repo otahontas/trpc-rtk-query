@@ -57,7 +57,7 @@ describe("create-trpc-api", () => {
     expect(api).toBeDefined();
   });
 
-  it("Generates 1st level queries with correct typings", () => {
+  it("Generates queries with correct typings", () => {
     const { useGetUserByIdQuery, useListUsersQuery } =
       createTRPCApi<FlatAppRouter>(tRPCClientOptions);
 
@@ -73,7 +73,7 @@ describe("create-trpc-api", () => {
       .toMatchTypeOf<typeof skipToken | void>();
   });
 
-  it("Generates 1st level mutations with correct typings", () => {
+  it("Generates mutations with correct typings", () => {
     const { useCreateUserMutation, useUpdateNameMutation } =
       createTRPCApi<FlatAppRouter>(tRPCClientOptions);
 
@@ -110,11 +110,21 @@ describe("create-trpc-api", () => {
     "useQuerySubscription",
     "useLazyQuery",
     "useLazyQuerySubscription",
-  ])("Generates %s hook correctly when accessing hooks through endpoint deeply", () => {
-    const api = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
-    const query = api.endpoints.getUserById.useQuery;
-    expect(query).toBeDefined();
-    expectTypeOf(query).toBeFunction();
+  ])(
+    "Generates %s hook when accessing hooks through endpoints[endpoint] property",
+    () => {
+      const api = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+      const query = api.endpoints.getUserById.useQuery;
+      expect(query).toBeDefined();
+      expectTypeOf(query).toBeFunction();
+    },
+  );
+
+  it("Generates defined usePrefetch with typings", () => {
+    const { usePrefetch } = createTRPCApi<FlatAppRouter>(tRPCClientOptions);
+    expect(usePrefetch).toBeDefined();
+    expectTypeOf(usePrefetch).toBeFunction();
+    expectTypeOf(usePrefetch).parameter(0).toMatchTypeOf<"getUserById" | "listUsers">();
   });
 });
 
@@ -159,6 +169,7 @@ describe("making actual requests with hooks renders correctly", () => {
     const Component = () => {
       const { useGetUserByIdQuery } = api;
       const userId = 4;
+      // TODO: errors should be properly typed from basequery!
       const { data, error, isLoading } = useGetUserByIdQuery(userId);
       if (isLoading) {
         return <div>Loading...</div>;
@@ -181,6 +192,23 @@ describe("making actual requests with hooks renders correctly", () => {
     await setTimeout(500);
     // result after data has loaded and component has re-rendered
     result = renderedToJSon(app);
+    expect(result).toMatchSnapshot();
+  });
+
+  it("with call to usePrefetch", async () => {
+    const { api, createComponentWrapper } = createReactTestApp();
+    // TODO: test that prefetching is actually called and it populates correctly!
+    const Component = () => {
+      const { usePrefetch } = api;
+      const userId = 1;
+      const prefetch = usePrefetch("getUserById");
+      expect(prefetch).toBeDefined();
+      prefetch(userId);
+      return <>prefetched</>;
+    };
+    const app = createComponentWrapper(Component);
+    // first render
+    const result = renderedToJSon(app);
     expect(result).toMatchSnapshot();
   });
 });
