@@ -1,95 +1,95 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { CreateTRPCClientOptions } from "@trpc/client";
+import { z } from "zod";
 
 import { httpBatchLink } from "@trpc/client";
 import { TRPCError, initTRPC } from "@trpc/server";
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 const t = initTRPC.create();
 
 export const { procedure, router } = t;
 
-type User = { id: number; name: string };
+const userSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});
 
-const database: Record<User["id"], User> = {
-  1: { id: 1, name: "John" },
-  2: { id: 2, name: "Jane" },
+export type User = { id: number; name: string };
+
+export const userFixtures: Record<User["id"], User> = {
+  1: { id: 1, name: "John Johnny" },
+  2: { id: 2, name: "Jane Janny" },
+  3: { id: 3, name: "Yolo Swaggins" },
 };
 
-type ValidateTypeReturn<T extends "number" | "string"> = T extends "number"
-  ? number
-  : T extends "string"
-  ? string
-  : never;
-
-function validateType(type: "string"): (input: unknown) => string;
-function validateType(type: "number"): (input: unknown) => number;
-function validateType(type: "number" | "string") {
-  return (input: unknown): ValidateTypeReturn<typeof type> => {
-    if (typeof input === type) {
-      switch (type) {
-        case "string": {
-          return input as string;
-        }
-        case "number": {
-          return input as number;
-        }
-        default: {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: `Not supported ${type}`,
-          });
-        }
-      }
-    }
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Bad input, expected ${type}, but was ${typeof input}`,
-    });
-  };
-}
-
 const flatAppRouter = router({
-  // just for testing purposes, we don't actually care about the input
-  updateName: procedure
-    .input(() => ({
-      id: 1,
-      name: "Yolo Swaggins",
-    }))
-    .mutation(async (options) => {
-      const { input } = options;
-      if (!database[input.id]) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found",
-        });
-      }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      database[input.id]!.name = input.name;
-    }),
-  userById: procedure.input(validateType("number")).query(async (options) => {
+  updateName: procedure.input(userSchema).mutation(async (options) => {
+    const { input } = options;
+    if (!userFixtures[input.id]) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+    userFixtures[input.id]!.name = input.name;
+  }),
+  getUserById: procedure.input(z.number()).query(async (options) => {
     const { input } = options;
     // Retrieve the user with the given ID
-    const user = database[input];
+    const user = userFixtures[input];
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "User not found",
       });
     }
-    return { id: input, name: "John" };
+    return user;
   }),
-  userCreate: procedure.input(validateType("string")).mutation(async (options) => {
+  createUser: procedure.input(z.string()).mutation(async (options) => {
     const { input } = options;
-    const id = Math.max(...Object.values(database).map(({ id }) => id)) + 1;
-    database[id] = {
+    const id = Math.max(...Object.values(userFixtures).map(({ id }) => id)) + 1;
+    userFixtures[id] = {
       id,
       name: input,
     };
   }),
-  userList: procedure.query(async () => Object.values(database)),
+  listUsers: procedure.query(async () => Object.values(userFixtures)),
 });
 
 export type FlatAppRouter = typeof flatAppRouter;
 
+const testPort = 3333;
+
 export const tRPCClientOptions: CreateTRPCClientOptions<FlatAppRouter> = {
-  links: [httpBatchLink({ url: "some-url" })],
+  links: [httpBatchLink({ url: `http://localhost:${testPort}` })],
 };
+interface TestServer {
+  close: () => Promise<void>;
+}
+
+export const startTestServer = (): Promise<TestServer> =>
+  new Promise((resolveCreate) => {
+    const { server } = createHTTPServer({
+      router: flatAppRouter,
+    });
+
+    const closePromise = (): Promise<void> =>
+      new Promise((resolveClose, rejectClose) => {
+        server.close((error) => {
+          if (error) {
+            console.error("Failed to close test server!");
+            rejectClose(error);
+            return;
+          }
+          resolveClose();
+        });
+      });
+
+    server.listen(testPort, () => {
+      console.log("Test server listening!");
+      resolveCreate({
+        close: closePromise,
+      });
+    });
+  });

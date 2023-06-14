@@ -86,7 +86,9 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
       };
     } catch (error) {
       // TODO: proper error typings for query results (i.e. TRPCClientError)
-      return { error };
+      // TODO: Try to catch non-serializable errors here, and turn them serializable
+      console.log("error", error);
+      return { error: "Error when calling client" };
     }
   };
   const reducerPath = "TRPCApi" as const;

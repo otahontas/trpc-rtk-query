@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`making actual requests > with successful useUserIdQuery 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`making actual requests > with successful useUserIdQuery 2`] = `
+<div>
+  <p>
+    Id: 
+    1
+  </p>
+  <p>
+    Name: 
+    John Johnny
+  </p>
+</div>
+`;
+
+exports[`making actual requests with hooks renders correctly > with failing useUserIdQuery 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`making actual requests with hooks renders correctly > with failing useUserIdQuery 2`] = `
+<div>
+  Error
+</div>
+`;
+
+exports[`making actual requests with hooks renders correctly > with successful useUserIdQuery 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`making actual requests with hooks renders correctly > with successful useUserIdQuery 2`] = `
+<div>
+  <p>
+    Id: 
+    1
+  </p>
+  <p>
+    Name: 
+    John Johnny
+  </p>
+</div>
+`;
