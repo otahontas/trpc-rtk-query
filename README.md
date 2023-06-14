@@ -2,7 +2,7 @@
 
 Generate rtk query api endpoints automatically from your trpc setup!
 
-This is very much work in progress -project, but when ready, my goal is to provide [react-query like tRPC experience](https://trpc.io/docs/client/react) for Redux toolkit users. Here are some usage pattern I'm planning to support:
+This is very much work in progress -project, but when ready, my goal is to provide [react-query like tRPC experience](https://trpc.io/docs/client/react) for Redux toolkit users. Here are some usage patterns I'm planning to support:
 
 ## Create new api
 
@@ -115,13 +115,13 @@ export { useUserListQuery } from api;
 ## TODO
 
 - [x] Generate rtk query api with given `AppRouter` typings (simplest version)
-- [] Support deep routers from trpc
-- [] Allow passing in custom client, use that instead of generating internal client
-- [] Allow passing in already existing api
-- [] Allow merging extra parameters to injected endpoints to e.g. make optimistic updates possible
-- [] Allow merging extra parameters to createApi to e.g. make optimistic updates possible
-- [] e2e tests
-- [] ci
-- [] publish package
-- [] remove unnecessary stuff from distributed package (e.g. don't have jsx in tsconfig etc)
-- [] this is very react heavy approach, test against vue and svelte too
+- [ ] Support deep routers from trpc
+- [ ] Allow passing in custom client, use that instead of generating internal client
+- [ ] Allow passing in already existing api
+- [ ] Allow merging extra parameters to injected endpoints to e.g. make optimistic updates possible
+- [ ] Allow merging extra parameters to createApi to e.g. make optimistic updates possible
+- [ ] e2e tests
+- [ ] ci
+- [ ] publish package
+- [ ] remove unnecessary stuff from distributed package (e.g. don't have jsx in tsconfig etc)
+- [ ] this is very react heavy approach, test against vue and svelte too
