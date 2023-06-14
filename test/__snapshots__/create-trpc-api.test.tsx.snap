@@ -14,6 +14,25 @@ exports[`making actual requests with hooks renders correctly > with failing useU
 </div>
 `;
 
+exports[`making actual requests with hooks renders correctly > with successful deep nested query 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`making actual requests with hooks renders correctly > with successful deep nested query 2`] = `
+<div>
+  <p>
+    inputBack: 
+    heyoooo
+  </p>
+  <p>
+    messageFromDeep: 
+    Hello from deep
+  </p>
+</div>
+`;
+
 exports[`making actual requests with hooks renders correctly > with successful useUserIdQuery 1`] = `
 <div>
   Loading...

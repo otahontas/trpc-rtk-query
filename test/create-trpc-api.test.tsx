@@ -84,7 +84,7 @@ describe("create-trpc-api", () => {
     type UseUpdateNameMutationTriggerArgument = Parameters<
       ReturnType<typeof useUpdateNameMutation>[0]
     >[0];
-    type useUserCreateMutationTriggerArgument = Parameters<
+    type UseUserCreateMutationTriggerArgument = Parameters<
       ReturnType<typeof useCreateUserMutation>[0]
     >[0];
     // @ts-expect-error _tests is unused
@@ -97,24 +97,23 @@ describe("create-trpc-api", () => {
         // @ts-expect-error Argument is required
         Equals<UseUpdateNameMutationTriggerArgument, never>
       >,
-      Assert<Equals<useUserCreateMutationTriggerArgument, string>>,
+      Assert<Equals<UseUserCreateMutationTriggerArgument, string>>,
       // @ts-expect-error Should not be possible to pass number here
-      Assert<Equals<useUserCreateMutationTriggerArgument, number>>,
+      Assert<Equals<UseUserCreateMutationTriggerArgument, number>>,
     ];
   });
 
   it.each([
     "useQuery",
-    "useMutation",
     "useQueryState",
     "useQuerySubscription",
     "useLazyQuery",
     "useLazyQuerySubscription",
-  ])(
+  ] as const)(
     "Generates %s hook when accessing hooks through endpoints[endpoint] property",
-    () => {
+    (queryName) => {
       const api = createTRPCApi<AppRouter>(tRPCClientOptions);
-      const query = api.endpoints.getUserById.useQuery;
+      const query = api.endpoints.getUserById[queryName];
       expect(query).toBeDefined();
       expectTypeOf(query).toBeFunction();
     },
@@ -124,7 +123,28 @@ describe("create-trpc-api", () => {
     const { usePrefetch } = createTRPCApi<AppRouter>(tRPCClientOptions);
     expect(usePrefetch).toBeDefined();
     expectTypeOf(usePrefetch).toBeFunction();
-    expectTypeOf(usePrefetch).parameter(0).toMatchTypeOf<"getUserById" | "listUsers">();
+    expectTypeOf(usePrefetch)
+      .parameter(0)
+      .toMatchTypeOf<
+        "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
+      >();
+  });
+
+  it("Generates hooks for deeply nested routes", () => {
+    const { useNested_Deep_GetVeryNestedMessageQuery } =
+      createTRPCApi<AppRouter>(tRPCClientOptions);
+    expect(useNested_Deep_GetVeryNestedMessageQuery).toBeDefined();
+    expectTypeOf(useNested_Deep_GetVeryNestedMessageQuery).toBeFunction();
+    expectTypeOf(useNested_Deep_GetVeryNestedMessageQuery)
+      .parameter(0)
+      .toMatchTypeOf<{ deepInput: string } | typeof skipToken>();
+  });
+
+  it("Generate hooks for deeply nested routes through endpoints[endpoint]", () => {
+    const api = createTRPCApi<AppRouter>(tRPCClientOptions);
+    const query = api.endpoints.nested_Deep_GetVeryNestedMessage.useQuerySubscription;
+    expect(query).toBeDefined();
+    expectTypeOf(query).toBeFunction();
   });
 });
 
@@ -182,6 +202,38 @@ describe("making actual requests with hooks renders correctly", () => {
         <div>
           <p>Id: {data.id}</p>
           <p>Name: {data.name}</p>
+        </div>
+      );
+    };
+    const app = createComponentWrapper(Component);
+    // first render
+    let result = renderedToJSon(app);
+    expect(result).toMatchSnapshot();
+    await setTimeout(500);
+    // result after data has loaded and component has re-rendered
+    result = renderedToJSon(app);
+    expect(result).toMatchSnapshot();
+  });
+
+  it("with successful deep nested query", async () => {
+    const { api, createComponentWrapper } = createReactTestApp();
+    const Component = () => {
+      const { useNested_Deep_GetVeryNestedMessageQuery } = api;
+      const myInput = "heyoooo";
+      const { data, error, isLoading } = useNested_Deep_GetVeryNestedMessageQuery({
+        deepInput: myInput,
+      });
+      if (isLoading) {
+        return <div>Loading...</div>;
+      }
+      if (error || !data) {
+        return <div>Error</div>;
+      }
+      expect(data.inputBack).toStrictEqual(myInput);
+      return (
+        <div>
+          <p>inputBack: {data.inputBack}</p>
+          <p>messageFromDeep: {data.messageFromDeep}</p>
         </div>
       );
     };

@@ -27,32 +27,64 @@ type inferProcedureType<TProcedure extends AnyProcedure> = TProcedure extends Pr
   ? ProcedureType
   : never;
 
-// TODO: handle deep merged routes with namespaces, like user.procedure
+// Flatten deeply nested routes, so we only have pairs of [endpoint name with path,
+// procedure]. Try to first match against procedure and then against router. Otherwise
+// return nothing
+export type FlattenToEndpointProcedurePairs<
+  MaybeProcedureRecord,
+  EndpointPath extends string = "",
+> = {
+  [MaybeEndpointName in keyof MaybeProcedureRecord]: MaybeProcedureRecord[MaybeEndpointName] extends AnyProcedure
+    ? [
+        EndpointPath extends ""
+          ? MaybeEndpointName
+          : `${EndpointPath}_${Capitalize<Extract<MaybeEndpointName, string>>}`,
+        MaybeProcedureRecord[MaybeEndpointName],
+      ]
+    : MaybeProcedureRecord[MaybeEndpointName] extends AnyRouter
+    ? FlattenToEndpointProcedurePairs<
+        MaybeProcedureRecord[MaybeEndpointName],
+        EndpointPath extends ""
+          ? MaybeEndpointName
+          : `${EndpointPath}_${Capitalize<Extract<MaybeEndpointName, string>>}`
+      >
+    : never;
+}[keyof MaybeProcedureRecord];
+
+// Helper type to check extending against
+type EndpointProcedurePair = [string, AnyProcedure];
+
+// Create actual api definitions
 type CreateTRPCApiEndpointDefinitions<
   TRouter extends AnyRouter,
   BaseQuery extends BaseQueryFn,
   TagTypes extends string,
   ReducerPath extends string,
-  Procedures = TRouter["_def"]["record"],
 > = {
-  [EndpointName in keyof Procedures]: Procedures[EndpointName] extends AnyProcedure
-    ? inferProcedureType<Procedures[EndpointName]> extends infer ProcedureType
-      ? ProcedureType extends "query"
-        ? QueryDefinition<
-            inferProcedureInput<Procedures[EndpointName]>,
-            BaseQuery,
-            TagTypes,
-            inferProcedureOutput<Procedures[EndpointName]>,
-            ReducerPath
-          >
-        : ProcedureType extends "mutation"
-        ? MutationDefinition<
-            inferProcedureInput<Procedures[EndpointName]>,
-            BaseQuery,
-            TagTypes,
-            inferProcedureOutput<Procedures[EndpointName]>,
-            ReducerPath
-          >
+  [Pair in FlattenToEndpointProcedurePairs<
+    TRouter["_def"]["record"]
+  > as Pair extends EndpointProcedurePair // should always extend but needs to be checked
+    ? Pair[0]
+    : never]: Pair extends EndpointProcedurePair // should always extend but needs to be checked
+    ? Pair[1] extends AnyProcedure
+      ? inferProcedureType<Pair[1]> extends infer ProcedureType
+        ? ProcedureType extends "query"
+          ? QueryDefinition<
+              inferProcedureInput<Pair[1]>,
+              BaseQuery,
+              TagTypes,
+              inferProcedureOutput<Pair[1]>,
+              ReducerPath
+            >
+          : ProcedureType extends "mutation"
+          ? MutationDefinition<
+              inferProcedureInput<Pair[1]>,
+              BaseQuery,
+              TagTypes,
+              inferProcedureOutput<Pair[1]>,
+              ReducerPath
+            >
+          : never
         : never
       : never
     : never;
@@ -119,17 +151,18 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
   // This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
   // TODO: allow passing original api from outside and inject endpoints instead of
   const baseQuery = async ({
-    procedureArguments,
-    procedureName,
+    arguments_,
+    path,
     procedureType,
   }: {
-    procedureArguments: unknown;
-    procedureName: string;
+    arguments_: unknown;
+    path: string;
     procedureType: "mutation" | "query";
   }) => {
     try {
+      // TODO: make it possible to pass in options?
       return {
-        data: await client[procedureType](procedureName, procedureArguments),
+        data: await client[procedureType](path, arguments_),
       };
     } catch (error) {
       let properlyShapedError: {
@@ -183,9 +216,6 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
     reducerPath,
   });
 
-  // TODO:
-  // add support for
-  // - deep properties such as api.endpoints.getPosts.useQuerySubscription
   const regexesWithProcedureType = [
     {
       procedureType: "query",
@@ -267,23 +297,31 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
                   throw new TypeError(procedureTypeResult.error);
                 }
                 const { data: procedureType } = procedureTypeResult;
-                // procedureName is the endpoint name
-                const procedureName = endpointProperty;
+                // Endpoint property is the correct endpoint name to generate.
+                // check if it is actually deeper path for trpc, handle replacements correctly
+                const path = endpointProperty.includes("_")
+                  ? endpointProperty
+                      .split("_")
+                      .map((part) => deCapitalize(part))
+                      .join(".")
+                  : endpointProperty;
                 // TODO: refactor injecting endpoint to external function, it's called
                 // always similarly
                 target.injectEndpoints({
                   endpoints: (builder) => ({
-                    [procedureName]: builder[procedureType]({
-                      query: (procedureArguments: unknown) => ({
-                        procedureArguments,
-                        procedureName,
+                    [endpointProperty]: builder[procedureType]({
+                      query: (arguments_: unknown) => ({
+                        arguments_,
+                        path,
                         procedureType,
                       }),
                     }),
                   }),
                 });
                 // endpoint injected, return it from the correct path
-                return (target as any)["endpoints"][procedureName][operationProperty];
+                return (target as any)["endpoints"][endpointProperty][
+                  operationProperty
+                ];
               },
             });
           },
@@ -294,22 +332,28 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
       // we can inject endpoint if needed
       if (property === "usePrefetch") {
         return (...arguments_: any[]) => {
-          const [endpointName] = arguments_;
-          if (!endpointName) {
+          const [endpointName] = arguments_; // endpoint that should be in endpoints record
+          if (!endpointName || typeof endpointName !== "string") {
             throw new TypeError(
-              "usePrefetch must be called with endpoint name as first arg",
+              "usePrefetch must be called with endpoint name string as first arg",
             );
           }
           // If endpoint hasn't been yet injected, inject it. UsePrefetch handles
           // only queries
           if (!(target as any)["endpoints"][endpointName]) {
-            const procedureName = endpointName;
+            // check if it is actually deeper path for trpc, handle replacements correctly
+            const path = endpointName.includes("_")
+              ? endpointName
+                  .split("_")
+                  .map((part) => deCapitalize(part))
+                  .join(".")
+              : endpointName;
             target.injectEndpoints({
               endpoints: (builder) => ({
-                [procedureName]: builder.query({
-                  query: (procedureArguments: unknown) => ({
-                    procedureArguments,
-                    procedureName,
+                [endpointName]: builder.query({
+                  query: (arguments_: unknown) => ({
+                    arguments_,
+                    path,
                     procedureType: "query",
                   }),
                 }),
@@ -341,13 +385,20 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
         if (!capitalizedEndpointName) {
           continue;
         }
-        const procedureName = deCapitalize(capitalizedEndpointName);
+        const endpointName = deCapitalize(capitalizedEndpointName);
+        // check if it is actually deeper path for trpc, handle replacements correctly
+        const path = endpointName.includes("_")
+          ? endpointName
+              .split("_")
+              .map((part) => deCapitalize(part))
+              .join(".")
+          : endpointName;
         target.injectEndpoints({
           endpoints: (builder) => ({
-            [procedureName]: builder[procedureType]({
-              query: (procedureArguments: unknown) => ({
-                procedureArguments,
-                procedureName,
+            [endpointName]: builder[procedureType]({
+              query: (arguments_: unknown) => ({
+                arguments_,
+                path,
                 procedureType,
               }),
             }),

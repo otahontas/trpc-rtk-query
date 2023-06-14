@@ -115,7 +115,7 @@ export { useUserListQuery } from api;
 ## TODO
 
 - [x] Generate rtk query api with given `AppRouter` typings (simplest version)
-- [ ] Support deep routers from trpc
+- [x] Support deep routers from trpc
 - [ ] Allow passing in custom client, use that instead of generating internal client
 - [ ] Allow passing in already existing api
 - [ ] Allow merging extra parameters to injected endpoints to e.g. make optimistic updates possible
