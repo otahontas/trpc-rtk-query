@@ -8,15 +8,19 @@ This is very much work in progress -project, but when ready, my goal is to provi
 
 ```ts
 // file: api.ts
-import type { AppRouter } from '../server/router'; // <- types from your server, say for a router like this:
+import type { AppRouter } from '../server/router'; // <- types from your server,
+// let's say for a router like this:
 // const appRouter = router({
 //   userList: publicProcedure
+//     .input(z.object({ showAll: z.boolean() })) // <- type is { showAll: boolean }
 //     .query(async () => {
-//       return await db.user.findMany();
+//       return await db.user.findMany(); // <- returns type User[]
 //     }),
 // });
 
-export const api = createTRPCApi<AppRouter>({ // <- takes in the same options as createTRPCProxyClient and sets up api like createApi would do
+export const api = createTRPCApi<AppRouter>({ clientOptions: {
+// ^ takes in the same options as createTRPCProxyClient and sets up api like
+// createApi would do
   links: [
     httpBatchLink({
     url: 'http://localhost:3000/trpc',
@@ -27,20 +31,21 @@ export const api = createTRPCApi<AppRouter>({ // <- takes in the same options as
     },
     }),
   ],
-}): 
+}}):
 
 export { useUserListQuery } from api; // <- Export your typed hooks
 
 // file: store.ts
 import { configureStore } from '@reduxjs/toolkit'
-import { api } from './services/pokemon'
+import { api } from './api.ts'
 
-export const store = configureStore({ // <- Setup store with api like you would according to rtk query docs
+export const store = configureStore({
+// ^ Setup store with api like you would  according to rtk query docs
   reducer: {
     [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(pokemonApi.middleware),
+    getDefaultMiddleware().concat(api.middleware),
 })
 
 
@@ -52,18 +57,21 @@ import ReactDOM from 'react-dom'
 import App from './App'
 
 ReactDOM.render(
-  <Provider store={store}> // Setup provider like you would according to rtk query docs 
+  <Provider store={store}> // Setup provider like you would according to rtk query docs
     <App />
   </Provider>,
   document.getElementById('root')
 )
 
 // file: App.ts
+import { useUserListQuery } from "./api"
 const App = () => {
-  const { data, isLoading } = useYourEndpointNameQuery({ params }) // <- Use your generated hooks! They are fully typed based on your trpc router.
+  const { data, isLoading } = useUserListQuery({ showAll: true })
+  // ^ Use your generated hooks! They are fully typed based on your trpc router.
   if (isLoading) return <p>Loading...</p>
   if (!data) return <p>No data!</p>
   return <p>{JSON.strinfigy(data)}</p>
+  //                         ^ type: User[]
 }
 ```
 
@@ -74,11 +82,11 @@ I'm planning to also support following approaches:
 ```ts
 
 // file: api.ts
-import { trpcClient } from "clien-from-your-own-package" // maybe from your monorepo package or private npm library
+import { trpcClient } from "clien-from-your-own-package"
+// ^ maybe from your monorepo package or private npm library
 
-
-export const api = createTRPCApi(trpcClient); // <- infers types directly from client
-
+export const api = createTRPCApi({ client: trpcClient });
+// ^ infers types directly from client, you don't have to pass in AppRouter type
 
 export { useUserListQuery } from api;
 
@@ -105,7 +113,24 @@ const api = createApi({
 // tprcApi.ts
 import { api } from "./api.ts"
 
-export const trpcApi = createTRPCApi<AppRouter>(api); // endpoint are injected to api and you can 
+const clientOptions = {
+  links: [
+    httpBatchLink({
+    url: 'http://localhost:3000/trpc',
+    async headers() {
+      return {
+        authorization: getAuthCookie(),
+      };
+    },
+    }),
+  ],
+}
+
+
+export const trpcApi = createTRPCApi<AppRouter>({
+  api,
+  clientOptions
+});
 
 export { useUserListQuery } from api;
 
