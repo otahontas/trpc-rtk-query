@@ -120,6 +120,8 @@ export { useUserListQuery } from api;
 - [ ] Allow passing in already existing api
 - [ ] Allow merging extra parameters to injected endpoints to e.g. make optimistic updates possible
 - [ ] Allow merging extra parameters to createApi to e.g. make optimistic updates possible
+- [ ] Better error types
+- [ ] Support using trpc vanilla client extra options
 - [ ] e2e tests
 - [ ] ci
 - [ ] publish package
