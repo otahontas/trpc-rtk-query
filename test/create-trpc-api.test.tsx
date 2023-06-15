@@ -5,7 +5,7 @@ import { setTimeout } from "node:timers/promises";
 import React from "react";
 import { Provider } from "react-redux";
 import renderer from "react-test-renderer";
-import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
+import { beforeAll, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import { type CreateTRPCApiOptions, createTRPCApi } from "../src/create-trpc-api";
 import {
@@ -277,6 +277,39 @@ describe("create-trpc-api", () => {
         // first render
         const result = renderedToJSon(app);
         expect(result).toMatchSnapshot();
+      });
+
+      it("does not inject endpoints again", async () => {
+        const { api, createComponentWrapper } = createReactTestApp(createApiOptions);
+
+        // Try to listen error log from rtk
+        const consoleErrorMock = vi
+          .spyOn(console, "error")
+          .mockImplementation(() => {});
+
+        const FirstComponent = () => {
+          const { useListUsersQuery } = api;
+          const { data } = useListUsersQuery();
+          return <>{JSON.stringify(data)}</>;
+        };
+        const SecondComponent = () => {
+          const { useListUsersQuery } = api;
+          const { data } = useListUsersQuery();
+          return <>{JSON.stringify(data)}</>;
+        };
+
+        const Parent = () => {
+          return (
+            <>
+              <FirstComponent />
+              <SecondComponent />
+            </>
+          );
+        };
+        const app = createComponentWrapper(Parent);
+        // first render
+        renderedToJSon(app);
+        expect(consoleErrorMock).not.toHaveBeenCalled();
       });
     });
   });

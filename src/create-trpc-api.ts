@@ -151,7 +151,7 @@ function assertPropertyIsString(property: string | symbol): asserts property is 
   }
 }
 
-type CreateTRPCApiOptions<TRouter extends AnyRouter> =
+export type CreateTRPCApiOptions<TRouter extends AnyRouter> =
   | {
       client: CreateTRPCProxyClient<TRouter>;
     }
