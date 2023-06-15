@@ -6,11 +6,13 @@ import { Provider } from "react-redux";
 import renderer from "react-test-renderer";
 import { beforeAll, describe, expect, expectTypeOf, it } from "vitest";
 
-import type { AppRouter } from "./fixtures";
-
 import { createTRPCApi } from "../src/create-trpc-api";
-import { startTestServer, userFixtures } from "./fixtures";
-import { tRPCClientOptions } from "./fixtures";
+import {
+  type AppRouter,
+  startTestServer,
+  tRPCClientOptions,
+  userFixtures,
+} from "./fixtures";
 
 // Type level helper, use for testing when vitest isn't flexible enough
 export type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y

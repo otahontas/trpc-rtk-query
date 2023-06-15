@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { CreateTRPCClientOptions } from "@trpc/client";
-
-import { httpBatchLink } from "@trpc/client";
+import { type CreateTRPCClientOptions, httpBatchLink } from "@trpc/client";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";

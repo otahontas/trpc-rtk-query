@@ -1,12 +1,14 @@
-import type {
-  BaseQueryFn,
-  MutationDefinition,
-  QueryDefinition,
+import {
+  type BaseQueryFn,
+  type MutationDefinition,
+  type QueryDefinition,
+  createApi,
 } from "@reduxjs/toolkit/query/react";
-import type { CreateTRPCClientOptions } from "@trpc/client";
-
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { TRPCClientError, createTRPCUntypedClient } from "@trpc/client";
+import {
+  type CreateTRPCClientOptions,
+  TRPCClientError,
+  createTRPCUntypedClient,
+} from "@trpc/client";
 import {
   type AnyProcedure,
   type AnyRouter,
