@@ -1,26 +1,26 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `"prefetched"`;
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `"prefetched"`;
 
-exports[`making actual requests with hooks renders correctly > with failing useUserIdQuery 1`] = `
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with failing useUserIdQuery 1`] = `
 <div>
   Loading...
 </div>
 `;
 
-exports[`making actual requests with hooks renders correctly > with failing useUserIdQuery 2`] = `
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with failing useUserIdQuery 2`] = `
 <div>
   Error
 </div>
 `;
 
-exports[`making actual requests with hooks renders correctly > with successful deep nested query 1`] = `
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with successful deep nested query 1`] = `
 <div>
   Loading...
 </div>
 `;
 
-exports[`making actual requests with hooks renders correctly > with successful deep nested query 2`] = `
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with successful deep nested query 2`] = `
 <div>
   <p>
     inputBack: 
@@ -33,13 +33,13 @@ exports[`making actual requests with hooks renders correctly > with successful d
 </div>
 `;
 
-exports[`making actual requests with hooks renders correctly > with successful useUserIdQuery 1`] = `
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 1`] = `
 <div>
   Loading...
 </div>
 `;
 
-exports[`making actual requests with hooks renders correctly > with successful useUserIdQuery 2`] = `
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 2`] = `
 <div>
   <p>
     Id: 
@@ -49,5 +49,43 @@ exports[`making actual requests with hooks renders correctly > with successful u
     Name: 
     John Johnny
   </p>
+</div>
+`;
+
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `"prefetched"`;
+
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with failing useUserIdQuery 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with failing useUserIdQuery 2`] = `
+<div>
+  Error
+</div>
+`;
+
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with successful deep nested query 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with successful deep nested query 2`] = `
+<div>
+  Error
+</div>
+`;
+
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 2`] = `
+<div>
+  Error
 </div>
 `;

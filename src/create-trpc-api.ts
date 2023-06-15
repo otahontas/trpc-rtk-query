@@ -151,12 +151,22 @@ function assertPropertyIsString(property: string | symbol): asserts property is 
   }
 }
 
+type CreateTRPCApiOptions<TRouter extends AnyRouter> =
+  | {
+      client: CreateTRPCProxyClient<TRouter>;
+    }
+  | {
+      clientOptions: CreateTRPCClientOptions<TRouter>;
+    };
+
 export const createTRPCApi = <TRouter extends AnyRouter>(
-  options: CreateTRPCClientOptions<TRouter>,
+  options: CreateTRPCApiOptions<TRouter>,
 ) => {
   // TRPC Client
-  // TODO: Allow passing from outside
-  const client = createTRPCUntypedClient(options);
+  const client =
+    "client" in options
+      ? getUntypedClient(options.client)
+      : createTRPCUntypedClient(options.clientOptions);
 
   // RTK Query api
 
