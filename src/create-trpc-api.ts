@@ -8,6 +8,7 @@ import {
   type CreateTRPCClientOptions,
   type CreateTRPCProxyClient,
   TRPCClientError,
+  TRPCRequestOptions,
   type TRPCUntypedClient,
   createTRPCUntypedClient,
 } from "@trpc/client";
@@ -159,32 +160,37 @@ export type CreateTRPCApiOptions<TRouter extends AnyRouter> =
       clientOptions: CreateTRPCClientOptions<TRouter>;
     };
 
-export const createTRPCApi = <TRouter extends AnyRouter>(
+// TODO: better names for params (like { procedureArgs?, procedurePath, procedureType })
+type BaseQueryArguments = {
+  arguments_: unknown; // args for the procedure
+  path: string;
+  procedureType: "mutation" | "query";
+};
+type BaseQueryResult = unknown; // TODO: type properly from Router
+type ExtraOptions = TRPCRequestOptions;
+// eslint-disable-next-line @typescript-eslint/ban-types
+type Meta = {}; // TODO: add a proper meta type
+type TrpcApiBaseQuery = BaseQueryFn<
+  BaseQueryArguments,
+  BaseQueryResult,
+  TRPCBaseQueryError,
+  ExtraOptions,
+  Meta
+>;
+
+// This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
+const createBaseQuery = <TRouter extends AnyRouter>(
   options: CreateTRPCApiOptions<TRouter>,
-) => {
-  // TRPC Client
+): TrpcApiBaseQuery => {
   const client =
     "client" in options
-      ? getUntypedClient(options.client)
+      ? getUntypedClient<TRouter>(options.client)
       : createTRPCUntypedClient(options.clientOptions);
-
-  // RTK Query api
-
-  // This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
-  // TODO: allow passing original api from outside and inject endpoints instead of
-  const baseQuery = async ({
-    arguments_,
-    path,
-    procedureType,
-  }: {
-    arguments_: unknown;
-    path: string;
-    procedureType: "mutation" | "query";
-  }) => {
+  return async (baseQueryArguments, _baseQueryApi, options) => {
     try {
-      // TODO: make it possible to pass in options?
+      const { arguments_, path, procedureType } = baseQueryArguments;
       return {
-        data: await client[procedureType](path, arguments_),
+        data: await client[procedureType](path, arguments_, options),
       };
     } catch (error) {
       let properlyShapedError: {
@@ -220,14 +226,20 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
       return properlyShapedError;
     }
   };
+};
+
+export const createTRPCApi = <TRouter extends AnyRouter>(
+  options: CreateTRPCApiOptions<TRouter>,
+) => {
+  // TODO: Extract to getBaseQuery, which generates the correct baseQuery for us
   const reducerPath = "TRPCApi" as const;
+  const baseQuery = createBaseQuery(options);
   type TagTypes = never; // No tags
   type ReducerPath = typeof reducerPath;
-  type BaseQuery = typeof baseQuery;
   // Create underlying api that can be proxyed
   const nonProxyApi = createApi<
-    BaseQuery,
-    CreateTRPCApiEndpointDefinitions<TRouter, BaseQuery, TagTypes, ReducerPath>,
+    TrpcApiBaseQuery,
+    CreateTRPCApiEndpointDefinitions<TRouter, TrpcApiBaseQuery, TagTypes, ReducerPath>,
     ReducerPath,
     TagTypes
   >({
