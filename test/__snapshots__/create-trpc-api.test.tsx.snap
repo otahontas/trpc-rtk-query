@@ -137,6 +137,19 @@ exports[`create-trpc-api > when 'using getClient to get the client' > and making
 </div>
 `;
 
+exports[`create-trpc-api > when 'using getClient to get the client' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 2`] = `
+<div>
+  <p>
+    Id: 
+    1
+  </p>
+  <p>
+    Name: 
+    John Johnny
+  </p>
+</div>
+`;
+
 exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `
 <div
   onMouseEnter={[Function]}

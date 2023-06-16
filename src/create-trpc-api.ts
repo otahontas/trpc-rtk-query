@@ -167,7 +167,9 @@ export type CreateTRPCApiOptions<TRouter extends AnyRouter> =
   | {
       client?: never;
       clientOptions?: never;
-      getClient: (baseQueryApi: BaseQueryApi) => CreateTRPCProxyClient<TRouter>;
+      getClient: (
+        baseQueryApi: BaseQueryApi,
+      ) => Promise<CreateTRPCProxyClient<TRouter>>;
     };
 
 // TODO: better names for params (like { procedureArgs?, procedurePath, procedureType })
@@ -195,12 +197,9 @@ type ClientResult<TRouter extends AnyRouter> =
     }
   | {
       clientReady: false;
-
       getClient: NonNullable<CreateTRPCApiOptions<TRouter>["getClient"]>;
     };
 
-// Cache the client from getClient. Setting it up everytime is a bit slow.
-let cachedClient: TRPCUntypedClient<AnyRouter> | undefined;
 // This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
 const createBaseQuery = <TRouter extends AnyRouter>(
   createTRPCApiOptions: CreateTRPCApiOptions<TRouter>,
@@ -226,17 +225,9 @@ const createBaseQuery = <TRouter extends AnyRouter>(
   return async (baseQueryArguments, baseQueryApi, options) => {
     try {
       const { arguments_, path, procedureType } = baseQueryArguments;
-      const clientToUse = (() => {
-        if (clientResult.clientReady) {
-          return clientResult.client;
-        }
-        // Cache the client
-        if (!cachedClient) {
-          const resultFromGetClient = clientResult.getClient(baseQueryApi);
-          cachedClient = getUntypedClient<TRouter>(resultFromGetClient);
-        }
-        return cachedClient;
-      })();
+      const clientToUse = clientResult.clientReady
+        ? clientResult.client
+        : getUntypedClient<TRouter>(await clientResult.getClient(baseQueryApi));
       const data = await clientToUse[procedureType](path, arguments_, options);
       return {
         data,

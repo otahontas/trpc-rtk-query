@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { configureStore } from "@reduxjs/toolkit";
 import { type BaseQueryApi, skipToken } from "@reduxjs/toolkit/query";
 import { type CreateTRPCProxyClient, createTRPCProxyClient } from "@trpc/client";
@@ -57,7 +56,9 @@ export const createReactTestApp = (options: CreateTRPCApiOptions<AppRouter>) => 
 
 describe("create-trpc-api", () => {
   const preMadeClient = createTRPCProxyClient(tRPCClientOptions);
-  const getClient = (baseQueryApi: BaseQueryApi): CreateTRPCProxyClient<AppRouter> => {
+  const getClient = async (
+    baseQueryApi: BaseQueryApi,
+  ): Promise<CreateTRPCProxyClient<AppRouter>> => {
     // Check that correct apiArgs object is passed
     expect(baseQueryApi.type).toBeDefined();
     expect(baseQueryApi.endpoint).toBeDefined();
@@ -87,18 +88,18 @@ describe("create-trpc-api", () => {
 
   describe.each([
     {
-      case: "creating client from clientOptions",
       createApiOptions: { clientOptions: tRPCClientOptions },
+      testCase: "creating client from clientOptions",
     },
     {
-      case: "using passed client",
       createApiOptions: { client: preMadeClient },
+      testCase: "using passed client",
     },
     {
-      case: "using getClient to get the client",
       createApiOptions: { getClient },
+      testCase: "using getClient to get the client",
     },
-  ])("when $case", ({ createApiOptions }) => {
+  ])("when $testCase", ({ createApiOptions }) => {
     it("Generates an api instance", () => {
       const api = createTRPCApi<AppRouter>(createApiOptions);
       expect(api).toBeDefined();
@@ -196,6 +197,9 @@ describe("create-trpc-api", () => {
     });
 
     describe("and making actual requests with hooks renders correctly", () => {
+      // how much to wait for loading state to resolve
+      // TODO: fix with using actual rerender with waitFor from testing-library
+      const msToWaitBeforeRenderingWithoutLoadingState = 100;
       beforeAll(async () => {
         const { close } = await startTestServer();
         return async () => await close();
@@ -224,8 +228,13 @@ describe("create-trpc-api", () => {
         const app = createComponentWrapper(Component);
         // first render
         let result = renderedToJSon(app);
+
+        await setTimeout(msToWaitBeforeRenderingWithoutLoadingState);
         expect(result).toMatchSnapshot();
-        await setTimeout(500);
+        // This render needs a bit more time for getClient case, I guess because of
+        // forming queryClient takes a bit more time
+        // TODO: plz fix with waitFor or something
+
         // result after data has loaded and component has re-rendered
         result = renderedToJSon(app);
         expect(JSON.stringify(result)).not.toContain("Loading...");
@@ -258,7 +267,7 @@ describe("create-trpc-api", () => {
         // first render
         let result = renderedToJSon(app);
         expect(result).toMatchSnapshot();
-        await setTimeout(500);
+        await setTimeout(msToWaitBeforeRenderingWithoutLoadingState);
         // result after data has loaded and component has re-rendered
         result = renderedToJSon(app);
         expect(JSON.stringify(result)).not.toContain("Loading...");
@@ -292,7 +301,7 @@ describe("create-trpc-api", () => {
         // first render
         let result = renderedToJSon(app);
         expect(result).toMatchSnapshot();
-        await setTimeout(500);
+        await setTimeout(msToWaitBeforeRenderingWithoutLoadingState);
         // result after data has loaded and component has re-rendered
         result = renderedToJSon(app);
         expect(JSON.stringify(result)).not.toContain("Loading...");
@@ -343,7 +352,7 @@ describe("create-trpc-api", () => {
         expect(result).toMatchSnapshot();
 
         // wait for data to load
-        await setTimeout(500);
+        await setTimeout(msToWaitBeforeRenderingWithoutLoadingState);
         // manually trigger the callback
         result.props["onMouseEnter"]();
         // render query component and check that prefetch was actually called
