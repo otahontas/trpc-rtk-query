@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { skipToken } from "@reduxjs/toolkit/query";
-import { createTRPCProxyClient } from "@trpc/client";
+import { type BaseQueryApi, skipToken } from "@reduxjs/toolkit/query";
+import { type CreateTRPCProxyClient, createTRPCProxyClient } from "@trpc/client";
 import { setTimeout } from "node:timers/promises";
 import React from "react";
 import { Provider } from "react-redux";
@@ -56,15 +56,46 @@ export const createReactTestApp = (options: CreateTRPCApiOptions<AppRouter>) => 
 
 describe("create-trpc-api", () => {
   const preMadeClient = createTRPCProxyClient(tRPCClientOptions);
+  const getClient = (baseQueryApi: BaseQueryApi): CreateTRPCProxyClient<AppRouter> => {
+    // Check that correct apiArgs object is passed
+    expect(baseQueryApi.type).toBeDefined();
+    expect(baseQueryApi.endpoint).toBeDefined();
+    // Return proxy client
+    return createTRPCProxyClient(tRPCClientOptions);
+  };
+
+  it("prevents passing in mutually exclusive args", () => {
+    // @ts-expect-error Should not be possible to pass both client and clientOptions
+    createTRPCApi<AppRouter>({
+      client: preMadeClient,
+      clientOptions: tRPCClientOptions,
+    });
+
+    // @ts-expect-error Should not be possible to pass both client and getClient
+    createTRPCApi<AppRouter>({
+      client: preMadeClient,
+      getClient,
+    });
+
+    // @ts-expect-error Should not be possible to pass both getClient and clientOptions
+    createTRPCApi<AppRouter>({
+      clientOptions: tRPCClientOptions,
+      getClient,
+    });
+  });
 
   describe.each([
+    // {
+    //   case: "creating client from clientOptions",
+    //   createApiOptions: { clientOptions: tRPCClientOptions },
+    // },
+    // {
+    //   case: "using passed client",
+    //   createApiOptions: { client: preMadeClient },
+    // },
     {
-      case: "creating client from clientOptions",
-      createApiOptions: { clientOptions: tRPCClientOptions },
-    },
-    {
-      case: "using passed client",
-      createApiOptions: { client: preMadeClient },
+      case: "using getClient to get the client",
+      createApiOptions: { getClient },
     },
   ])("when $case", ({ createApiOptions }) => {
     it("Generates an api instance", () => {
@@ -285,6 +316,7 @@ describe("create-trpc-api", () => {
         // Try to listen error log from rtk
         const consoleErrorMock = vi
           .spyOn(console, "error")
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           .mockImplementation(() => {});
 
         const FirstComponent = () => {

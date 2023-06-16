@@ -1,4 +1,5 @@
 import {
+  type BaseQueryApi,
   type BaseQueryFn,
   type MutationDefinition,
   type QueryDefinition,
@@ -155,9 +156,18 @@ function assertPropertyIsString(property: string | symbol): asserts property is 
 export type CreateTRPCApiOptions<TRouter extends AnyRouter> =
   | {
       client: CreateTRPCProxyClient<TRouter>;
+      clientOptions?: never;
+      getClient?: never;
     }
   | {
+      client?: never;
       clientOptions: CreateTRPCClientOptions<TRouter>;
+      getClient?: never;
+    }
+  | {
+      client?: never;
+      clientOptions?: never;
+      getClient: (baseQueryApi: BaseQueryApi) => CreateTRPCProxyClient<TRouter>;
     };
 
 // TODO: better names for params (like { procedureArgs?, procedurePath, procedureType })
@@ -178,19 +188,58 @@ type TrpcApiBaseQuery = BaseQueryFn<
   Meta
 >;
 
+type ClientResult<TRouter extends AnyRouter> =
+  | {
+      client: TRPCUntypedClient<TRouter>;
+      clientReady: true;
+    }
+  | {
+      clientReady: false;
+
+      getClient: NonNullable<CreateTRPCApiOptions<TRouter>["getClient"]>;
+    };
+
+// Cache the client from getClient. Setting it up everytime is a bit slow.
+let cachedClient: TRPCUntypedClient<AnyRouter> | undefined;
 // This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
 const createBaseQuery = <TRouter extends AnyRouter>(
-  options: CreateTRPCApiOptions<TRouter>,
+  createTRPCApiOptions: CreateTRPCApiOptions<TRouter>,
 ): TrpcApiBaseQuery => {
-  const client =
-    "client" in options
-      ? getUntypedClient<TRouter>(options.client)
-      : createTRPCUntypedClient(options.clientOptions);
-  return async (baseQueryArguments, _baseQueryApi, options) => {
+  const clientResult = ((): ClientResult<TRouter> => {
+    if ("client" in createTRPCApiOptions) {
+      return {
+        client: getUntypedClient<TRouter>(createTRPCApiOptions.client),
+        clientReady: true,
+      };
+    } else if ("clientOptions" in createTRPCApiOptions) {
+      return {
+        client: createTRPCUntypedClient(createTRPCApiOptions.clientOptions),
+        clientReady: true,
+      };
+    }
+    return {
+      clientReady: false,
+      getClient: createTRPCApiOptions.getClient,
+    };
+  })();
+
+  return async (baseQueryArguments, baseQueryApi, options) => {
     try {
       const { arguments_, path, procedureType } = baseQueryArguments;
+      const clientToUse = (() => {
+        if (clientResult.clientReady) {
+          return clientResult.client;
+        }
+        // Cache the client
+        if (!cachedClient) {
+          const resultFromGetClient = clientResult.getClient(baseQueryApi);
+          cachedClient = getUntypedClient<TRouter>(resultFromGetClient);
+        }
+        return cachedClient;
+      })();
+      const data = await clientToUse[procedureType](path, arguments_, options);
       return {
-        data: await client[procedureType](path, arguments_, options),
+        data,
       };
     } catch (error) {
       let properlyShapedError: {
@@ -228,6 +277,7 @@ const createBaseQuery = <TRouter extends AnyRouter>(
   };
 };
 
+// TODO: infer types correctly when passing in premade client or when getting client
 export const createTRPCApi = <TRouter extends AnyRouter>(
   options: CreateTRPCApiOptions<TRouter>,
 ) => {
