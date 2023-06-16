@@ -6,7 +6,9 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import {
   type CreateTRPCClientOptions,
+  type CreateTRPCProxyClient,
   TRPCClientError,
+  type TRPCUntypedClient,
   createTRPCUntypedClient,
 } from "@trpc/client";
 import {
@@ -18,6 +20,14 @@ import {
   type inferProcedureOutput,
 } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
+
+// Get untyped client. TODO: use export from trpc when it's published to npm
+export function getUntypedClient<TRouter extends AnyRouter>(
+  client: CreateTRPCProxyClient<TRouter>,
+): TRPCUntypedClient<TRouter> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (client as any).__untypedClient;
+}
 
 // Follows trpc internal infer type pattern
 type inferProcedureType<TProcedure extends AnyProcedure> = TProcedure extends Procedure<

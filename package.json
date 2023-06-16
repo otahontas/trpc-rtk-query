@@ -41,5 +41,10 @@
     "@trpc/client": "^10.29.1",
     "@trpc/server": "^10.29.1",
     "react-redux": "^8.0.7"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@trpc/client@10.30.0": "patches/@trpc__client@10.30.0.patch"
+    }
   }
 }

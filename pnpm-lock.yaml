@@ -1,12 +1,17 @@
 lockfileVersion: '6.0'
 
+patchedDependencies:
+  '@trpc/client@10.30.0':
+    hash: u6hshpvqmlyay4cpcuxa5n4vqa
+    path: patches/@trpc__client@10.30.0.patch
+
 devDependencies:
   '@reduxjs/toolkit':
     specifier: ^1.9.5
     version: 1.9.5(react-redux@8.1.0)(react@18.2.0)
   '@trpc/client':
     specifier: ^10.30.0
-    version: 10.30.0(@trpc/server@10.30.0)
+    version: 10.30.0(patch_hash=u6hshpvqmlyay4cpcuxa5n4vqa)(@trpc/server@10.30.0)
   '@trpc/server':
     specifier: ^10.30.0
     version: 10.30.0
@@ -648,13 +653,14 @@ packages:
     engines: {node: '>= 10'}
     dev: true
 
-  /@trpc/client@10.30.0(@trpc/server@10.30.0):
+  /@trpc/client@10.30.0(patch_hash=u6hshpvqmlyay4cpcuxa5n4vqa)(@trpc/server@10.30.0):
     resolution: {integrity: sha512-utz0qRI4eU3QcHvBwcSONEnt5pWR3Dyk4VFJnySHysBT6GQRRpJifWX5+RxDhFK93LxcAmiirFbYXjZ40gbobw==}
     peerDependencies:
       '@trpc/server': 10.30.0
     dependencies:
       '@trpc/server': 10.30.0
     dev: true
+    patched: true
 
   /@trpc/server@10.30.0:
     resolution: {integrity: sha512-pRsrHCuar3fbyOdJvO4b80OMP1Tx/wOSy5Ozy6cFDFWVUmfAyIX3En5Hoysy4cmMUuCsQsfTEYQwo+OcpjzBkg==}

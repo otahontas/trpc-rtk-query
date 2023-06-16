@@ -1,0 +1,28 @@
+diff --git a/dist/index.js b/dist/index.js
+index 1cf82b24da4f96cb50201954c1dc6e1b41d2dd94..46263d0bcd7608733835dc3cd1c12521aca8b65f 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -146,6 +146,9 @@ const clientCallTypeMap = {
+         if (client.hasOwnProperty(key)) {
+             return client[key];
+         }
++        if (key === '__untypedClient') {
++          return client;
++        }
+         return shared.createRecursiveProxy(({ path , args  })=>{
+             const pathCopy = [
+                 key,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 1bf2fc876b084f87a499e3591e6dae87e483c841..ea5e671afa181e649c853ba7a40fb79aaafb251d 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -147,6 +147,9 @@ const clientCallTypeMap = {
+         if (client.hasOwnProperty(key)) {
+             return client[key];
+         }
++        if (key === '__untypedClient') {
++          return client;
++        }
+         return createRecursiveProxy(({ path , args  })=>{
+             const pathCopy = [
+                 key,
