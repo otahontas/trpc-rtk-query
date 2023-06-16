@@ -24,6 +24,7 @@ import {
   type inferProcedureOutput,
 } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
+import { isAnyObject, isString } from "is-what";
 
 // Get untyped client. TODO: use export from trpc when it's published to npm
 export function getUntypedClient<TRouter extends AnyRouter>(
@@ -306,6 +307,38 @@ const formatEndpointToProcedurePathAndInjectToApi = <ProxyedApi extends Injectab
   });
 };
 
+// Helper function that creates proxy which validates incoming properties on each level
+// before calling callback on final level. Defaults to empty object if target is not available
+type CreateRecursiveProtectiveProxyOptions = {
+  callback: (handledProperties: string[]) => unknown;
+  propertyList?: string[];
+  proxyTarget: object;
+  recursionLevels: number;
+};
+const createRecursiveProtectiveProxy = ({
+  callback,
+  propertyList = [],
+  proxyTarget,
+  recursionLevels,
+}: CreateRecursiveProtectiveProxyOptions): unknown =>
+  new Proxy(proxyTarget, {
+    get(target, property, receiver) {
+      if (Reflect.has(target, property)) {
+        return Reflect.get(target, property, receiver);
+      }
+      assertPropertyIsString(property);
+      const newPropertyList = [...propertyList, property];
+      return recursionLevels > 1
+        ? createRecursiveProtectiveProxy({
+            callback,
+            propertyList: newPropertyList,
+            proxyTarget: {}, // there's no property so pass in empty oject
+            recursionLevels: recursionLevels - 1,
+          })
+        : callback(newPropertyList); // callback handles the leaf property
+    },
+  });
+
 // TODO: infer types correctly when passing in premade client or when getting client
 export const createTRPCApi = <TRouter extends AnyRouter>(
   options: CreateTRPCApiOptions<TRouter>,
@@ -346,88 +379,70 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
 
   return new Proxy(nonProxyApi, {
     get(target, property, receiver) {
-      // If property was endpoints , user might want to call endpoint that isn't
-      // yet generated. Return proxy that handles generating
-      // TODO: can this be made cleaner, maybe recursion here?
+      // Validate endpoints target, since it is needed in multiple places
+      if (!("endpoints" in target) || !isAnyObject(target["endpoints"])) {
+        throw new Error("Library error: Can't get endpoints from rtk api!");
+      }
+      const { endpoints } = target;
+      // If property is "endpoints", we know that it surely exists, but
+      // user might want to call endpoint attribute of it  that isn't yet generated.
+      // Return proxy that handles generating.
       if (property === "endpoints") {
-        // Any is okay, we know target has endpoints property
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return new Proxy((target as any)["endpoints"], {
-          /* eslint-disable @typescript-eslint/no-explicit-any */
-          get(endpointTarget, endpointProperty, endpointReceiver) {
-            if (Reflect.has(endpointTarget, endpointProperty)) {
-              return Reflect.get(endpointTarget, endpointProperty, endpointReceiver);
+        // Return two level proxy, where last level can actually inject the endpoint.
+        return createRecursiveProtectiveProxy({
+          callback: (propertyList) => {
+            const [endpoint, operation] = propertyList;
+            if (!endpoint || !operation) {
+              throw new Error(
+                "Library error: Internal recursive proxy failed to collect all properties!",
+              );
             }
-            assertPropertyIsString(endpointProperty);
-
-            // Return one more proxy that can actually inject the endpoint
-            // We can't do it at this level yet, since we need to know the type of
-            // operation (query or mutation) that's being called for the endpoint
-
-            // Since endpoint in endpoints object might be undefined, we'll default
-            // to empty object
-            // any is okay, we know endpointTarget will be defined
-            /* eslint-disable @typescript-eslint/no-explicit-any */
-            return new Proxy((endpointTarget as any)[endpointProperty] ?? {}, {
-              get(operationTarget, operationProperty, operationReceiver) {
-                if (Reflect.has(operationTarget, operationProperty)) {
-                  return Reflect.get(
-                    operationTarget,
-                    operationProperty,
-                    operationReceiver,
-                  );
-                }
-                assertPropertyIsString(operationProperty);
-                const mutationOperation = "useMutation";
-                const queryOperations = [
-                  "useQuery",
-                  "useQueryState",
-                  "useQuerySubscription",
-                  "useLazyQuery",
-                  "useLazyQuerySubscription",
-                ];
-                let procedureType: "mutation" | "query" | undefined;
-                if (operationProperty === mutationOperation) {
-                  procedureType = "mutation" as const;
-                } else if (queryOperations.includes(operationProperty)) {
-                  procedureType = "query" as const;
-                } else {
-                  throw new TypeError(
-                    `Property ${property}.${endpointProperty}.${operationProperty} is not defined and could not be generated`,
-                  );
-                }
-
-                formatEndpointToProcedurePathAndInjectToApi(
-                  target,
-                  endpointProperty,
-                  procedureType,
-                );
-                // endpoint injected, return it from the correct path
-                return (target as any)["endpoints"][endpointProperty][
-                  operationProperty
-                ];
-              },
-            });
+            const mutationOperation = "useMutation";
+            const queryOperations = [
+              "useQuery",
+              "useQueryState",
+              "useQuerySubscription",
+              "useLazyQuery",
+              "useLazyQuerySubscription",
+            ];
+            let procedureType: "mutation" | "query" | undefined;
+            if (operation === mutationOperation) {
+              procedureType = "mutation" as const;
+            } else if (queryOperations.includes(operation)) {
+              procedureType = "query" as const;
+            } else {
+              throw new Error(
+                `Input error: Property ${property}.${endpoint}.${operation} is not defined and could not be generated`,
+              );
+            }
+            formatEndpointToProcedurePathAndInjectToApi(
+              target,
+              endpoint,
+              procedureType,
+            );
+            return endpoints[endpoint][operation];
           },
+          proxyTarget: target["endpoints"],
+          recursionLevels: 2,
         });
       }
 
       // if property is usePrefetch we need to wrap it with it's arguments, so
       // we can inject endpoint if needed
       if (property === "usePrefetch") {
-        return (...arguments_: any[]) => {
-          const [endpointName] = arguments_; // endpoint that should be in endpoints record
-          if (!endpointName || typeof endpointName !== "string") {
-            throw new TypeError(
-              "usePrefetch must be called with endpoint name string as first arg",
+        return (...usePrefetchArguments: unknown[]) => {
+          const [endpointName] = usePrefetchArguments; // endpoint that should be in endpoints record
+          if (!isString(endpointName)) {
+            throw new Error(
+              "input error: usePrefetch must be called with endpoint name string as first arg",
             );
           }
-          // If endpoint hasn't been yet injected, inject it. usePrefetch is always
-          // for query endpoint.
-          if (!(target as any)["endpoints"][endpointName]) {
+          if (!endpoints[endpointName]) {
             formatEndpointToProcedurePathAndInjectToApi(target, endpointName, "query");
           }
-          return (target as any).usePrefetch(...arguments_);
+          // any is okay, we know usePrefetch hook is at least now generated
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return (target as any)["usePrefetch"](...usePrefetchArguments);
         };
       }
 

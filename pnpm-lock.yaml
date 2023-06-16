@@ -5,6 +5,11 @@ patchedDependencies:
     hash: u6hshpvqmlyay4cpcuxa5n4vqa
     path: patches/@trpc__client@10.30.0.patch
 
+dependencies:
+  is-what:
+    specifier: ^4.1.15
+    version: 4.1.15
+
 devDependencies:
   '@reduxjs/toolkit':
     specifier: ^1.9.5
@@ -1824,6 +1829,11 @@ packages:
   /is-potential-custom-element-name@1.0.1:
     resolution: {integrity: sha512-bCYeRA2rVibKZd+s2625gGnGF/t7DSqDs4dP7CrLA1m7jKWz6pps0LpYLJN8Q64HtmPKJ1hrN3nzPNKFEKOUiQ==}
     dev: true
+
+  /is-what@4.1.15:
+    resolution: {integrity: sha512-uKua1wfy3Yt+YqsD6mTUEa2zSi3G1oPlqTflgaPJ7z63vUGN5pxFpnQfeSLMFnJDEsdvOtkp1rUWkYjB4YfhgA==}
+    engines: {node: '>=12.13'}
+    dev: false
 
   /isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}

@@ -47,5 +47,8 @@
     "patchedDependencies": {
       "@trpc/client@10.30.0": "patches/@trpc__client@10.30.0.patch"
     }
+  },
+  "dependencies": {
+    "is-what": "^4.1.15"
   }
 }
