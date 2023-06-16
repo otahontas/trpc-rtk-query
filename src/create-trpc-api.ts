@@ -1,6 +1,8 @@
 import {
+  type Api,
   type BaseQueryApi,
   type BaseQueryFn,
+  EndpointDefinitions,
   type MutationDefinition,
   type QueryDefinition,
   createApi,
@@ -9,7 +11,7 @@ import {
   type CreateTRPCClientOptions,
   type CreateTRPCProxyClient,
   TRPCClientError,
-  TRPCRequestOptions,
+  type TRPCRequestOptions,
   type TRPCUntypedClient,
   createTRPCUntypedClient,
 } from "@trpc/client";
@@ -172,10 +174,11 @@ export type CreateTRPCApiOptions<TRouter extends AnyRouter> =
       ) => Promise<CreateTRPCProxyClient<TRouter>>;
     };
 
-// TODO: better names for params (like { procedureArgs?, procedurePath, procedureType })
 type BaseQueryArguments = {
-  arguments_: unknown; // args for the procedure
-  path: string;
+  // Okay to be unknown, we handle argument type safety at rtk query level.
+  // This is just forwarding arguments to trpc client
+  procedureArguments: unknown;
+  procedurePath: string;
   procedureType: "mutation" | "query";
 };
 type BaseQueryResult = unknown; // TODO: type properly from Router
@@ -224,7 +227,11 @@ const createBaseQuery = <TRouter extends AnyRouter>(
 
   return async (baseQueryArguments, baseQueryApi, options) => {
     try {
-      const { arguments_, path, procedureType } = baseQueryArguments;
+      const {
+        procedureArguments: arguments_,
+        procedurePath: path,
+        procedureType,
+      } = baseQueryArguments;
       const clientToUse = clientResult.clientReady
         ? clientResult.client
         : getUntypedClient<TRouter>(await clientResult.getClient(baseQueryApi));
@@ -268,6 +275,37 @@ const createBaseQuery = <TRouter extends AnyRouter>(
   };
 };
 
+type Injectable = Pick<
+  // Any is okay, we just need this to check that proxyedApi is correctly shaped
+  // and that we have correct params for baseQuery
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Api<TrpcApiBaseQuery, EndpointDefinitions, any, any>,
+  "injectEndpoints"
+>;
+const formatEndpointToProcedurePathAndInjectToApi = <ProxyedApi extends Injectable>(
+  proxyedApi: ProxyedApi,
+  endpoint: string,
+  procedureType: "mutation" | "query",
+) => {
+  const procedurePath = endpoint.includes("_")
+    ? endpoint
+        .split("_")
+        .map((part) => deCapitalize(part))
+        .join(".")
+    : endpoint;
+  proxyedApi.injectEndpoints({
+    endpoints: (builder) => ({
+      [endpoint]: builder[procedureType]({
+        query: (procedureArguments: unknown) => ({
+          procedureArguments,
+          procedurePath,
+          procedureType,
+        }),
+      }),
+    }),
+  });
+};
+
 // TODO: infer types correctly when passing in premade client or when getting client
 export const createTRPCApi = <TRouter extends AnyRouter>(
   options: CreateTRPCApiOptions<TRouter>,
@@ -275,7 +313,7 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
   // TODO: Extract to getBaseQuery, which generates the correct baseQuery for us
   const reducerPath = "TRPCApi" as const;
   const baseQuery = createBaseQuery(options);
-  type TagTypes = never; // No tags
+  type TagTypes = string; // No tags
   type ReducerPath = typeof reducerPath;
   // Create underlying api that can be proxyed
   const nonProxyApi = createApi<
@@ -306,32 +344,38 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
     },
   ] as const;
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  /* eslint-disable no-prototype-builtins */
   return new Proxy(nonProxyApi, {
-    get(target, property) {
+    get(target, property, receiver) {
       // If property was endpoints , user might want to call endpoint that isn't
       // yet generated. Return proxy that handles generating
       // TODO: can this be made cleaner, maybe recursion here?
       if (property === "endpoints") {
-        return new Proxy((target as any)[property as any], {
-          get(endpointTarget, endpointProperty) {
-            // Validate & call the property if is already defined
-            if (endpointTarget.hasOwnProperty(endpointProperty)) {
-              return (endpointTarget as any)[endpointProperty as any];
+        // Any is okay, we know target has endpoints property
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return new Proxy((target as any)["endpoints"], {
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          get(endpointTarget, endpointProperty, endpointReceiver) {
+            if (Reflect.has(endpointTarget, endpointProperty)) {
+              return Reflect.get(endpointTarget, endpointProperty, endpointReceiver);
             }
             assertPropertyIsString(endpointProperty);
 
             // Return one more proxy that can actually inject the endpoint
             // We can't do it at this level yet, since we need to know the type of
             // operation (query or mutation) that's being called for the endpoint
-            //
-            // Since endpoint in endpoints object might be undefined, we pass default
+
+            // Since endpoint in endpoints object might be undefined, we'll default
             // to empty object
-            return new Proxy((endpointTarget as any)[endpointProperty as any] ?? {}, {
-              get(operationTarget, operationProperty) {
-                if (operationTarget.hasOwnProperty(property)) {
-                  return (operationTarget as any)[property as any];
+            // any is okay, we know endpointTarget will be defined
+            /* eslint-disable @typescript-eslint/no-explicit-any */
+            return new Proxy((endpointTarget as any)[endpointProperty] ?? {}, {
+              get(operationTarget, operationProperty, operationReceiver) {
+                if (Reflect.has(operationTarget, operationProperty)) {
+                  return Reflect.get(
+                    operationTarget,
+                    operationProperty,
+                    operationReceiver,
+                  );
                 }
                 assertPropertyIsString(operationProperty);
                 const mutationOperation = "useMutation";
@@ -342,57 +386,22 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
                   "useLazyQuery",
                   "useLazyQuerySubscription",
                 ];
-
-                // default to state where we don't find operationProperty
-                let procedureTypeResult:
-                  | {
-                      data: "mutation" | "query";
-                      success: true;
-                    }
-                  | {
-                      error: string;
-                      success: false;
-                    } = {
-                  error: `Property ${property}.${endpointProperty}.${operationProperty} is not defined and could not be generated`,
-                  success: false,
-                };
+                let procedureType: "mutation" | "query" | undefined;
                 if (operationProperty === mutationOperation) {
-                  procedureTypeResult = {
-                    data: "mutation",
-                    success: true,
-                  };
+                  procedureType = "mutation" as const;
                 } else if (queryOperations.includes(operationProperty)) {
-                  procedureTypeResult = {
-                    data: "query",
-                    success: true,
-                  };
+                  procedureType = "query" as const;
+                } else {
+                  throw new TypeError(
+                    `Property ${property}.${endpointProperty}.${operationProperty} is not defined and could not be generated`,
+                  );
                 }
 
-                if (!procedureTypeResult.success) {
-                  throw new TypeError(procedureTypeResult.error);
-                }
-                const { data: procedureType } = procedureTypeResult;
-                // Endpoint property is the correct endpoint name to generate.
-                // check if it is actually deeper path for trpc, handle replacements correctly
-                const path = endpointProperty.includes("_")
-                  ? endpointProperty
-                      .split("_")
-                      .map((part) => deCapitalize(part))
-                      .join(".")
-                  : endpointProperty;
-                // TODO: refactor injecting endpoint to external function, it's called
-                // always similarly
-                target.injectEndpoints({
-                  endpoints: (builder) => ({
-                    [endpointProperty]: builder[procedureType]({
-                      query: (arguments_: unknown) => ({
-                        arguments_,
-                        path,
-                        procedureType,
-                      }),
-                    }),
-                  }),
-                });
+                formatEndpointToProcedurePathAndInjectToApi(
+                  target,
+                  endpointProperty,
+                  procedureType,
+                );
                 // endpoint injected, return it from the correct path
                 return (target as any)["endpoints"][endpointProperty][
                   operationProperty
@@ -413,40 +422,19 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
               "usePrefetch must be called with endpoint name string as first arg",
             );
           }
-          // If endpoint hasn't been yet injected, inject it. UsePrefetch handles
-          // only queries
+          // If endpoint hasn't been yet injected, inject it. usePrefetch is always
+          // for query endpoint.
           if (!(target as any)["endpoints"][endpointName]) {
-            // check if it is actually deeper path for trpc, handle replacements correctly
-            const path = endpointName.includes("_")
-              ? endpointName
-                  .split("_")
-                  .map((part) => deCapitalize(part))
-                  .join(".")
-              : endpointName;
-            target.injectEndpoints({
-              endpoints: (builder) => ({
-                [endpointName]: builder.query({
-                  query: (arguments_: unknown) => ({
-                    arguments_,
-                    path,
-                    procedureType: "query",
-                  }),
-                }),
-              }),
-            });
+            formatEndpointToProcedurePathAndInjectToApi(target, endpointName, "query");
           }
           return (target as any).usePrefetch(...arguments_);
         };
       }
 
       // Generate the endpoint
-
-      // TODO: should we use Reflect instead?
-      if (target.hasOwnProperty(property)) {
-        return (target as any)[property as any];
+      if (Reflect.has(target, property)) {
+        return Reflect.get(target, property, receiver);
       }
-      /* eslint-enable @typescript-eslint/no-explicit-any */
-      /* eslint-enable no-prototype-builtins */
       assertPropertyIsString(property);
 
       for (const { procedureType, regex } of regexesWithProcedureType) {
@@ -462,23 +450,11 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
         }
         const endpointName = deCapitalize(capitalizedEndpointName);
         // check if it is actually deeper path for trpc, handle replacements correctly
-        const path = endpointName.includes("_")
-          ? endpointName
-              .split("_")
-              .map((part) => deCapitalize(part))
-              .join(".")
-          : endpointName;
-        target.injectEndpoints({
-          endpoints: (builder) => ({
-            [endpointName]: builder[procedureType]({
-              query: (arguments_: unknown) => ({
-                arguments_,
-                path,
-                procedureType,
-              }),
-            }),
-          }),
-        });
+        formatEndpointToProcedurePathAndInjectToApi(
+          target,
+          endpointName,
+          procedureType,
+        );
 
         // Return newly generated property
         return target[property as keyof typeof target];
