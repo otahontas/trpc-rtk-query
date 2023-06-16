@@ -326,8 +326,8 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
         return new Proxy((target as any)[property as any], {
           get(endpointTarget, endpointProperty) {
             // Validate & call the property if is already defined
-            if (endpointTarget.hasOwnProperty(property)) {
-              return (endpointTarget as any)[property as any];
+            if (endpointTarget.hasOwnProperty(endpointProperty)) {
+              return (endpointTarget as any)[endpointProperty as any];
             }
             assertPropertyIsString(endpointProperty);
 
