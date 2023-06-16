@@ -72,21 +72,9 @@ exports[`create-trpc-api > when 'using getClient to get the client' > and making
 </div>
 `;
 
-exports[`create-trpc-api > when 'using getClient to get the client' > and making actual requests with hooks renders correctly > with successful deep nested query 2`] = `
-<div>
-  Error
-</div>
-`;
-
 exports[`create-trpc-api > when 'using getClient to get the client' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 1`] = `
 <div>
   Loading...
-</div>
-`;
-
-exports[`create-trpc-api > when 'using getClient to get the client' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 2`] = `
-<div>
-  Error
 </div>
 `;
 
@@ -110,20 +98,8 @@ exports[`create-trpc-api > when 'using passed client' > and making actual reques
 </div>
 `;
 
-exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with successful deep nested query 2`] = `
-<div>
-  Error
-</div>
-`;
-
 exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 1`] = `
 <div>
   Loading...
-</div>
-`;
-
-exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with successful useUserIdQuery 2`] = `
-<div>
-  Error
 </div>
 `;

@@ -85,14 +85,14 @@ describe("create-trpc-api", () => {
   });
 
   describe.each([
-    // {
-    //   case: "creating client from clientOptions",
-    //   createApiOptions: { clientOptions: tRPCClientOptions },
-    // },
-    // {
-    //   case: "using passed client",
-    //   createApiOptions: { client: preMadeClient },
-    // },
+    {
+      case: "creating client from clientOptions",
+      createApiOptions: { clientOptions: tRPCClientOptions },
+    },
+    {
+      case: "using passed client",
+      createApiOptions: { client: preMadeClient },
+    },
     {
       case: "using getClient to get the client",
       createApiOptions: { getClient },
@@ -227,6 +227,8 @@ describe("create-trpc-api", () => {
         await setTimeout(500);
         // result after data has loaded and component has re-rendered
         result = renderedToJSon(app);
+        expect(JSON.stringify(result)).not.toContain("Loading...");
+        expect(JSON.stringify(result)).not.toContain("Error");
         expect(result).toMatchSnapshot();
       });
 
@@ -258,6 +260,8 @@ describe("create-trpc-api", () => {
         await setTimeout(500);
         // result after data has loaded and component has re-rendered
         result = renderedToJSon(app);
+        expect(JSON.stringify(result)).not.toContain("Loading...");
+        expect(JSON.stringify(result)).toContain("Error");
         expect(result).toMatchSnapshot();
       });
 
@@ -290,6 +294,8 @@ describe("create-trpc-api", () => {
         await setTimeout(500);
         // result after data has loaded and component has re-rendered
         result = renderedToJSon(app);
+        expect(JSON.stringify(result)).not.toContain("Loading...");
+        expect(JSON.stringify(result)).not.toContain("Error");
         expect(result).toMatchSnapshot();
       });
 
