@@ -1,6 +1,29 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `"prefetched"`;
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `
+<div
+  onMouseEnter={[Function]}
+>
+  prefetched
+</div>
+`;
+
+exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with call to usePrefetch 2`] = `
+<div
+  onMouseEnter={[Function]}
+>
+  <div>
+    <p>
+      Id: 
+      1
+    </p>
+    <p>
+      Name: 
+      John Johnny
+    </p>
+  </div>
+</div>
+`;
 
 exports[`create-trpc-api > when 'creating client from clientOptions' > and making actual requests with hooks renders correctly > with failing useUserIdQuery 1`] = `
 <div>
@@ -52,7 +75,13 @@ exports[`create-trpc-api > when 'creating client from clientOptions' > and makin
 </div>
 `;
 
-exports[`create-trpc-api > when 'using getClient to get the client' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `"prefetched"`;
+exports[`create-trpc-api > when 'using getClient to get the client' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `
+<div
+  onMouseEnter={[Function]}
+>
+  prefetched
+</div>
+`;
 
 exports[`create-trpc-api > when 'using getClient to get the client' > and making actual requests with hooks renders correctly > with failing useUserIdQuery 1`] = `
 <div>
@@ -78,7 +107,13 @@ exports[`create-trpc-api > when 'using getClient to get the client' > and making
 </div>
 `;
 
-exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `"prefetched"`;
+exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with call to usePrefetch 1`] = `
+<div
+  onMouseEnter={[Function]}
+>
+  prefetched
+</div>
+`;
 
 exports[`create-trpc-api > when 'using passed client' > and making actual requests with hooks renders correctly > with failing useUserIdQuery 1`] = `
 <div>

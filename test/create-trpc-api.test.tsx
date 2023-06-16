@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { configureStore } from "@reduxjs/toolkit";
 import { type BaseQueryApi, skipToken } from "@reduxjs/toolkit/query";
 import { type CreateTRPCProxyClient, createTRPCProxyClient } from "@trpc/client";
@@ -301,18 +302,56 @@ describe("create-trpc-api", () => {
 
       it("with call to usePrefetch", async () => {
         const { api, createComponentWrapper } = createReactTestApp(createApiOptions);
-        // TODO: test that prefetching is actually called and it populates correctly!
-        const Component = () => {
+        const userId = 1;
+        const PrefetcherComponent = () => {
           const { usePrefetch } = api;
-          const userId = 1;
           const prefetch = usePrefetch("getUserById");
           expect(prefetch).toBeDefined();
           prefetch(userId);
           return <>prefetched</>;
         };
-        const app = createComponentWrapper(Component);
-        // first render
-        const result = renderedToJSon(app);
+        const QueryComponent = () => {
+          const { useQueryState } = api.endpoints.getUserById;
+          const { data } = useQueryState(userId);
+          expect(data).toEqual(userFixtures[1]);
+          return (
+            <div>
+              <p>Id: {data!.id}</p>
+              <p>Name: {data!.name}</p>
+            </div>
+          );
+        };
+
+        const Parent = () => {
+          const [showQueryComponent, setShowQueryComponent] = React.useState(false);
+
+          const handleMouseEnter = () => {
+            setShowQueryComponent(true);
+          };
+
+          return (
+            <div onMouseEnter={handleMouseEnter}>
+              {showQueryComponent ? <QueryComponent /> : <PrefetcherComponent />}
+            </div>
+          );
+        };
+
+        // render prefetcher component
+        const component = createComponentWrapper(Parent);
+        let result = renderedToJSon(component);
+        expect(JSON.stringify(result)).toContain("prefetched");
+        expect(result).toMatchSnapshot();
+
+        // wait for data to load
+        await setTimeout(500);
+        // manually trigger the callback
+        result.props["onMouseEnter"]();
+        // render query component and check that prefetch was actually called
+        // properly through proxy (e.g. query state should be loaded)
+        result = renderedToJSon(component);
+        expect(JSON.stringify(result)).not.toContain("Error");
+        expect(JSON.stringify(result)).toContain("Id");
+        expect(JSON.stringify(result)).toContain("Name");
         expect(result).toMatchSnapshot();
       });
 
