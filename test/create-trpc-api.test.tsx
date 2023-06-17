@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { type BaseQueryApi, skipToken, createApi } from "@reduxjs/toolkit/query/react";
+import { type BaseQueryApi, createApi, skipToken } from "@reduxjs/toolkit/query/react";
 import { type CreateTRPCProxyClient, createTRPCProxyClient } from "@trpc/client";
 import { setTimeout } from "node:timers/promises";
 import React from "react";
@@ -8,9 +8,9 @@ import renderer from "react-test-renderer";
 import { beforeAll, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import {
+  type AnyApi,
   type CreateTRPCApiOptions,
   createTRPCApi,
-  type AnyApi,
 } from "../src/create-trpc-api";
 import {
   type AppRouter,
@@ -75,7 +75,6 @@ describe("create-trpc-api", () => {
   };
   type PreMadeApiSuccessResponse = typeof preMadeApiSuccessResponse;
   const preMadeApi = createApi({
-    reducerPath: "premadeApi",
     baseQuery: (baseQueryArguments) => {
       if (baseQueryArguments.getResponseArgument !== premadeApiArgument) {
         return {
@@ -95,6 +94,7 @@ describe("create-trpc-api", () => {
         }),
       }),
     }),
+    reducerPath: "premadeApi",
   }) as unknown as AnyApi; // TODO: fix types
 
   it("prevents passing in mutually exclusive args", () => {
@@ -122,11 +122,12 @@ describe("create-trpc-api", () => {
 
   it("doesn't replace previous hooks when passing in premade api", () => {
     const api = createTRPCApi<AppRouter>({
-      clientOptions: tRPCClientOptions,
       api: preMadeApi,
+      clientOptions: tRPCClientOptions,
     });
     const { useListUsersQuery } = api;
     expect(useListUsersQuery).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const useGetResponseQuery = (api as any).useGetResponseQuery!; // TODO: fix types, this should be merged when injecting new endpoints
     expect(useGetResponseQuery).toBeDefined();
     // TODO: test types here too
@@ -256,28 +257,6 @@ describe("create-trpc-api", () => {
           api.endpoints.nested_Deep_GetVeryNestedMessage.useQuerySubscription;
         expect(query).toBeDefined();
         expectTypeOf(query).toBeFunction();
-      });
-
-      it("Can be extended with enchangeEndpoints", () => {
-        const api = createTRPCApi<AppRouter>(createApiOptions);
-        expect(api.enhanceEndpoints).toBeDefined();
-        // This is here just to see that it can be executed
-        api.enhanceEndpoints({
-          addTagTypes: ["User"],
-          endpoints: {
-            getUserById: {
-              onQueryStarted(argument, baseQuery) {
-                console.log("could call baseQuery with arg!", baseQuery, argument);
-              },
-              providesTags: ["User"],
-            },
-            updateName: {
-              onQueryStarted() {
-                console.log("could do optimistic update here");
-              },
-            },
-          },
-        });
       });
 
       describe("and making actual requests with hooks renders correctly", () => {
@@ -482,6 +461,27 @@ describe("create-trpc-api", () => {
           // first render
           renderedToJSon(app);
           expect(consoleErrorMock).not.toHaveBeenCalled();
+        });
+      });
+      it("Can be extended with enchangeEndpoints", () => {
+        const api = createTRPCApi<AppRouter>(createApiOptions);
+        expect(api.enhanceEndpoints).toBeDefined();
+        // This is here just to see that it can be executed
+        api.enhanceEndpoints({
+          addTagTypes: ["User"],
+          endpoints: {
+            getUserById: {
+              // TODO: actually test this works
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onQueryStarted() {},
+              providesTags: ["User"],
+            },
+            updateName: {
+              // TODO: actually test this works
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onQueryStarted() {},
+            },
+          },
         });
       });
     });

@@ -318,9 +318,9 @@ type Injectable = Pick<
 type FormatEndpointToProcedurePathAndInjectToApiOptionsBase<
   ProxyedApi extends Injectable,
 > = {
-  proxyedApi: ProxyedApi;
   endpoint: string;
   procedureType: "mutation" | "query";
+  proxyedApi: ProxyedApi;
 };
 type FormatEndpointToProcedurePathAndInjectToApiOptionWithoutQueryFunction<
   ProxyedApi extends Injectable,
@@ -331,19 +331,19 @@ type FormatEndpointToProcedurePathAndInjectToApiOptionWithQueryFunction<
   ProxyedApi extends Injectable,
   TRouter extends AnyRouter,
 > = FormatEndpointToProcedurePathAndInjectToApiOptionsBase<ProxyedApi> & {
-  useQueryFunction: true;
   createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
+  useQueryFunction: true;
 };
 
 type FormatEndpointToProcedurePathAndInjectToApiOptions<
   ProxyedApi extends Injectable,
   TRouter extends AnyRouter,
 > =
-  | FormatEndpointToProcedurePathAndInjectToApiOptionWithoutQueryFunction<ProxyedApi>
   | FormatEndpointToProcedurePathAndInjectToApiOptionWithQueryFunction<
       ProxyedApi,
       TRouter
-    >;
+    >
+  | FormatEndpointToProcedurePathAndInjectToApiOptionWithoutQueryFunction<ProxyedApi>;
 
 const formatEndpointToProcedurePathAndInjectToApi = <
   ProxyedApi extends Injectable,
@@ -351,26 +351,42 @@ const formatEndpointToProcedurePathAndInjectToApi = <
 >(
   options: FormatEndpointToProcedurePathAndInjectToApiOptions<ProxyedApi, TRouter>,
 ) => {
-  const { proxyedApi, endpoint, procedureType } = options;
+  const { endpoint, procedureType, proxyedApi, useQueryFunction } = options;
   const procedurePath = endpoint.includes("_")
     ? endpoint
         .split("_")
         .map((part) => deCapitalize(part))
         .join(".")
     : endpoint;
-  proxyedApi.injectEndpoints({
-    endpoints: (builder) => ({
-      [endpoint]: builder[procedureType]({
-        // TODO: proper typings
+
+  const builderArguments = useQueryFunction
+    ? {
+        // TODO: fix typings
+        // TODO: curry, so we don't have to pass all three args
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        queryFn: (procedureArguments: unknown, api: any, extraOptions: any) =>
+          // eslint-disable-next-line unicorn/consistent-destructuring
+          createBaseQuery(options.createTrpcApiClientOptions)(
+            {
+              procedureArguments,
+              procedurePath,
+              procedureType,
+            },
+            api,
+            extraOptions,
+          ),
+      }
+    : {
         query: (procedureArguments: unknown) => ({
           procedureArguments,
           procedurePath,
           procedureType,
         }),
-        queryFn: (options.useQueryFunction
-          ? createBaseQuery(options.createTrpcApiClientOptions)
-          : undefined) as never, // TODO: really fix this xD
-      }),
+      };
+
+  proxyedApi.injectEndpoints({
+    endpoints: (builder) => ({
+      [endpoint]: builder[procedureType](builderArguments),
     }),
   });
 };
@@ -433,9 +449,7 @@ export const createTRPCApi = <
     endpoints: () => ({} as any),
     reducerPath,
   });
-  console.log("options has api", Boolean(options.api));
   const nonProxyApi = options.api ? (options.api as typeof newApi) : newApi;
-  console.log("nonProxyApi", nonProxyApi);
 
   const regexesWithProcedureType = [
     {
@@ -454,8 +468,8 @@ export const createTRPCApi = <
 
   const useQueryFunctionOptions = options.api
     ? {
-        useQueryFunction: true as const,
         createTrpcApiClientOptions: options,
+        useQueryFunction: true as const,
       }
     : {
         useQueryFunction: false as const,
@@ -463,9 +477,6 @@ export const createTRPCApi = <
 
   return new Proxy(nonProxyApi, {
     get(target, property, receiver) {
-      console.log("non proxy api called");
-      console.log("non proxy api is", target);
-      console.log("property is", property);
       // Validate endpoints target, since it is needed in multiple places
       if (!("endpoints" in target) || !isAnyObject(target["endpoints"])) {
         throw new Error("Library error: Can't get endpoints from rtk api!");
@@ -503,9 +514,9 @@ export const createTRPCApi = <
               );
             }
             formatEndpointToProcedurePathAndInjectToApi({
-              proxyedApi: target,
               endpoint,
               procedureType,
+              proxyedApi: target,
               ...useQueryFunctionOptions,
             });
             return endpoints[endpoint][operation];
@@ -527,9 +538,9 @@ export const createTRPCApi = <
           }
           if (!endpoints[endpoint]) {
             formatEndpointToProcedurePathAndInjectToApi({
-              proxyedApi: target,
               endpoint,
               procedureType: "query",
+              proxyedApi: target,
               ...useQueryFunctionOptions,
             });
           }
@@ -559,9 +570,9 @@ export const createTRPCApi = <
         const endpoint = deCapitalize(capitalizedEndpoint);
         // check if it is actually deeper path for trpc, handle replacements correctly
         formatEndpointToProcedurePathAndInjectToApi({
-          proxyedApi: target,
           endpoint,
           procedureType,
+          proxyedApi: target,
           ...useQueryFunctionOptions,
         });
 
