@@ -41,7 +41,7 @@ export const injectTRPCEndpointsToApi = <
 >(
   options: InjectTRPCEndpointsToApiOptions<TRouter, ExistingApi>,
 ) => {
-  const nonProxyApi = options.existingApi.injectEndpoints as unknown as Api<
+  const nonProxyApi = options.existingApi as unknown as Api<
     BaseQuery,
     Endpoints &
       CreateEndpointDefinitionsFromTRPCRouter<

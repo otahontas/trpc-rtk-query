@@ -153,6 +153,7 @@ const regexesWithProcedureType = [
     regex: /use(\w+)Mutation/,
   },
 ] as const;
+// TODO: call queryFn (& add option) when using pre-existing api
 export const wrapApiToProxy = <NonProxyApi extends Injectable>(
   nonProxyApi: NonProxyApi,
 ) =>
