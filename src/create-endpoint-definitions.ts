@@ -11,8 +11,10 @@ import {
   type inferProcedureOutput,
 } from "@trpc/server";
 
-// Infer type of procedure ("query" or "mutation") from procedure. We don't support
-// "subscription" type, so it's dropped here
+/** Infer type of procedure ("query" or "mutation") from procedure. We don't support
+ * "subscription" type, so it's dropped here
+ * @internal
+ **/
 type inferProcedureType<TProcedure extends AnyProcedure> = TProcedure extends Procedure<
   infer ProcedureType,
   // we don't care about the second param, so it can be any
@@ -22,8 +24,10 @@ type inferProcedureType<TProcedure extends AnyProcedure> = TProcedure extends Pr
   ? Exclude<ProcedureType, "subscription">
   : never;
 
-// If the path is empty, just return the endpoint name. Otherwise, concat the endpoint
-// name with the path, separated by an underscore
+/** Formatter for path and endpoint. If the path is empty, just return the endpoint
+ * name. Otherwise, concat the endpoint name with the path, separated by an underscore.
+ * @internal
+ **/
 type FormatPathAndEndpointName<MaybeEndpointName, EndpointPath> =
   EndpointPath extends ""
     ? MaybeEndpointName
@@ -31,8 +35,10 @@ type FormatPathAndEndpointName<MaybeEndpointName, EndpointPath> =
         Extract<MaybeEndpointName, string>
       >}`;
 
-// Flatten deeply nested routes, so we only have pairs of [endpoint name with path,
-// procedure].
+/** Flatten deeply nested routes, so we only have pairs of [endpoint name with path,
+ * procedure]. This helps avoiding infinitely deep type error from TS compiler.
+ * @internal
+ **/
 type FlattenToEndpointProcedurePairs<MaybeProcedureRecord, EndpointPath = ""> = {
   // Grab result of "FormatPathAndEndpointName" to FormatterPath variable
   [MaybeEndpointName in keyof MaybeProcedureRecord]: FormatPathAndEndpointName<
@@ -52,10 +58,14 @@ type FlattenToEndpointProcedurePairs<MaybeProcedureRecord, EndpointPath = ""> = 
     : never; // Will never happen, but must be here for the extends infer -pattern
 }[keyof MaybeProcedureRecord];
 
-// Type structure of [endpoint name with path, procedure] to check extending against
+/** Type structure of [endpoint name with path, procedure] to check extending against
+ * @internal
+ **/
 type EndpointProcedurePair = [string, AnyProcedure];
 
-// Create endpoint definitions from TRPC Router for RTK query api
+/** Create endpoint definitions from TRPC Router for RTK query api
+ * @internal
+ **/
 export type CreateEndpointDefinitionsFromTRPCRouter<
   TRouter extends AnyRouter,
   BaseQuery extends BaseQueryFn,

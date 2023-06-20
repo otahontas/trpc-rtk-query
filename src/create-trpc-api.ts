@@ -1,60 +1,18 @@
 import {
   type Api,
-  type BaseQueryApi,
   type BaseQueryFn,
   EndpointDefinitions,
   createApi,
 } from "@reduxjs/toolkit/query/react";
-import {
-  type CreateTRPCClientOptions,
-  type CreateTRPCProxyClient,
-  TRPCClientError,
-  type TRPCRequestOptions,
-  type TRPCUntypedClient,
-  createTRPCUntypedClient,
-  getUntypedClient,
-} from "@trpc/client";
-import { type AnyRouter, TRPCError } from "@trpc/server";
-import { getHTTPStatusCodeFromError } from "@trpc/server/http";
+import { type AnyRouter } from "@trpc/server";
 import { isAnyObject, isString } from "is-what";
 
-import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoints-definitions";
-
-export type TRPCBaseQueryError =
-  | {
-      data?: undefined;
-      error: string;
-      message: string;
-      name: string;
-      /**
-       * * `"TRPC_CLIENT_ERROR"`:
-       *   An error that happened on trpc client. Original error is stringified in error
-       *   attribute.
-       **/
-      status: "TRPC_CLIENT_ERROR";
-    }
-  | {
-      data?: undefined;
-      error: string;
-      message: string;
-      name: string;
-      /**
-       * * `"TRPC_ERROR"`:
-       *   An error that was returned by trpc backend. Original error is stringified in
-       *   error attribute.
-       **/
-      status: "TRPC_ERROR";
-      statusCode: number;
-    }
-  | {
-      data?: unknown;
-      error: string;
-      /**
-       * * `"CUSTOM_ERROR"`:
-       *   A custom error type that you can return from your `queryFn` where another error might not make sense.
-       **/
-      status: "CUSTOM_ERROR";
-    };
+import {
+  type BaseQueryForTRPCClient,
+  type CreateTRPCApiClientOptions,
+  createBaseQueryForTRPCClient,
+} from "./create-base-query";
+import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoint-definitions";
 
 const deCapitalize = (string_: string) => {
   const firstChar = string_[0];
@@ -72,25 +30,6 @@ function assertPropertyIsString(property: string | symbol): asserts property is 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyApi = Api<BaseQueryFn, EndpointDefinitions, any, any>;
 
-type CreateTRPCApiClientOptions<TRouter extends AnyRouter> =
-  | {
-      client: CreateTRPCProxyClient<TRouter>;
-      clientOptions?: never;
-      getClient?: never;
-    }
-  | {
-      client?: never;
-      clientOptions: CreateTRPCClientOptions<TRouter>;
-      getClient?: never;
-    }
-  | {
-      client?: never;
-      clientOptions?: never;
-      getClient: (
-        baseQueryApi: BaseQueryApi,
-      ) => Promise<CreateTRPCProxyClient<TRouter>>;
-    };
-
 type CreateTRPCApiApiOptions<ExistingApi extends AnyApi> = {
   api?: ExistingApi;
 };
@@ -100,112 +39,11 @@ export type CreateTRPCApiOptions<
   ExistingApi extends AnyApi = AnyApi,
 > = CreateTRPCApiClientOptions<TRouter> & CreateTRPCApiApiOptions<ExistingApi>;
 
-type BaseQueryArguments = {
-  // Okay to be unknown, we handle argument type safety at rtk query level.
-  // This is just forwarding arguments to trpc client
-  procedureArguments: unknown;
-  procedurePath: string;
-  procedureType: "mutation" | "query";
-};
-type BaseQueryResult = unknown; // TODO: type properly from Router
-type ExtraOptions = TRPCRequestOptions;
-// eslint-disable-next-line @typescript-eslint/ban-types
-type Meta = {}; // TODO: add a proper meta type
-type TrpcApiBaseQuery = BaseQueryFn<
-  BaseQueryArguments,
-  BaseQueryResult,
-  TRPCBaseQueryError,
-  ExtraOptions,
-  Meta
->;
-
-type ClientResult<TRouter extends AnyRouter> =
-  | {
-      client: TRPCUntypedClient<TRouter>;
-      clientReady: true;
-    }
-  | {
-      clientReady: false;
-      getClient: NonNullable<CreateTRPCApiOptions<TRouter>["getClient"]>;
-    };
-
-// This baseQuery tries to follow conventions from RTK query's fetchBaseQuery wrapper
-const createBaseQuery = <TRouter extends AnyRouter>(
-  createTRPCApiOptions: CreateTRPCApiOptions<TRouter>,
-): TrpcApiBaseQuery => {
-  const clientResult = ((): ClientResult<TRouter> => {
-    if ("client" in createTRPCApiOptions) {
-      return {
-        client: getUntypedClient<TRouter>(createTRPCApiOptions.client),
-        clientReady: true,
-      };
-    } else if ("clientOptions" in createTRPCApiOptions) {
-      return {
-        client: createTRPCUntypedClient<TRouter>(createTRPCApiOptions.clientOptions),
-        clientReady: true,
-      };
-    }
-    return {
-      clientReady: false,
-      getClient: createTRPCApiOptions.getClient,
-    };
-  })();
-
-  return async (baseQueryArguments, baseQueryApi, options) => {
-    try {
-      const {
-        procedureArguments: arguments_,
-        procedurePath: path,
-        procedureType,
-      } = baseQueryArguments;
-      const clientToUse = clientResult.clientReady
-        ? clientResult.client
-        : getUntypedClient<TRouter>(await clientResult.getClient(baseQueryApi));
-      const data = await clientToUse[procedureType](path, arguments_, options);
-      return {
-        data,
-      };
-    } catch (error) {
-      let properlyShapedError: {
-        error: TRPCBaseQueryError;
-      };
-      if (error instanceof TRPCClientError) {
-        properlyShapedError = {
-          error: {
-            error: String(error),
-            message: error.message,
-            name: error.name,
-            status: "TRPC_CLIENT_ERROR",
-          },
-        };
-      } else if (error instanceof TRPCError) {
-        properlyShapedError = {
-          error: {
-            error: String(error),
-            message: error.message,
-            name: error.name,
-            status: "TRPC_ERROR",
-            statusCode: getHTTPStatusCodeFromError(error),
-          },
-        };
-      } else {
-        properlyShapedError = {
-          error: {
-            error: String(error),
-            status: "CUSTOM_ERROR",
-          },
-        };
-      }
-      return properlyShapedError;
-    }
-  };
-};
-
 type Injectable = Pick<
   // Any is okay, we just need this to check that proxyedApi is correctly shaped
   // and that we have correct params for baseQuery
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Api<TrpcApiBaseQuery, EndpointDefinitions, any, any>,
+  Api<BaseQueryFn, EndpointDefinitions, any, any>,
   "injectEndpoints"
 >;
 
@@ -324,31 +162,25 @@ export const createTRPCApi = <
 >(
   options: CreateTRPCApiOptions<TRouter, ExistingApi>,
 ) => {
-  const reducerPath = "TRPCApi" as const;
-  const baseQuery = createBaseQuery(options);
-  type TagTypes = string; // No tags
-  type ReducerPath = typeof reducerPath;
-
-  // Create underlying api that can be proxyed
-  // TODO: very hacky types here, handle inferring types from passed api correctly
-  const newApi = createApi<
-    TrpcApiBaseQuery,
-    CreateEndpointDefinitionsFromTRPCRouter<
-      TRouter,
-      TrpcApiBaseQuery,
-      TagTypes,
-      ReducerPath
-    >,
-    ReducerPath,
-    TagTypes
-  >({
-    baseQuery,
-    // We're injecting endpoints later when they're exported
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    endpoints: () => ({} as any),
-    reducerPath,
-  });
-  const nonProxyApi = options.api ? (options.api as typeof newApi) : newApi;
+  const { api: existingApi } = options;
+  const nonProxyApi =
+    existingApi ??
+    createApi<
+      BaseQueryForTRPCClient,
+      CreateEndpointDefinitionsFromTRPCRouter<
+        TRouter,
+        BaseQueryForTRPCClient,
+        never,
+        "api" // Reducer path. TODO: see if we can default to rtk querys default, so we don't redo this one
+      >,
+      "api",
+      never
+    >({
+      baseQuery: createBaseQueryForTRPCClient(options),
+      // We're injecting endpoints later with proxy, so this can be any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      endpoints: () => ({} as any),
+    });
 
   const regexesWithProcedureType = [
     {
@@ -365,7 +197,7 @@ export const createTRPCApi = <
     },
   ] as const;
 
-  const useQueryFunctionOptions = options.api
+  const useQueryFunctionOptions = existingApi
     ? {
         createTrpcApiClientOptions: options,
         useQueryFunction: true as const,
@@ -418,7 +250,8 @@ export const createTRPCApi = <
               proxyedApi: target,
               ...useQueryFunctionOptions,
             });
-            return endpoints[endpoint][operation];
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return endpoints[endpoint]![operation]; // TODO: check why this doesn't work
           },
           proxyTarget: target["endpoints"],
           recursionLevels: 2,
