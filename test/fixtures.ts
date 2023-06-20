@@ -1,4 +1,4 @@
-import { type CreateTRPCClientOptions, httpBatchLink } from "@trpc/client";
+import { httpBatchLink } from "@trpc/client";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
@@ -79,9 +79,11 @@ export type AppRouter = typeof appRouter;
 
 const testPort = 3333;
 
-export const tRPCClientOptions: CreateTRPCClientOptions<AppRouter> = {
+// Don't add AppRouter to this, so we don't get false positives when testing for types
+export const testClientOptions = {
   links: [httpBatchLink({ url: `http://localhost:${testPort}` })],
 };
+
 interface TestServer {
   close: () => Promise<void>;
 }

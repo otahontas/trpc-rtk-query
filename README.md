@@ -143,7 +143,8 @@ export { useUserListQuery } from api;
 - [x] Support deep routers from trpc
 - [x] Allow passing in custom client, use that instead of generating internal client
 - [x] Allow passing in custom client creator that has access to QueryFn parameters
-- [ ] Allow passing in already existing api
+- [x] Allow passing in already existing api
+- [ ] Investigate if using custom modules from rtk toolkit would be a better approach?
 - [ ] Allow passing in some parameters that can't be handled with enhanceEndpoints
 - [ ] Better error types
 - [ ] Support using trpc vanilla client extra options

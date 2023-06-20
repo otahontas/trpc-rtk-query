@@ -6,8 +6,9 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint . && prettier --check .",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "test": "vitest test/",
+    "typecheck": "vitest typecheck test/",
+    "coverage": "vitest run --coverage test/"
   },
   "devDependencies": {
     "@reduxjs/toolkit": "^1.9.5",
