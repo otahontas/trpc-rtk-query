@@ -3,8 +3,6 @@ import {
   type BaseQueryApi,
   type BaseQueryFn,
   EndpointDefinitions,
-  type MutationDefinition,
-  type QueryDefinition,
   createApi,
 } from "@reduxjs/toolkit/query/react";
 import {
@@ -15,16 +13,11 @@ import {
   type TRPCUntypedClient,
   createTRPCUntypedClient,
 } from "@trpc/client";
-import {
-  type AnyProcedure,
-  type AnyRouter,
-  type Procedure,
-  TRPCError,
-  type inferProcedureInput,
-  type inferProcedureOutput,
-} from "@trpc/server";
+import { type AnyRouter, TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 import { isAnyObject, isString } from "is-what";
+
+import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoints-definitions";
 
 // Get untyped client. TODO: use export from trpc when it's published to npm
 // NOTE: we need to set a proper min version for trpc this can be actually used with
@@ -35,96 +28,6 @@ export function getUntypedClient<TRouter extends AnyRouter>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (client as any).__untypedClient;
 }
-
-// Follows trpc internal infer type pattern
-type inferProcedureType<TProcedure extends AnyProcedure> = TProcedure extends Procedure<
-  infer ProcedureType,
-  // any is okay here, we don't care about the second param
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any
->
-  ? ProcedureType
-  : never;
-
-// Flatten deeply nested routes, so we only have pairs of [endpoint name with path,
-// procedure]. Try to first match against procedure and then against router. Otherwise
-// return nothing
-export type FlattenToEndpointProcedurePairs<
-  MaybeProcedureRecord,
-  EndpointPath extends string = "",
-> = {
-  [MaybeEndpointName in keyof MaybeProcedureRecord]: MaybeProcedureRecord[MaybeEndpointName] extends AnyProcedure
-    ? [
-        EndpointPath extends ""
-          ? MaybeEndpointName
-          : `${EndpointPath}_${Capitalize<Extract<MaybeEndpointName, string>>}`,
-        MaybeProcedureRecord[MaybeEndpointName],
-      ]
-    : MaybeProcedureRecord[MaybeEndpointName] extends AnyRouter
-    ? FlattenToEndpointProcedurePairs<
-        MaybeProcedureRecord[MaybeEndpointName],
-        EndpointPath extends ""
-          ? MaybeEndpointName
-          : `${EndpointPath}_${Capitalize<Extract<MaybeEndpointName, string>>}`
-      >
-    : never;
-}[keyof MaybeProcedureRecord];
-
-// Helper type to check extending against
-type EndpointProcedurePair = [string, AnyProcedure];
-
-type InferBaseQuery<InferableApi extends AnyApi> = InferableApi extends Api<
-  infer BaseQuery,
-  EndpointDefinitions,
-  any,
-  any
->
-  ? BaseQuery
-  : never;
-type InferTagTypes<InferableApi extends AnyApi> = InferableApi extends Api<
-  any,
-  EndpointDefinitions,
-  any,
-  infer TagTypes
->
-  ? TagTypes
-  : never;
-
-// Create actual api definitions
-type CreateTRPCApiEndpointDefinitions<
-  TRouter extends AnyRouter,
-  BaseQuery extends BaseQueryFn,
-  TagTypes extends string,
-  ReducerPath extends string,
-> = {
-  [Pair in FlattenToEndpointProcedurePairs<
-    TRouter["_def"]["record"]
-  > as Pair extends EndpointProcedurePair // should always extend but needs to be checked
-    ? Pair[0]
-    : never]: Pair extends EndpointProcedurePair // should always extend but needs to be checked
-    ? Pair[1] extends AnyProcedure
-      ? inferProcedureType<Pair[1]> extends infer ProcedureType
-        ? ProcedureType extends "query"
-          ? QueryDefinition<
-              inferProcedureInput<Pair[1]>,
-              BaseQuery,
-              TagTypes,
-              inferProcedureOutput<Pair[1]>,
-              ReducerPath
-            >
-          : ProcedureType extends "mutation"
-          ? MutationDefinition<
-              inferProcedureInput<Pair[1]>,
-              BaseQuery,
-              TagTypes,
-              inferProcedureOutput<Pair[1]>,
-              ReducerPath
-            >
-          : never
-        : never
-      : never
-    : never;
-};
 
 export type TRPCBaseQueryError =
   | {
@@ -439,7 +342,12 @@ export const createTRPCApi = <
   // TODO: very hacky types here, handle inferring types from passed api correctly
   const newApi = createApi<
     TrpcApiBaseQuery,
-    CreateTRPCApiEndpointDefinitions<TRouter, TrpcApiBaseQuery, TagTypes, ReducerPath>,
+    CreateEndpointDefinitionsFromTRPCRouter<
+      TRouter,
+      TrpcApiBaseQuery,
+      TagTypes,
+      ReducerPath
+    >,
     ReducerPath,
     TagTypes
   >({
