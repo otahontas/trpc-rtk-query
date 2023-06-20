@@ -69,8 +69,8 @@ type EndpointProcedurePair = [string, AnyProcedure];
 export type CreateEndpointDefinitionsFromTRPCRouter<
   TRouter extends AnyRouter,
   BaseQuery extends BaseQueryFn,
-  TagTypes extends string,
   ReducerPath extends string,
+  TagTypes extends string,
 > = {
   [Pair in FlattenToEndpointProcedurePairs<
     TRouter["_def"]["record"]

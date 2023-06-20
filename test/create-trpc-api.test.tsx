@@ -131,26 +131,17 @@ describe("create-trpc-api", () => {
       },
     ])("when $testCase", ({ createApiOptions }) => {
       it("Generates an api instance", () => {
-        const api = createTRPCApi<
-          AppRouter,
-          NonNullable<(typeof createApiOptions)["api"]>
-        >(createApiOptions);
+        const api = createTRPCApi<AppRouter>(createApiOptions);
         expect(api).toBeDefined();
       });
       it("Generates queries ", () => {
-        const api = createTRPCApi<
-          AppRouter,
-          NonNullable<(typeof createApiOptions)["api"]>
-        >(createApiOptions);
+        const api = createTRPCApi<AppRouter>(createApiOptions);
         const { useGetUserByIdQuery, useListUsersQuery } = api;
         expect(useGetUserByIdQuery).toBeDefined();
         expect(useListUsersQuery).toBeDefined();
       });
       it("Generates mutations with correct typings", () => {
-        const api = createTRPCApi<
-          AppRouter,
-          NonNullable<(typeof createApiOptions)["api"]>
-        >(createApiOptions);
+        const api = createTRPCApi<AppRouter>(createApiOptions);
         const { useCreateUserMutation, useUpdateNameMutation } = api;
         expect(useUpdateNameMutation).toBeDefined();
         expect(useCreateUserMutation).toBeDefined();
@@ -164,19 +155,13 @@ describe("create-trpc-api", () => {
       ] as const)(
         "Generates %s hook when accessing hooks through endpoints[endpoint] property",
         (queryName) => {
-          const api = createTRPCApi<
-            AppRouter,
-            NonNullable<(typeof createApiOptions)["api"]>
-          >(createApiOptions);
+          const api = createTRPCApi<AppRouter>(createApiOptions);
           const query = api.endpoints.getUserById[queryName];
           expect(query).toBeDefined();
         },
       );
       it("Generates usePrefetch", () => {
-        const api = createTRPCApi<
-          AppRouter,
-          NonNullable<(typeof createApiOptions)["api"]>
-        >(createApiOptions);
+        const api = createTRPCApi<AppRouter>(createApiOptions);
         const { usePrefetch } = api;
         expect(usePrefetch).toBeDefined();
       });

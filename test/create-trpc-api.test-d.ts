@@ -2,7 +2,7 @@ import { createApi, skipToken } from "@reduxjs/toolkit/query/react";
 import { createTRPCProxyClient } from "@trpc/client";
 import { describe, expectTypeOf, it } from "vitest";
 
-import { createTRPCApi } from "../src/create-trpc-api";
+import { createTRPCApi, injectTRPCEndpointsToApi } from "../src/create-trpc-api";
 import { type AppRouter, testClientOptions } from "./fixtures";
 
 // Tests each scenery with one query and one mutation
@@ -200,7 +200,6 @@ describe("create-trpc-api", () => {
     expectTypeOf(useQuerySubscription).toBeFunction();
 
     // use prefetch
-
     expectTypeOf(usePrefetch).toBeFunction();
     expectTypeOf(usePrefetch)
       .parameter(0)
@@ -211,24 +210,24 @@ describe("create-trpc-api", () => {
 
   it("allows injecting trpc api to existing api", () => {
     const existingApi = createApi({
-      baseQuery: (string_) => {
+      baseQuery: (string_: string) => {
         return {
-          data: string_,
+          data: {
+            string_,
+          },
         };
       },
       endpoints: (builder) => ({
         getResponse: builder.query<string, string>({
-          query: (string_) => ({
-            string_,
-          }),
+          query: (string_: string) => string_,
         }),
       }),
       reducerPath: "premadeApi",
     });
-    //TODO: can we do this with just passing the AppRouter?
-    const api = createTRPCApi<AppRouter, typeof existingApi>({
-      api: existingApi,
+
+    const api = injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
       clientOptions: testClientOptions,
+      existingApi,
     });
     const {
       endpoints: {
@@ -279,13 +278,12 @@ describe("create-trpc-api", () => {
     expectTypeOf(useQueryState).toBeFunction();
     expectTypeOf(useQuerySubscription).toBeFunction();
 
-    // use prefetch
-
+    // use prefetch should have types from both previous and trpc endpoints
     expectTypeOf(usePrefetch).toBeFunction();
     expectTypeOf(usePrefetch)
       .parameter(0)
       .toMatchTypeOf<
-        "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
+        "getResponse" | "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
       >();
 
     // existing query through api & endpoints.getResponse
@@ -304,6 +302,7 @@ describe("create-trpc-api", () => {
       .exclude<typeof skipToken>()
       .toMatchTypeOf<string>();
   });
+
   it("prevents passing in mutually exclusive args", () => {
     // @ts-expect-error Should not be possible to pass both client and clientOptions
     createTRPCApi<AppRouter>({
