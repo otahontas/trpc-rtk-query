@@ -12,22 +12,13 @@ import {
   type TRPCRequestOptions,
   type TRPCUntypedClient,
   createTRPCUntypedClient,
+  getUntypedClient,
 } from "@trpc/client";
 import { type AnyRouter, TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 import { isAnyObject, isString } from "is-what";
 
 import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoints-definitions";
-
-// Get untyped client. TODO: use export from trpc when it's published to npm
-// NOTE: we need to set a proper min version for trpc this can be actually used with
-// premade clients
-export function getUntypedClient<TRouter extends AnyRouter>(
-  client: CreateTRPCProxyClient<TRouter>,
-): TRPCUntypedClient<TRouter> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (client as any).__untypedClient;
-}
 
 export type TRPCBaseQueryError =
   | {
@@ -150,7 +141,7 @@ const createBaseQuery = <TRouter extends AnyRouter>(
       };
     } else if ("clientOptions" in createTRPCApiOptions) {
       return {
-        client: createTRPCUntypedClient(createTRPCApiOptions.clientOptions),
+        client: createTRPCUntypedClient<TRouter>(createTRPCApiOptions.clientOptions),
         clientReady: true,
       };
     }
