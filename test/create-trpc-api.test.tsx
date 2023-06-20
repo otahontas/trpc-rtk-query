@@ -1,65 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { type BaseQueryApi, createApi } from "@reduxjs/toolkit/query/react";
 import { createTRPCProxyClient } from "@trpc/client";
-import { AnyRouter } from "@trpc/server";
 import { setTimeout } from "node:timers/promises";
 import React from "react";
 import { Provider } from "react-redux";
 import renderer from "react-test-renderer";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import {
-  type CreateTRPCApiOptions,
-  Injectable,
-  createTRPCApi,
-} from "../src/create-trpc-api";
+import { createTRPCApi, injectTRPCEndpointsToApi } from "../src/create-trpc-api";
 import {
   type AppRouter,
   startTestServer,
   testClientOptions,
   userFixtures,
 } from "./fixtures";
-
-// === Utils ===
-
-// render component to json for snapshots
-export const renderedToJSon = (component: renderer.ReactTestRenderer) => {
-  const result = component.toJSON();
-  expect(result).toBeDefined();
-  expect(result).not.toBeInstanceOf(Array);
-  return result as renderer.ReactTestRendererJSON;
-};
-
-// generate api store and app creator for testing hooks
-// TODO: flow Router through
-export const createReactTestApp = <
-  TRouter extends AnyRouter,
-  ExistingApi extends Injectable = never,
->(
-  createApiOptions: CreateTRPCApiOptions<TRouter, ExistingApi>,
-) => {
-  const api = createTRPCApi<TRouter, ExistingApi>(createApiOptions);
-  const store = configureStore({
-    middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), api.middleware],
-    reducer: {
-      [api.reducerPath]: api.reducer,
-    },
-  });
-
-  const createComponentWrapper = (Component: () => React.JSX.Element) =>
-    renderer.create(
-      <Provider store={store}>
-        <Component />
-      </Provider>,
-    );
-  return {
-    api,
-    createComponentWrapper,
-    store,
-  };
-};
-
-// === Tests ===
 
 describe("create-trpc-api", () => {
   // Client side options that can be passed in when testing
@@ -103,45 +57,70 @@ describe("create-trpc-api", () => {
   ])("when $testCase and ", ({ apiForCreateApiOptions }) => {
     describe.each([
       {
-        createApiOptions: {
-          api: apiForCreateApiOptions?.createApiLazily?.(),
-          clientOptions: testClientOptions,
+        getApi: () => {
+          const base = { clientOptions: testClientOptions };
+          if (apiForCreateApiOptions?.createApiLazily) {
+            const existingApi = createApiLazily();
+            return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
+              ...base,
+              existingApi,
+            });
+          }
+          return createTRPCApi<AppRouter>(base);
         },
         testCase: "creating client from clientOptions",
       },
       {
-        createApiOptions: {
-          api: apiForCreateApiOptions?.createApiLazily?.(),
-          client: createTRPCProxyClient<AppRouter>(testClientOptions),
+        getApi: () => {
+          const base = {
+            client: createTRPCProxyClient<AppRouter>(testClientOptions),
+          };
+          if (apiForCreateApiOptions?.createApiLazily) {
+            const existingApi = createApiLazily();
+            return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
+              ...base,
+              existingApi,
+            });
+          }
+          return createTRPCApi(base);
         },
         testCase: "using passed client",
       },
       {
-        createApiOptions: {
-          api: apiForCreateApiOptions?.createApiLazily?.(),
-          getClient: async (baseQueryApi: BaseQueryApi) => {
-            // Check that correct apiArgs object is passed
-            expect(baseQueryApi.type).toBeDefined();
-            expect(baseQueryApi.endpoint).toBeDefined();
-            // Return proxy client
-            return createTRPCProxyClient<AppRouter>(testClientOptions);
-          },
+        getApi: () => {
+          const base = {
+            getClient: async (baseQueryApi: BaseQueryApi) => {
+              // Check that correct apiArgs object is passed
+              expect(baseQueryApi.type).toBeDefined();
+              expect(baseQueryApi.endpoint).toBeDefined();
+              // Return proxy client
+              return createTRPCProxyClient<AppRouter>(testClientOptions);
+            },
+          };
+          if (apiForCreateApiOptions?.createApiLazily) {
+            const existingApi = createApiLazily();
+            return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
+              ...base,
+              existingApi,
+            });
+          }
+          return createTRPCApi(base);
         },
         testCase: "using getClient to get the client",
       },
-    ])("when $testCase", ({ createApiOptions }) => {
+    ])("when $testCase", ({ getApi }) => {
       it("Generates an api instance", () => {
-        const api = createTRPCApi<AppRouter>(createApiOptions);
+        const api = getApi();
         expect(api).toBeDefined();
       });
       it("Generates queries ", () => {
-        const api = createTRPCApi<AppRouter>(createApiOptions);
+        const api = getApi();
         const { useGetUserByIdQuery, useListUsersQuery } = api;
         expect(useGetUserByIdQuery).toBeDefined();
         expect(useListUsersQuery).toBeDefined();
       });
       it("Generates mutations with correct typings", () => {
-        const api = createTRPCApi<AppRouter>(createApiOptions);
+        const api = getApi();
         const { useCreateUserMutation, useUpdateNameMutation } = api;
         expect(useUpdateNameMutation).toBeDefined();
         expect(useCreateUserMutation).toBeDefined();
@@ -155,37 +134,66 @@ describe("create-trpc-api", () => {
       ] as const)(
         "Generates %s hook when accessing hooks through endpoints[endpoint] property",
         (queryName) => {
-          const api = createTRPCApi<AppRouter>(createApiOptions);
+          const api = getApi();
           const query = api.endpoints.getUserById[queryName];
           expect(query).toBeDefined();
         },
       );
       it("Generates usePrefetch", () => {
-        const api = createTRPCApi<AppRouter>(createApiOptions);
+        const api = getApi();
         const { usePrefetch } = api;
         expect(usePrefetch).toBeDefined();
       });
 
       it("Generates hook for deeply nested route", () => {
-        const api = createTRPCApi<
-          AppRouter,
-          NonNullable<(typeof createApiOptions)["api"]>
-        >(createApiOptions);
+        const api = getApi();
         const { useNested_Deep_GetVeryNestedMessageQuery } = api;
         expect(useNested_Deep_GetVeryNestedMessageQuery).toBeDefined();
       });
+
       it("Generates hook for deeply nested routes through endpoints[endpoint]", () => {
-        const api = createTRPCApi<
-          AppRouter,
-          NonNullable<(typeof createApiOptions)["api"]>
-        >(createApiOptions);
-        // TODO: fix this type
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const query = (api.endpoints.nested_Deep_GetVeryNestedMessage as any)
-          .useQuerySubscription;
+        const api = getApi();
+        const query =
+          api.endpoints.nested_Deep_GetVeryNestedMessage.useQuerySubscription;
         expect(query).toBeDefined();
       });
       describe("and making actual requests with hooks renders correctly", () => {
+        // render component to json for snapshots
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const renderedToJSon = (component: renderer.ReactTestRenderer) => {
+          const result = component.toJSON();
+          expect(result).toBeDefined();
+          expect(result).not.toBeInstanceOf(Array);
+          return result as renderer.ReactTestRendererJSON;
+        };
+
+        // Keep this in scope for easier type deriving
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const createReactTestApp = (getApiForStore: typeof getApi) => {
+          const api = getApiForStore();
+          const store = configureStore({
+            middleware: (getDefaultMiddleware) => [
+              ...getDefaultMiddleware(),
+              api.middleware,
+            ],
+            reducer: {
+              [api.reducerPath]: api.reducer,
+            },
+          });
+
+          const createComponentWrapper = (Component: () => React.JSX.Element) =>
+            renderer.create(
+              <Provider store={store}>
+                <Component />
+              </Provider>,
+            );
+          return {
+            api,
+            createComponentWrapper,
+            store,
+          };
+        };
+
         // how much to wait for loading state to resolve
         // TODO: fix with using actual rerender with waitFor from testing-library
         const msToWaitBeforeRenderingWithoutLoadingState = 150;
@@ -194,7 +202,7 @@ describe("create-trpc-api", () => {
           return async () => await close();
         });
         it("with successful useUserIdQuery", async () => {
-          const { api, createComponentWrapper } = createReactTestApp(createApiOptions);
+          const { api, createComponentWrapper } = createReactTestApp(getApi);
           const Component = () => {
             const { useGetUserByIdQuery } = api;
             const userId = 1;
@@ -228,7 +236,7 @@ describe("create-trpc-api", () => {
           expect(result).toMatchSnapshot();
         });
         it("with failing useUserIdQuery", async () => {
-          const { api, createComponentWrapper } = createReactTestApp(createApiOptions);
+          const { api, createComponentWrapper } = createReactTestApp(getApi);
           const Component = () => {
             const { useGetUserByIdQuery } = api;
             const userId = 4;
@@ -260,7 +268,7 @@ describe("create-trpc-api", () => {
           expect(result).toMatchSnapshot();
         });
         it("with successful deep nested query", async () => {
-          const { api, createComponentWrapper } = createReactTestApp(createApiOptions);
+          const { api, createComponentWrapper } = createReactTestApp(getApi);
           const Component = () => {
             const { useNested_Deep_GetVeryNestedMessageQuery } = api;
             const myInput = "heyoooo";
@@ -295,10 +303,12 @@ describe("create-trpc-api", () => {
           expect(result).toMatchSnapshot();
         });
         it("with call to usePrefetch", async () => {
-          const { api, createComponentWrapper } = createReactTestApp(createApiOptions);
+          const { api, createComponentWrapper } = createReactTestApp(getApi);
           const userId = 1;
           const PrefetcherComponent = () => {
             const { usePrefetch } = api;
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore ignore for now, for runtime testing. Fix type later
             const prefetch = usePrefetch("getUserById");
             expect(prefetch).toBeDefined();
             prefetch(userId);
@@ -344,7 +354,7 @@ describe("create-trpc-api", () => {
           expect(result).toMatchSnapshot();
         });
         it("does not inject endpoints again", async () => {
-          const { api, createComponentWrapper } = createReactTestApp(createApiOptions);
+          const { api, createComponentWrapper } = createReactTestApp(getApi);
           // Try to listen error log from rtk
           const consoleErrorMock = vi
             .spyOn(console, "error")
@@ -375,7 +385,7 @@ describe("create-trpc-api", () => {
         });
       });
       it("Can be extended with enchangeEndpoints", () => {
-        const api = createTRPCApi<AppRouter>(createApiOptions);
+        const api = getApi();
         expect(api.enhanceEndpoints).toBeDefined();
         // This is here just to see that it can be executed
         api.enhanceEndpoints({
@@ -398,10 +408,11 @@ describe("create-trpc-api", () => {
     });
   });
   it("doesn't replace previous hooks when passing in and existing api", () => {
+    const base = { clientOptions: testClientOptions };
     const existingApi = createApiLazily();
-    const api = createTRPCApi<AppRouter, typeof existingApi>({
-      api: existingApi,
-      clientOptions: testClientOptions,
+    const api = injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
+      ...base,
+      existingApi,
     });
     const { useListUsersQuery } = api;
     expect(useListUsersQuery).toBeDefined();
