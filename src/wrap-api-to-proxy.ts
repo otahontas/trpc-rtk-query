@@ -16,6 +16,14 @@ const deCapitalize = (string_: string) => {
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
 };
 
+// Note that assertions can't be declared with arrow functions. Otherwise we're
+// following arrow function style here.
+function assertPropertyIsString(property: string | symbol): asserts property is string {
+  if (typeof property === "symbol") {
+    throw new TypeError("Calling api with new symbol properties is not supported");
+  }
+}
+
 export type Injectable = Pick<
   // Pick the fields we need to inject trpc endpoints properly on type level
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,36 +38,33 @@ type FormatEndpointToProcedurePathAndInjectToApiOptionsBase<
   procedureType: "mutation" | "query";
   proxyedApi: ProxyedApi;
 };
-type FormatEndpointToProcedurePathAndInjectToApiOptionWithoutQueryFunction<
+
+type WithQueryFunction<TRouter extends AnyRouter> = {
+  createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
+  useQueryFunction: true;
+};
+
+type FormatEndpointToProcedurePathAndInjectToApiOptionsWithoutQueryFunction<
   ProxyedApi extends Injectable,
 > = FormatEndpointToProcedurePathAndInjectToApiOptionsBase<ProxyedApi> & {
   useQueryFunction: false;
 };
-type FormatEndpointToProcedurePathAndInjectToApiOptionWithQueryFunction<
+
+type FormatEndpointToProcedurePathAndInjectToApiOptionsWithQueryFunction<
   ProxyedApi extends Injectable,
   TRouter extends AnyRouter,
-> = FormatEndpointToProcedurePathAndInjectToApiOptionsBase<ProxyedApi> & {
-  createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
-  useQueryFunction: true;
-};
+> = FormatEndpointToProcedurePathAndInjectToApiOptionsBase<ProxyedApi> &
+  WithQueryFunction<TRouter>;
 
 type FormatEndpointToProcedurePathAndInjectToApiOptions<
   ProxyedApi extends Injectable,
   TRouter extends AnyRouter,
 > =
-  | FormatEndpointToProcedurePathAndInjectToApiOptionWithQueryFunction<
+  | FormatEndpointToProcedurePathAndInjectToApiOptionsWithQueryFunction<
       ProxyedApi,
       TRouter
     >
-  | FormatEndpointToProcedurePathAndInjectToApiOptionWithoutQueryFunction<ProxyedApi>;
-
-// Note that assertions can't be declared with arrow functions. Otherwise we're
-// following arrow function style here.
-function assertPropertyIsString(property: string | symbol): asserts property is string {
-  if (typeof property === "symbol") {
-    throw new TypeError("Calling api with new symbol properties is not supported");
-  }
-}
+  | FormatEndpointToProcedurePathAndInjectToApiOptionsWithoutQueryFunction<ProxyedApi>;
 
 const formatEndpointToProcedurePathAndInjectToApi = <
   ProxyedApi extends Injectable,
@@ -153,10 +158,21 @@ const regexesWithProcedureType = [
     regex: /use(\w+)Mutation/,
   },
 ] as const;
-// TODO: call queryFn (& add option) when using pre-existing api
-export const wrapApiToProxy = <NonProxyApi extends Injectable>(
-  nonProxyApi: NonProxyApi,
-) =>
+
+export const wrapApiToProxy = <
+  NonProxyApi extends Injectable,
+  TRouter extends AnyRouter,
+>({
+  nonProxyApi,
+  ...queryFunctionProperties
+}:
+  | {
+      nonProxyApi: NonProxyApi;
+      useQueryFunction: false;
+    }
+  | ({
+      nonProxyApi: NonProxyApi;
+    } & WithQueryFunction<TRouter>)) =>
   new Proxy(nonProxyApi, {
     get(target, property, receiver) {
       // Validate endpoints target, since it is needed in multiple places
@@ -165,7 +181,7 @@ export const wrapApiToProxy = <NonProxyApi extends Injectable>(
       }
       const { endpoints } = target;
       // If property is "endpoints", we know that it surely exists, but
-      // user might want to call endpoint attribute of it  that isn't yet generated.
+      // user might want to call endpoint attribute of it that isn't yet generated.
       // Return proxy that handles generating.
       if (property === "endpoints") {
         // Return two level proxy, where last level can actually inject the endpoint.
@@ -199,7 +215,7 @@ export const wrapApiToProxy = <NonProxyApi extends Injectable>(
               endpoint,
               procedureType,
               proxyedApi: target,
-              useQueryFunction: false,
+              ...queryFunctionProperties,
             });
             // Any is ok, we know endpoint will have this endpoint
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -225,7 +241,7 @@ export const wrapApiToProxy = <NonProxyApi extends Injectable>(
               endpoint,
               procedureType: "query",
               proxyedApi: target,
-              useQueryFunction: false,
+              ...queryFunctionProperties,
             });
           }
           // any is okay, we know usePrefetch hook is at least now generated
@@ -257,7 +273,7 @@ export const wrapApiToProxy = <NonProxyApi extends Injectable>(
           endpoint,
           procedureType,
           proxyedApi: target,
-          useQueryFunction: false,
+          ...queryFunctionProperties,
         });
 
         // Return newly generated property

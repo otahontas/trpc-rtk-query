@@ -10,20 +10,52 @@ import {
 import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoint-definitions";
 import { Injectable, SupportedModule, wrapApiToProxy } from "./wrap-api-to-proxy";
 
+// TODO: investigate why we need to use casting with { endpoints: Record... } here
+type EndpointsObject = {
+  // TODO: fix any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  endpoints: Record<string, any>;
+};
+
+/*
+ * Creates a new api using trpc under the hood
+ */
+export const createTRPCApi = <TRouter extends AnyRouter>(
+  options: CreateTRPCApiClientOptions<TRouter>,
+) => {
+  const nonProxyApi = createApi({
+    baseQuery: createBaseQueryForTRPCClient(options),
+    // We're injecting endpoints later with proxy, but need to cast them
+    // beforehand for proper typings to be exposed to users
+    endpoints: () =>
+      ({}) as CreateEndpointDefinitionsFromTRPCRouter<
+        TRouter,
+        BaseQueryForTRPCClient,
+        "api", // Reducer path.
+        never
+      >,
+  });
+  return wrapApiToProxy({
+    nonProxyApi: nonProxyApi as typeof nonProxyApi & EndpointsObject, // TODO: fix endpoints cast
+    useQueryFunction: false,
+  });
+};
+
+// TODO: Allow passing in settings for api (reducerpath, tagtypes etc)
 type InjectTRPCEndpointsToApiOptions<
   TRouter extends AnyRouter,
   ExistingApi extends Injectable,
 > = CreateTRPCApiClientOptions<TRouter> & {
   existingApi: ExistingApi;
 };
-// TODO: investigate why we need to use casting with { endpoints: Record... }
-// -intersection here
+
 export const injectTRPCEndpointsToApi = <
   TRouter extends AnyRouter,
   ExistingApi extends Injectable,
-  // == Save the types needed to build up proper new api type ==
+  // == "Save" the types needed to build up proper new api type to type variables ==
   // Current baseQuery from existing api
-  BaseQuery extends BaseQueryFn = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["BaseQuery"],
+  BaseQuery extends
+    BaseQueryFn = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["BaseQuery"],
   // Endpoints record values mapped to their inner definitions
   Endpoints = {
     [Endpoint in keyof ExistingApi["endpoints"]]: ExistingApi["endpoints"][Endpoint] extends ApiEndpointQuery<
@@ -35,12 +67,15 @@ export const injectTRPCEndpointsToApi = <
       : never;
   },
   // Reducer path
-  ReducerPath extends string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["ReducerPath"],
+  ReducerPath extends
+    string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["ReducerPath"],
   // Tag types
-  TagTypes extends string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["TagTypes"],
+  TagTypes extends
+    string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["TagTypes"],
 >(
   options: InjectTRPCEndpointsToApiOptions<TRouter, ExistingApi>,
 ) => {
+  // TODO: fix casting with { endpoints }
   const nonProxyApi = options.existingApi as unknown as Api<
     BaseQuery,
     Endpoints &
@@ -53,30 +88,12 @@ export const injectTRPCEndpointsToApi = <
     ReducerPath,
     TagTypes,
     SupportedModule
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  > & { endpoints: Record<string, any> };
-  return wrapApiToProxy(nonProxyApi);
-};
+  > &
+    EndpointsObject;
 
-// TODO: Allow passing in settings for api (reducerpath, tagtypes etc)
-export const createTRPCApi = <TRouter extends AnyRouter>(
-  options: CreateTRPCApiClientOptions<TRouter>,
-) => {
-  const nonProxyApi = createApi({
-    baseQuery: createBaseQueryForTRPCClient(options),
-    // We're injecting endpoints later with proxy, but need to cast them
-    // beforehand for proper typings to be exposed to users
-    endpoints: () =>
-      ({} as CreateEndpointDefinitionsFromTRPCRouter<
-        TRouter,
-        BaseQueryForTRPCClient,
-        "api", // Reducer path. TODO: see if we can default to rtk querys default, so we don't redo this one
-        never
-      >),
+  return wrapApiToProxy({
+    createTrpcApiClientOptions: options,
+    nonProxyApi,
+    useQueryFunction: true,
   });
-  return wrapApiToProxy(
-    //TODO: fix any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    nonProxyApi as typeof nonProxyApi & { endpoints: Record<string, any> },
-  );
 };

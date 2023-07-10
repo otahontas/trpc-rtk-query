@@ -14,38 +14,38 @@ import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 /* Errors baseQuery can return. Follows the conventions of RTK query's fetchBaseQuery */
 export type TRPCBaseQueryError =
   | {
-      data?: undefined;
-      error: string;
-      message: string;
-      name: string;
       /**
        * * `"TRPC_CLIENT_ERROR"`:
        *   An error that happened on trpc client. Original error is stringified in error
        *   attribute.
        **/
-      status: "TRPC_CLIENT_ERROR";
-    }
-  | {
       data?: undefined;
       error: string;
       message: string;
       name: string;
+      status: "TRPC_CLIENT_ERROR";
+    }
+  | {
       /**
        * * `"TRPC_ERROR"`:
        *   An error that was returned by trpc backend. Original error is stringified in
        *   error attribute.
        **/
+      data?: undefined;
+      error: string;
+      message: string;
+      name: string;
       status: "TRPC_ERROR";
       statusCode: number;
     }
   | {
-      data?: unknown;
-      error: string;
       /**
        * * `"UNKNOWN_ERROR"`:
        *   A unknown error type that captures error not wrapped by trpc. Original error
        *   is stringified in error attribute
        **/
+      data?: unknown;
+      error: string;
       status: "UNKNOWN_ERROR";
     };
 
@@ -125,7 +125,7 @@ export type BaseQueryForTRPCClient = BaseQueryFn<
     procedureType: "mutation" | "query";
   },
   // Result type. Endpoint definitions are typed manually instead of deriving them from
-  // this type, so it's probably enough that this is unknown. TODO: Make sure this is the case
+  // this type, so it's enough that this is unknown.
   unknown,
   // Use typed errors
   TRPCBaseQueryError,
@@ -135,8 +135,6 @@ export type BaseQueryForTRPCClient = BaseQueryFn<
   never
 >;
 
-// TODO: baseQueryFn and correct types for it
-
 /** Create a base query that uses trpc client under the hood.
  **/
 export const createBaseQueryForTRPCClient = <TRouter extends AnyRouter>(
@@ -144,7 +142,6 @@ export const createBaseQueryForTRPCClient = <TRouter extends AnyRouter>(
 ): BaseQueryForTRPCClient => {
   const clientStatus = resolveClientStatus(createTRPCApiClientOptions);
 
-  // TODO: test options
   return async (baseQueryArguments, baseQueryApi, extraOptions) => {
     try {
       const { procedureArguments, procedurePath, procedureType } = baseQueryArguments;
