@@ -199,7 +199,9 @@ describe("create-trpc-api", () => {
         const msToWaitBeforeRenderingWithoutLoadingState = 150;
         beforeAll(async () => {
           const { close } = await startTestServer();
-          return async () => await close();
+          console.log("waiting a bit before running integration tests");
+          await setTimeout(250);
+          return () => close();
         });
         it("with successful useUserIdQuery", async () => {
           const { api, createComponentWrapper } = createReactTestApp(getApi);
