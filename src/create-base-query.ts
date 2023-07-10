@@ -1,7 +1,5 @@
-import { type BaseQueryApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
+import { type BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import {
-  type CreateTRPCClientOptions,
-  type CreateTRPCProxyClient,
   TRPCClientError,
   type TRPCRequestOptions,
   TRPCUntypedClient,
@@ -10,6 +8,8 @@ import {
 } from "@trpc/client";
 import { type AnyRouter, TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
+
+import { CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
 
 /* Errors baseQuery can return. Follows the conventions of RTK query's fetchBaseQuery */
 export type TRPCBaseQueryError =
@@ -47,32 +47,6 @@ export type TRPCBaseQueryError =
       data?: unknown;
       error: string;
       status: "UNKNOWN_ERROR";
-    };
-
-/**
- * Client specific options when creating trpc api. You can either
- *  - pass in already created proxy client
- *  - pass in client options, so client is created for you
- *  - pass in getClient -function, that has gets access to BaseQueryApi from RTK. This
- *    is useful e.g. when you need to access redux store when creating the client.
- **/
-export type CreateTRPCApiClientOptions<TRouter extends AnyRouter> =
-  | {
-      client: CreateTRPCProxyClient<TRouter>;
-      clientOptions?: never;
-      getClient?: never;
-    }
-  | {
-      client?: never;
-      clientOptions: CreateTRPCClientOptions<TRouter>;
-      getClient?: never;
-    }
-  | {
-      client?: never;
-      clientOptions?: never;
-      getClient: (
-        baseQueryApi: BaseQueryApi,
-      ) => Promise<CreateTRPCProxyClient<TRouter>>;
     };
 
 /** Helper type to differentiate between whether client is ready to be used or should

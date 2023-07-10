@@ -5,10 +5,8 @@ import { type Api } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 import { isAnyObject, isString } from "is-what";
 
-import {
-  type CreateTRPCApiClientOptions,
-  createBaseQueryForTRPCClient,
-} from "./create-base-query";
+import { createBaseQueryForTRPCClient } from "./create-base-query";
+import { CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
 export type SupportedModule = CoreModule | ReactHooksModule;
 
 const deCapitalize = (string_: string) => {
@@ -31,40 +29,22 @@ export type Injectable = Pick<
   "endpoints" | "injectEndpoints"
 >;
 
-type FormatEndpointToProcedurePathAndInjectToApiOptionsBase<
+type FormatEndpointToProcedurePathAndInjectToApiOptions<
   ProxyedApi extends Injectable,
+  TRouter extends AnyRouter,
 > = {
   endpoint: string;
   procedureType: "mutation" | "query";
   proxyedApi: ProxyedApi;
-};
-
-type WithQueryFunction<TRouter extends AnyRouter> = {
-  createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
-  useQueryFunction: true;
-};
-
-type FormatEndpointToProcedurePathAndInjectToApiOptionsWithoutQueryFunction<
-  ProxyedApi extends Injectable,
-> = FormatEndpointToProcedurePathAndInjectToApiOptionsBase<ProxyedApi> & {
-  useQueryFunction: false;
-};
-
-type FormatEndpointToProcedurePathAndInjectToApiOptionsWithQueryFunction<
-  ProxyedApi extends Injectable,
-  TRouter extends AnyRouter,
-> = FormatEndpointToProcedurePathAndInjectToApiOptionsBase<ProxyedApi> &
-  WithQueryFunction<TRouter>;
-
-type FormatEndpointToProcedurePathAndInjectToApiOptions<
-  ProxyedApi extends Injectable,
-  TRouter extends AnyRouter,
-> =
-  | FormatEndpointToProcedurePathAndInjectToApiOptionsWithQueryFunction<
-      ProxyedApi,
-      TRouter
-    >
-  | FormatEndpointToProcedurePathAndInjectToApiOptionsWithoutQueryFunction<ProxyedApi>;
+} & (
+  | {
+      createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
+      useQueryFunction: true;
+    }
+  | {
+      useQueryFunction: false;
+    }
+);
 
 const formatEndpointToProcedurePathAndInjectToApi = <
   ProxyedApi extends Injectable,
@@ -165,14 +145,17 @@ export const wrapApiToProxy = <
 >({
   nonProxyApi,
   ...queryFunctionProperties
-}:
+}: {
+  nonProxyApi: NonProxyApi;
+} & (
   | {
-      nonProxyApi: NonProxyApi;
+      createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
+      useQueryFunction: true;
+    }
+  | {
       useQueryFunction: false;
     }
-  | ({
-      nonProxyApi: NonProxyApi;
-    } & WithQueryFunction<TRouter>)) =>
+)) =>
   new Proxy(nonProxyApi, {
     get(target, property, receiver) {
       // Validate endpoints target, since it is needed in multiple places

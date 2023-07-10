@@ -1,13 +1,13 @@
-import { ApiEndpointQuery } from "@reduxjs/toolkit/dist/query/core/module"; // TODO: don't import from dist
+import { type ApiEndpointQuery } from "@reduxjs/toolkit/dist/query/core/module"; // TODO: don't import from dist
 import { type Api, type BaseQueryFn, createApi } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
 import {
   type BaseQueryForTRPCClient,
-  type CreateTRPCApiClientOptions,
   createBaseQueryForTRPCClient,
 } from "./create-base-query";
 import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoint-definitions";
+import { type CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
 import { Injectable, SupportedModule, wrapApiToProxy } from "./wrap-api-to-proxy";
 
 // TODO: investigate why we need to use casting with { endpoints: Record... } here
