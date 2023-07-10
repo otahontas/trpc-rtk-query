@@ -3,16 +3,21 @@ import { type CoreModule } from "@reduxjs/toolkit/dist/query/core/module";
 import { type ReactHooksModule } from "@reduxjs/toolkit/dist/query/react/module";
 import { type Api } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
-import { isAnyObject, isString } from "is-what";
 
 import { createBaseQueryForTRPCClient } from "./create-base-query";
 import { CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
 export type SupportedModule = CoreModule | ReactHooksModule;
 
+// TODO: test these helpers
 const deCapitalize = (string_: string) => {
   const firstChar = string_[0];
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
 };
+
+const isObject = (value: unknown): value is object =>
+  typeof value === "object" && value !== null;
+
+const isString = (value: unknown): value is string => typeof value === "string";
 
 // Note that assertions can't be declared with arrow functions. Otherwise we're
 // following arrow function style here.
@@ -159,7 +164,7 @@ export const wrapApiToProxy = <
   new Proxy(nonProxyApi, {
     get(target, property, receiver) {
       // Validate endpoints target, since it is needed in multiple places
-      if (!("endpoints" in target) || !isAnyObject(target["endpoints"])) {
+      if (!("endpoints" in target) || !isObject(target["endpoints"])) {
         throw new Error("Library error: Can't get endpoints from rtk api!");
       }
       const { endpoints } = target;
