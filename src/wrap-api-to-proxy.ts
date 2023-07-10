@@ -67,9 +67,7 @@ const formatEndpointToProcedurePathAndInjectToApi = <
 
   const builderArguments = useQueryFunction
     ? {
-        // TODO: fix typings
-        // TODO: curry, so we don't have to pass all three args. And can we use
-        // createBaseQuery, should we have createBaseFn instead?
+        // TODO: fix typings, e.g. injectable api. extraOptions etc.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         queryFn: (procedureArguments: unknown, api: any, extraOptions: any) =>
           // eslint-disable-next-line unicorn/consistent-destructuring
