@@ -42,7 +42,7 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
 };
 
 // TODO: Allow passing in settings for api (reducerpath, tagtypes etc)
-type InjectTRPCEndpointsToApiOptions<
+export type InjectTRPCEndpointsToApiOptions<
   TRouter extends AnyRouter,
   ExistingApi extends Injectable,
 > = CreateTRPCApiClientOptions<TRouter> & {
