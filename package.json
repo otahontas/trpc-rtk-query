@@ -15,6 +15,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@reduxjs/toolkit": "^1.9.5",
     "@trpc/client": "^10.34.0",
     "@trpc/server": "^10.34.0",
