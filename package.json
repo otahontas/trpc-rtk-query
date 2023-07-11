@@ -4,11 +4,15 @@
   "description": "tRPC adapter for RTK Query",
   "author": "Otto Ahoniemi",
   "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "test": "vitest test/",
-    "typecheck": "vitest typecheck test/",
-    "coverage": "vitest run --coverage test/"
+    "typecheck": "vitest typecheck test/ && tsc --noEmit",
+    "coverage": "vitest run --coverage test/",
+    "build": "tsup src/index.ts --format cjs,esm --dts"
   },
   "devDependencies": {
     "@reduxjs/toolkit": "^1.9.5",
@@ -33,6 +37,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^8.1.1",
     "react-test-renderer": "^18.2.0",
+    "tsup": "^7.1.0",
     "typescript": "^5.1.6",
     "vite": "^4.4.2",
     "vitest": "^0.33.0",
