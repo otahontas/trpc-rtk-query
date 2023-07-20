@@ -4,5 +4,5 @@ export default defineConfig({
   format: ["cjs", "esm"],
   minify: true,
   treeshake: true,
-  tsconfig: "tsconfig.build.json",
+  tsconfig: "./tsconfig.build.json",
 });
