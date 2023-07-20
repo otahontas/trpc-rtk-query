@@ -1,6 +1,6 @@
 {
   "name": "trpc-rtk-query",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1",
   "description": "tRPC adapter for RTK Query",
   "author": "Otto Ahoniemi",
   "license": "MIT",
