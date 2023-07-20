@@ -2,5 +2,6 @@
   "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node20/tsconfig"],
   "compilerOptions": {
     "jsx": "react"
-  }
+  },
+  "exclude": ["node_modules", "dist"]
 }

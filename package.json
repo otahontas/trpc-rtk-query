@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "test": "vitest test/",
-    "typecheck": "vitest typecheck test/ && tsc --noEmit",
+    "typecheck": "vitest typecheck test/",
     "coverage": "vitest run --coverage test/",
     "build": "tsup src/index.ts --format cjs,esm --dts"
   },

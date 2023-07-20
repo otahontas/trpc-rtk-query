@@ -181,7 +181,7 @@ describe("create-trpc-api", () => {
             },
           });
 
-          const createComponentWrapper = (Component: () => React.JSX.Element) =>
+          const createComponentWrapper = (Component: () => JSX.Element) =>
             renderer.create(
               <Provider store={store}>
                 <Component />
