@@ -7,9 +7,9 @@
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "test": "vitest test/",
-    "typecheck": "vitest typecheck test/",
     "coverage": "vitest run --coverage test/",
-    "build": "tsup src/index.ts --format cjs,esm --dts"
+    "typecheck": "vitest typecheck test/",
+    "build": "tsup src/ && tsc --emitDeclarationOnly --declaration --project tsconfig.build.json"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
