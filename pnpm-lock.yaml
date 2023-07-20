@@ -12,11 +12,11 @@ devDependencies:
     specifier: ^1.9.5
     version: 1.9.5(react-redux@8.1.1)(react@18.2.0)
   '@trpc/client':
-    specifier: ^10.34.0
-    version: 10.34.0(@trpc/server@10.34.0)
+    specifier: 10.31.0
+    version: 10.31.0(@trpc/server@10.31.0)
   '@trpc/server':
-    specifier: ^10.34.0
-    version: 10.34.0
+    specifier: 10.31.0
+    version: 10.31.0
   '@tsconfig/node20':
     specifier: ^1.0.2
     version: 1.0.2
@@ -895,16 +895,16 @@ packages:
     engines: {node: '>= 10'}
     dev: true
 
-  /@trpc/client@10.34.0(@trpc/server@10.34.0):
-    resolution: {integrity: sha512-nqtDTIqSY/9syo2EjSy4WWWXPU9GsamEh9Tsg698gLAh1nhgFc5+/YYeb+Ne1pbvWGZ5/3t9Dcz3h4wMyyJ9gQ==}
+  /@trpc/client@10.31.0(@trpc/server@10.31.0):
+    resolution: {integrity: sha512-VCqbJEvFJb8C4hQFw7AD+dkQTjgEdV/QAzO4D+/cX5e93u5NpfNXI+PKS0QFXwG/zqgwQwVV6OkYc/D/MFwA6g==}
     peerDependencies:
-      '@trpc/server': 10.34.0
+      '@trpc/server': 10.31.0
     dependencies:
-      '@trpc/server': 10.34.0
+      '@trpc/server': 10.31.0
     dev: true
 
-  /@trpc/server@10.34.0:
-    resolution: {integrity: sha512-2VMW44Fpaoyqb50dBtzdSWMhqt8lmoJiocEyBBeDb03R0W+XrzbVD5kU/wqKPlcp1DWeNCkOEIMtetMZCfo1hA==}
+  /@trpc/server@10.31.0:
+    resolution: {integrity: sha512-9EnRTSDE9nF11LZsvSOqNKqkRYzHqFX4ch5AJ6VIu8uta2vxVTN4FxxsNRSOluTzVYZDeaCISbwmOJ5iihCCIg==}
     dev: true
 
   /@tsconfig/node20@1.0.2:

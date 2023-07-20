@@ -144,13 +144,13 @@ export { useUserListQuery } from api;
 - [x] Allow passing in custom client, use that instead of generating internal client
 - [x] Allow passing in custom client creator that has access to QueryFn parameters
 - [x] Allow passing in already existing api
-- [ ] Investigate if using custom modules from rtk toolkit would be a better approach?
+- [x] Investigate if using custom modules from rtk toolkit would be a better approach? --> was not
+- [x] ci
+- [ ] remove unnecessary stuff from distributed package (e.g. don't have jsx in tsconfig etc)
+- [ ] add proper build output, publishing
+- [ ] e2e tests
 - [ ] Allow passing in some parameters that can't be handled with enhanceEndpoints
+- [ ] (maybe) allow transformresponse and transformerroresponse. not sure tho
 - [ ] Better error types
 - [ ] Support using trpc vanilla client extra options
-- [ ] e2e tests
-- [ ] ci
-- [ ] publish package
-- [ ] remove unnecessary stuff from distributed package (e.g. don't have jsx in tsconfig etc)
-- [ ] (maybe) allow transformresponse and transformerroresponse. not sure tho
 - [ ] this is very react heavy approach, test against vue and svelte too

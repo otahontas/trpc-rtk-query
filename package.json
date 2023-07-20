@@ -17,8 +17,8 @@
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
     "@reduxjs/toolkit": "^1.9.5",
-    "@trpc/client": "^10.34.0",
-    "@trpc/server": "^10.34.0",
+    "@trpc/client": "10.31.0",
+    "@trpc/server": "10.31.0",
     "@tsconfig/node20": "^1.0.2",
     "@tsconfig/strictest": "^2.0.1",
     "@types/react": "^18.2.14",
@@ -46,8 +46,8 @@
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.5",
-    "@trpc/client": "^10.29.1",
-    "@trpc/server": "^10.29.1",
+    "@trpc/client": "^10.31.0",
+    "@trpc/server": "^10.31.0",
     "react-redux": "^8.0.7"
   }
 }
