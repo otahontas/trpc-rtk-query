@@ -4,9 +4,6 @@
   "description": "tRPC adapter for RTK Query",
   "author": "Otto Ahoniemi",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "test": "vitest test/",
@@ -16,12 +13,12 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
-    "@reduxjs/toolkit": "^1.9.5",
+    "@reduxjs/toolkit": "1.8.1",
     "@trpc/client": "10.31.0",
     "@trpc/server": "10.31.0",
     "@tsconfig/node20": "^1.0.2",
     "@tsconfig/strictest": "^2.0.1",
-    "@types/react": "^18.2.14",
+    "@types/react": "18.0.0",
     "@types/react-test-renderer": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -34,10 +31,10 @@
     "happy-dom": "^10.1.0",
     "jsdom": "^22.1.0",
     "prettier": "^3.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-redux": "^8.1.1",
-    "react-test-renderer": "^18.2.0",
+    "react": "18.0.0",
+    "react-dom": "18.0.0",
+    "react-redux": "8.0.0",
+    "react-test-renderer": "18.0.0",
     "tsup": "^7.1.0",
     "typescript": "^5.1.6",
     "vite": "^4.4.2",
@@ -45,9 +42,8 @@
     "zod": "^3.21.4"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "^1.9.5",
+    "@reduxjs/toolkit": "^1.8.1",
     "@trpc/client": "^10.31.0",
-    "@trpc/server": "^10.31.0",
-    "react-redux": "^8.0.7"
+    "@trpc/server": "^10.31.0"
   }
 }
