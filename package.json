@@ -4,6 +4,12 @@
   "description": "tRPC adapter for RTK Query",
   "author": "Otto Ahoniemi",
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "test": "vitest test/",
