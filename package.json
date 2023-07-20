@@ -15,9 +15,12 @@
     "test": "vitest test/",
     "coverage": "vitest run --coverage test/",
     "typecheck": "vitest typecheck test/",
-    "build": "tsup src/ && tsc --emitDeclarationOnly --declaration --project tsconfig.build.json"
+    "build": "tsup src/ && tsc --emitDeclarationOnly --declaration --project tsconfig.build.json",
+    "changeset": "changeset",
+    "release": "pnpm run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
     "@reduxjs/toolkit": "1.9.5",
     "@trpc/client": "10.31.0",
