@@ -136,23 +136,3 @@ export { useUserListQuery } from api;
 
 // Again, otherwise the same setup
 ```
-
-## TODO
-
-- [x] Generate rtk query api with given `AppRouter` typings (simplest version)
-- [x] Support deep routers from trpc
-- [x] Allow passing in custom client, use that instead of generating internal client
-- [x] Allow passing in custom client creator that has access to QueryFn parameters
-- [x] Allow passing in already existing api
-- [x] Investigate if using custom modules from rtk toolkit would be a better approach? --> was not
-- [x] ci
-- [ ] better ci with good test matrix
-- [ ] remove unnecessary stuff from distributed package (e.g. don't have jsx in tsconfig etc)
-- [ ] add proper build output, publishing
-- [ ] split tests, add more unit tests
-- [ ] e2e tests
-- [ ] Allow passing in some parameters that can't be handled with enhanceEndpoints
-- [ ] (maybe) allow transformresponse and transformerroresponse. not sure tho
-- [ ] Better error types
-- [ ] Support using trpc vanilla client extra options
-- [ ] this is very react heavy approach, test against vue and svelte too
