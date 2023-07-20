@@ -2,4 +2,4 @@
 "trpc-rtk-query": patch
 ---
 
-Setup proper changeset version
+Setup proper release workflow with changelogs
