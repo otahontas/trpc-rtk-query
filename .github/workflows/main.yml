@@ -1,4 +1,4 @@
-name: CI
+name: Main CI
 on:
   push:
     branches:
@@ -8,16 +8,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: "Checkout repo"
+        uses: actions/checkout@v3
 
-      - uses: pnpm/action-setup@v2
+      - name: "Setup pnpm"
+        uses: pnpm/action-setup@v2
         with:
           version: 8.6.5
 
-      - uses: actions/setup-node@v3
+      - name: "Setup node"
+        uses: actions/setup-node@v3
         with:
           node-version: 20.x
           cache: "pnpm"
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint && pnpm run build
+      - name: "Install packages"
+        run: pnpm install --frozen-lockfile
+
+      - name: "Lint"
+        run: pnpm run lint
+
+      - name: "Typecheck"
+        run: pnpm run typecheck
+
+      - name: "Test"
+        run: pnpm run test
+
+      - name: "Build"
+        run: pnpm run build
+
+      ## TODO: e2e against builded package
