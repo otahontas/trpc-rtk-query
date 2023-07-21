@@ -82,9 +82,10 @@ describe("create-trpc-api", () => {
     expectTypeOf(api).not.toHaveProperty("useCreateUserMutation");
   });
 
-  it("allows creating api with pre made client without passing AppRouter to api", () => {
+  it("allows creating api with pre made client while infering type from client", () => {
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
     const api = createTRPCApi({
-      client: createTRPCProxyClient<AppRouter>(testClientOptions),
+      client,
     });
     const {
       endpoints: {
@@ -145,10 +146,11 @@ describe("create-trpc-api", () => {
       >();
   });
 
-  it("allows creating api with get client without passing AppRouter to api", () => {
+  it("allows creating api with get client while infering types from getClient func", () => {
     // eslint-disable-next-line unicorn/consistent-function-scoping
+    const getClient = async () => createTRPCProxyClient<AppRouter>(testClientOptions);
     const api = createTRPCApi({
-      getClient: async () => createTRPCProxyClient<AppRouter>(testClientOptions),
+      getClient,
     });
     const {
       endpoints: {
@@ -208,7 +210,7 @@ describe("create-trpc-api", () => {
       >();
   });
 
-  it("allows injecting trpc api to existing api", () => {
+  it("allows injecting trpc api to existing api with clientOptions", () => {
     const existingApi = createApi({
       baseQuery: (string_: string) => {
         return {
@@ -228,6 +230,199 @@ describe("create-trpc-api", () => {
     const api = injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
       clientOptions: testClientOptions,
       existingApi,
+    });
+    const {
+      endpoints: {
+        getUserById: {
+          useLazyQuery,
+          useLazyQuerySubscription,
+          useQuery,
+          useQueryState,
+          useQuerySubscription,
+        },
+      },
+      useGetUserByIdQuery,
+      useNested_Deep_GetVeryNestedMessageQuery,
+      usePrefetch,
+      useUpdateNameMutation,
+    } = api;
+
+    // Basic queries
+    expectTypeOf(useGetUserByIdQuery).toBeFunction();
+    expectTypeOf(useGetUserByIdQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<number>();
+    expectTypeOf(useUpdateNameMutation).toBeFunction();
+    type UseUpdateNameMutationTriggerArgument = Parameters<
+      ReturnType<typeof useUpdateNameMutation>[0]
+    >[0];
+    expectTypeOf<UseUpdateNameMutationTriggerArgument>().toMatchTypeOf<{
+      id: number;
+      name: string;
+    }>();
+
+    // Deeply nested query & same query through endpoints
+    expectTypeOf(useNested_Deep_GetVeryNestedMessageQuery).toBeFunction();
+    expectTypeOf(useNested_Deep_GetVeryNestedMessageQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<{ deepInput: string }>();
+    expectTypeOf(
+      // eslint-disable-next-line unicorn/consistent-destructuring
+      api.endpoints.nested_Deep_GetVeryNestedMessage.useQuery,
+    ).toBeFunction();
+
+    // queries through endpoint
+    expectTypeOf(useLazyQuery).toBeFunction();
+    expectTypeOf(useLazyQuerySubscription).toBeFunction();
+    expectTypeOf(useQuery).toBeFunction();
+    expectTypeOf(useQueryState).toBeFunction();
+    expectTypeOf(useQuerySubscription).toBeFunction();
+
+    // use prefetch should have types from both previous and trpc endpoints
+    expectTypeOf(usePrefetch).toBeFunction();
+    expectTypeOf(usePrefetch)
+      .parameter(0)
+      .toMatchTypeOf<
+        "getResponse" | "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
+      >();
+
+    // existing query through api & endpoints.getResponse
+    const {
+      endpoints: { getResponse },
+      useGetResponseQuery,
+    } = api;
+    expectTypeOf(useGetResponseQuery).toBeFunction();
+    expectTypeOf(useGetResponseQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<string>();
+    expectTypeOf(getResponse.useQuery).toBeFunction();
+    expectTypeOf(getResponse.useQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<string>();
+  });
+
+  it("allows injecting trpc api to existing api while infering types from client and api", () => {
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const existingApi = createApi({
+      baseQuery: (string_: string) => {
+        return {
+          data: {
+            string_,
+          },
+        };
+      },
+      endpoints: (builder) => ({
+        getResponse: builder.query<string, string>({
+          query: (string_: string) => string_,
+        }),
+      }),
+      reducerPath: "premadeApi",
+    });
+
+    const api = injectTRPCEndpointsToApi({
+      client,
+      existingApi,
+    });
+    const {
+      endpoints: {
+        getUserById: {
+          useLazyQuery,
+          useLazyQuerySubscription,
+          useQuery,
+          useQueryState,
+          useQuerySubscription,
+        },
+      },
+      useGetUserByIdQuery,
+      useNested_Deep_GetVeryNestedMessageQuery,
+      usePrefetch,
+      useUpdateNameMutation,
+    } = api;
+
+    // Basic queries
+    expectTypeOf(useGetUserByIdQuery).toBeFunction();
+    expectTypeOf(useGetUserByIdQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<number>();
+    expectTypeOf(useUpdateNameMutation).toBeFunction();
+    type UseUpdateNameMutationTriggerArgument = Parameters<
+      ReturnType<typeof useUpdateNameMutation>[0]
+    >[0];
+    expectTypeOf<UseUpdateNameMutationTriggerArgument>().toMatchTypeOf<{
+      id: number;
+      name: string;
+    }>();
+
+    // Deeply nested query & same query through endpoints
+    expectTypeOf(useNested_Deep_GetVeryNestedMessageQuery).toBeFunction();
+    expectTypeOf(useNested_Deep_GetVeryNestedMessageQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<{ deepInput: string }>();
+    expectTypeOf(
+      // eslint-disable-next-line unicorn/consistent-destructuring
+      api.endpoints.nested_Deep_GetVeryNestedMessage.useQuery,
+    ).toBeFunction();
+
+    // queries through endpoint
+    expectTypeOf(useLazyQuery).toBeFunction();
+    expectTypeOf(useLazyQuerySubscription).toBeFunction();
+    expectTypeOf(useQuery).toBeFunction();
+    expectTypeOf(useQueryState).toBeFunction();
+    expectTypeOf(useQuerySubscription).toBeFunction();
+
+    // use prefetch should have types from both previous and trpc endpoints
+    expectTypeOf(usePrefetch).toBeFunction();
+    expectTypeOf(usePrefetch)
+      .parameter(0)
+      .toMatchTypeOf<
+        "getResponse" | "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
+      >();
+
+    // existing query through api & endpoints.getResponse
+    const {
+      endpoints: { getResponse },
+      useGetResponseQuery,
+    } = api;
+    expectTypeOf(useGetResponseQuery).toBeFunction();
+    expectTypeOf(useGetResponseQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<string>();
+    expectTypeOf(getResponse.useQuery).toBeFunction();
+    expectTypeOf(getResponse.useQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<string>();
+  });
+
+  it("allows injecting trpc api to existing api infering types from getclient", () => {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const getClient = async () => createTRPCProxyClient<AppRouter>(testClientOptions);
+    const existingApi = createApi({
+      baseQuery: (string_: string) => {
+        return {
+          data: {
+            string_,
+          },
+        };
+      },
+      endpoints: (builder) => ({
+        getResponse: builder.query<string, string>({
+          query: (string_: string) => string_,
+        }),
+      }),
+      reducerPath: "premadeApi",
+    });
+
+    const api = injectTRPCEndpointsToApi({
+      existingApi,
+      getClient,
     });
     const {
       endpoints: {
