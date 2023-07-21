@@ -16,7 +16,12 @@
       "files": ["**/test/**/*.ts", "**/test/**/*.tsx"],
       "rules": {
         "no-console": "off",
-        "@typescript-eslint/no-non-null-assertion": "off"
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "unicorn/no-null": "off",
+        "unicorn/no-useless-undefined": "off",
+        "unicorn/consistent-function-scoping": "off"
       }
     }
   ],

@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -37,7 +36,6 @@ describe("isObject", () => {
     expect(isObject("string")).toBe(false);
     expect(isObject(123)).toBe(false);
     expect(isObject(true)).toBe(false);
-    // eslint-disable-next-line unicorn/no-useless-undefined
     expect(isObject(undefined)).toBe(false);
     expect(isObject([])).toBe(false);
     expect(isObject(() => {})).toBe(false);
@@ -54,7 +52,6 @@ describe("isString", () => {
     expect(isString({})).toBe(false);
     expect(isString(123)).toBe(false);
     expect(isString(true)).toBe(false);
-    // eslint-disable-next-line unicorn/no-useless-undefined
     expect(isObject(undefined)).toBe(false);
     expect(isObject([])).toBe(false);
     expect(isObject(() => {})).toBe(false);

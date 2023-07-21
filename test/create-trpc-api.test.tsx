@@ -208,7 +208,6 @@ describe("create-trpc-api", () => {
 
       describe("and making actual requests with hooks renders correctly", () => {
         // Create react app for testing. Keeping this in scope so it's easier to type.
-        // eslint-disable-next-line unicorn/consistent-function-scoping
         const createReactTestApp = (getApiForStore: typeof getApi) => {
           const api = getApiForStore();
           const store = configureStore({
@@ -402,7 +401,6 @@ describe("create-trpc-api", () => {
           // Try to listen error log from rtk
           const consoleErrorMock = vi
             .spyOn(console, "error")
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
             .mockImplementation(() => {});
           const FirstComponent = () => {
             const { useListUsersQuery } = api;
@@ -438,12 +436,10 @@ describe("create-trpc-api", () => {
           addTagTypes: ["User"],
           endpoints: {
             getUserById: {
-              // eslint-disable-next-line @typescript-eslint/no-empty-function
               onQueryStarted() {},
               providesTags: ["User"],
             },
             updateName: {
-              // eslint-disable-next-line @typescript-eslint/no-empty-function
               onQueryStarted() {},
             },
           },
