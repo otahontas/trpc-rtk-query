@@ -1,6 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { type BaseQueryApi, createApi } from "@reduxjs/toolkit/query/react";
-import { httpBatchLink } from "@trpc/client";
 import { createTRPCProxyClient } from "@trpc/client";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { setTimeout } from "node:timers/promises";
@@ -10,14 +9,13 @@ import renderer from "react-test-renderer";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { createTRPCApi, injectTRPCEndpointsToApi } from "../src/create-trpc-api";
-import { type AppRouter, appRouter, userFixtures } from "./fixtures";
-
-// Test server setup
-const testPort = 3333;
-
-const testClientOptions = {
-  links: [httpBatchLink({ url: `http://localhost:${testPort}` })],
-};
+import {
+  type AppRouter,
+  appRouter,
+  testClientOptions,
+  testPort,
+  userFixtures,
+} from "./fixtures";
 
 type TestServer = {
   close: () => Promise<void>;
