@@ -1,6 +1,4 @@
-import { httpBatchLink } from "@trpc/client";
 import { TRPCError, initTRPC } from "@trpc/server";
-import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
 
 const t = initTRPC.create();
@@ -40,7 +38,7 @@ const veryDeepRouter = router({
   }),
 });
 
-const appRouter = router({
+export const appRouter = router({
   createUser: procedure.input(z.string()).mutation(async (options) => {
     const { input } = options;
     const id = Math.max(...Object.values(userFixtures).map(({ id }) => id)) + 1;
@@ -76,40 +74,3 @@ const appRouter = router({
 });
 
 export type AppRouter = typeof appRouter;
-
-const testPort = 3333;
-
-// Don't add AppRouter to this, so we don't get false positives when testing for types
-export const testClientOptions = {
-  links: [httpBatchLink({ url: `http://localhost:${testPort}` })],
-};
-
-interface TestServer {
-  close: () => Promise<void>;
-}
-
-export const startTestServer = (): Promise<TestServer> =>
-  new Promise((resolveCreate) => {
-    const { server } = createHTTPServer({
-      router: appRouter,
-    });
-
-    const closePromise = (): Promise<void> =>
-      new Promise((resolveClose, rejectClose) => {
-        server.close((error) => {
-          if (error) {
-            console.error("Failed to close test server!");
-            rejectClose(error);
-            return;
-          }
-          resolveClose();
-        });
-      });
-
-    server.listen(testPort, () => {
-      console.log("Test server listening!");
-      resolveCreate({
-        close: closePromise,
-      });
-    });
-  });
