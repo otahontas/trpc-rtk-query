@@ -8,20 +8,21 @@ import { createBaseQueryForTRPCClient } from "./create-base-query";
 import { CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
 export type SupportedModule = CoreModule | ReactHooksModule;
 
-// TODO: test these helpers
-const deCapitalize = (string_: string) => {
+// Helpers
+export const deCapitalize = (string_: string) => {
   const firstChar = string_[0];
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
 };
 
-const isObject = (value: unknown): value is object =>
-  typeof value === "object" && value !== null;
+export const isObject = (value: unknown): value is Record<PropertyKey, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
-const isString = (value: unknown): value is string => typeof value === "string";
+export const isString = (value: unknown): value is string => typeof value === "string";
 
-// Note that assertions can't be declared with arrow functions. Otherwise we're
-// following arrow function style here.
-function assertPropertyIsString(property: string | symbol): asserts property is string {
+// assertions can't be declared with arrow functions, so we need to use function
+export function assertPropertyIsString(
+  property: string | symbol,
+): asserts property is string {
   if (typeof property === "symbol") {
     throw new TypeError("Calling api with new symbol properties is not supported");
   }
@@ -95,6 +96,7 @@ const formatEndpointToProcedurePathAndInjectToApi = <
     }),
   });
 };
+
 // Helper function that creates proxy which validates incoming properties on each level
 // before calling callback on final level. Defaults to empty object if target is not available
 type CreateRecursiveProtectiveProxyOptions = {
@@ -103,7 +105,8 @@ type CreateRecursiveProtectiveProxyOptions = {
   proxyTarget: object;
   recursionLevels: number;
 };
-const createRecursiveProtectiveProxy = ({
+
+export const createRecursiveProtectiveProxy = ({
   callback,
   propertyList = [],
   proxyTarget,
