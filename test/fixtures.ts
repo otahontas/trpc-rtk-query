@@ -1,3 +1,4 @@
+import { httpBatchLink } from "@trpc/client";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { z } from "zod";
 
@@ -74,3 +75,9 @@ export const appRouter = router({
 });
 
 export type AppRouter = typeof appRouter;
+
+export const testPort = 3333;
+
+export const testClientOptions = {
+  links: [httpBatchLink({ url: `http://localhost:${testPort}` })],
+};
