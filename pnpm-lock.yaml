@@ -13,7 +13,7 @@ devDependencies:
     version: 2.26.2
   '@reduxjs/toolkit':
     specifier: 1.9.5
-    version: 1.9.5(react-redux@7.2.2)(react@16.9.0)
+    version: 1.9.5(react-redux@8.1.2)(react@16.9.0)
   '@trpc/client':
     specifier: 10.31.0
     version: 10.31.0(@trpc/server@10.31.0)
@@ -72,8 +72,8 @@ devDependencies:
     specifier: 16.9.0
     version: 16.9.0(react@16.9.0)
   react-redux:
-    specifier: 7.2.2
-    version: 7.2.2(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1)
+    specifier: 8.1.2
+    version: 8.1.2(@types/react@16.9.0)(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1)
   react-test-renderer:
     specifier: 16.9.0
     version: 16.9.0(react@16.9.0)
@@ -685,7 +685,7 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@reduxjs/toolkit@1.9.5(react-redux@7.2.2)(react@16.9.0):
+  /@reduxjs/toolkit@1.9.5(react-redux@8.1.2)(react@16.9.0):
     resolution: {integrity: sha512-Rt97jHmfTeaxL4swLRNPD/zV4OxTes4la07Xc4hetpUW/vc75t5m1ANyxG6ymnEQ2FsLQsoMlYB2vV1sO3m8tQ==}
     peerDependencies:
       react: ^16.9.0 || ^17.0.0 || ^18
@@ -698,7 +698,7 @@ packages:
     dependencies:
       immer: 9.0.21
       react: 16.9.0
-      react-redux: 7.2.2(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1)
+      react-redux: 8.1.2(@types/react@16.9.0)(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1)
       redux: 4.2.1
       redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
@@ -808,6 +808,10 @@ packages:
 
   /@types/semver@7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
+    dev: true
+
+  /@types/use-sync-external-store@0.0.3:
+    resolution: {integrity: sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==}
     dev: true
 
   /@typescript-eslint/eslint-plugin@6.1.0(@typescript-eslint/parser@6.1.0)(eslint@8.45.0)(typescript@5.1.6):
@@ -3232,27 +3236,37 @@ packages:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
     dev: true
 
-  /react-redux@7.2.2(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1):
-    resolution: {integrity: sha512-8+CQ1EvIVFkYL/vu6Olo7JFLWop1qRUeb46sGtIMDCSpgwPQq8fPLpirIB0iTqFe9XYEFPHssdX8/UwN6pAkEA==}
+  /react-redux@8.1.2(@types/react@16.9.0)(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1):
+    resolution: {integrity: sha512-xJKYI189VwfsFc4CJvHqHlDrzyFTY/3vZACbE+rr/zQ34Xx1wQfB4OTOSeOSNrF6BDVe8OOdxIrAnMGXA3ggfw==}
     peerDependencies:
-      react: ^16.8.3 || ^17
-      react-dom: '*'
-      react-native: '*'
-      redux: ^2.0.0 || ^3.0.0 || ^4.0.0-0
+      '@types/react': ^16.8 || ^17.0 || ^18.0
+      '@types/react-dom': ^16.8 || ^17.0 || ^18.0
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+      react-native: '>=0.59'
+      redux: ^4 || ^5.0.0-beta.0
     peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
       react-dom:
         optional: true
       react-native:
         optional: true
+      redux:
+        optional: true
     dependencies:
       '@babel/runtime': 7.22.6
+      '@types/hoist-non-react-statics': 3.3.1
+      '@types/react': 16.9.0
+      '@types/use-sync-external-store': 0.0.3
       hoist-non-react-statics: 3.3.2
-      loose-envify: 1.4.0
-      prop-types: 15.8.1
       react: 16.9.0
       react-dom: 16.9.0(react@16.9.0)
-      react-is: 16.13.1
+      react-is: 18.2.0
       redux: 4.2.1
+      use-sync-external-store: 1.2.0(react@16.9.0)
     dev: true
 
   /react-test-renderer@16.9.0(react@16.9.0):
@@ -3954,6 +3968,14 @@ packages:
     dependencies:
       querystringify: 2.2.0
       requires-port: 1.0.0
+    dev: true
+
+  /use-sync-external-store@1.2.0(react@16.9.0):
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 16.9.0
     dev: true
 
   /v8-to-istanbul@9.1.0:
