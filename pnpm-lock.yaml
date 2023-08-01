@@ -69,11 +69,11 @@ devDependencies:
     specifier: 16.9.0
     version: 16.9.0
   react-dom:
-    specifier: 16.9.0
-    version: 16.9.0(react@16.9.0)
+    specifier: 16.13.0
+    version: 16.13.0(react@16.9.0)
   react-redux:
     specifier: 7.2.2
-    version: 7.2.2(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1)
+    version: 7.2.2(react-dom@16.13.0)(react@16.9.0)(redux@4.2.1)
   react-test-renderer:
     specifier: 16.9.0
     version: 16.9.0(react@16.9.0)
@@ -698,7 +698,7 @@ packages:
     dependencies:
       immer: 9.0.21
       react: 16.9.0
-      react-redux: 7.2.2(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1)
+      react-redux: 7.2.2(react-dom@16.13.0)(react@16.9.0)(redux@4.2.1)
       redux: 4.2.1
       redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
@@ -3212,8 +3212,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /react-dom@16.9.0(react@16.9.0):
-    resolution: {integrity: sha512-YFT2rxO9hM70ewk9jq0y6sQk8cL02xm4+IzYBz75CQGlClQQ1Bxq0nhHF6OtSbit+AIahujJgb/CPRibFkMNJQ==}
+  /react-dom@16.13.0(react@16.9.0):
+    resolution: {integrity: sha512-y09d2c4cG220DzdlFkPTnVvGTszVvNpC73v+AaLGLHbkpy3SSgvYq8x0rNwPJ/Rk/CicTNgk0hbHNw1gMEZAXg==}
     peerDependencies:
       react: ^16.0.0
     dependencies:
@@ -3221,7 +3221,7 @@ packages:
       object-assign: 4.1.1
       prop-types: 15.8.1
       react: 16.9.0
-      scheduler: 0.15.0
+      scheduler: 0.19.1
     dev: true
 
   /react-is@16.13.1:
@@ -3232,7 +3232,7 @@ packages:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
     dev: true
 
-  /react-redux@7.2.2(react-dom@16.9.0)(react@16.9.0)(redux@4.2.1):
+  /react-redux@7.2.2(react-dom@16.13.0)(react@16.9.0)(redux@4.2.1):
     resolution: {integrity: sha512-8+CQ1EvIVFkYL/vu6Olo7JFLWop1qRUeb46sGtIMDCSpgwPQq8fPLpirIB0iTqFe9XYEFPHssdX8/UwN6pAkEA==}
     peerDependencies:
       react: ^16.8.3 || ^17
@@ -3250,7 +3250,7 @@ packages:
       loose-envify: 1.4.0
       prop-types: 15.8.1
       react: 16.9.0
-      react-dom: 16.9.0(react@16.9.0)
+      react-dom: 16.13.0(react@16.9.0)
       react-is: 16.13.1
       redux: 4.2.1
     dev: true
@@ -3446,6 +3446,13 @@ packages:
 
   /scheduler@0.15.0:
     resolution: {integrity: sha512-xAefmSfN6jqAa7Kuq7LIJY0bwAPG3xlCj0HMEBQk1lxYiDKZscY2xJ5U/61ZTrYbmNQbXa+gc7czPkVo11tnCg==}
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+    dev: true
+
+  /scheduler@0.19.1:
+    resolution: {integrity: sha512-n/zwRWRYSUj0/3g/otKDRPMh6qv2SYMWNq85IEa8iZyAv8od9zDYpGSnpBEjNgcMNq6Scbu5KfIPxNF72R/2EA==}
     dependencies:
       loose-envify: 1.4.0
       object-assign: 4.1.1
