@@ -52,7 +52,7 @@ devDependencies:
     version: 8.8.0(eslint@8.45.0)
   eslint-plugin-perfectionist:
     specifier: ^1.5.0
-    version: 1.5.0(eslint@8.45.0)(typescript@5.1.6)
+    version: 1.5.1(eslint@8.45.0)(typescript@5.1.6)
   eslint-plugin-unicorn:
     specifier: ^48.0.0
     version: 48.0.0(eslint@8.45.0)
@@ -1713,8 +1713,8 @@ packages:
       eslint: 8.45.0
     dev: true
 
-  /eslint-plugin-perfectionist@1.5.0(eslint@8.45.0)(typescript@5.1.6):
-    resolution: {integrity: sha512-khVm+M55D95YhoNEjinLdhC5pSse5/EXn7HuI1Y2R+WU1Hb5wWehPlRqAWzWS4VFJKRPWt78OmnzsmnDq1T5IA==}
+  /eslint-plugin-perfectionist@1.5.1(eslint@8.45.0)(typescript@5.1.6):
+    resolution: {integrity: sha512-PiUrAfGDc/l6MKKUP8qt5RXueC7FZC6F/0j8ijXYU8o3x8o2qUi6zEEYBkId/IiKloIXM5KTD4jrH9833kDNzA==}
     peerDependencies:
       eslint: '>=8.0.0'
     dependencies:
