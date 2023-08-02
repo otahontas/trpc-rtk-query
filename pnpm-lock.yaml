@@ -55,7 +55,7 @@ devDependencies:
     version: 1.5.1(eslint@8.46.0)(typescript@5.1.6)
   eslint-plugin-unicorn:
     specifier: ^48.0.0
-    version: 48.0.0(eslint@8.46.0)
+    version: 48.0.1(eslint@8.46.0)
   happy-dom:
     specifier: ^10.5.2
     version: 10.5.2
@@ -1735,8 +1735,8 @@ packages:
       - typescript
     dev: true
 
-  /eslint-plugin-unicorn@48.0.0(eslint@8.46.0):
-    resolution: {integrity: sha512-8fk/v3p1ro34JSVDBEmtOq6EEQRpMR0iTir79q69KnXFZ6DJyPkT3RAi+ZoTqhQMdDSpGh8BGR68ne1sP5cnAA==}
+  /eslint-plugin-unicorn@48.0.1(eslint@8.46.0):
+    resolution: {integrity: sha512-FW+4r20myG/DqFcCSzoumaddKBicIPeFnTrifon2mWIzlfyvzwyqZjqVP7m4Cqr/ZYisS2aiLghkUWaPg6vtCw==}
     engines: {node: '>=16'}
     peerDependencies:
       eslint: '>=8.44.0'
