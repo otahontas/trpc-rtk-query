@@ -9,3 +9,17 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # Update manually all the most important libraries, i.e. redux, trpc and their
+      # peer deps. Lowest versions possible are installed for all of these to keep
+      # compatibility as good as possible.
+      - dependency-name: "@reduxjs/toolkit"
+      - dependency-name: "@trpc/client"
+      - dependency-name: "@trpc/server"
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-redux"
+      - dependency-name: "@types/react-test-renderer"
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "react-redux"
+      - dependency-name: "react-test-renderer"
