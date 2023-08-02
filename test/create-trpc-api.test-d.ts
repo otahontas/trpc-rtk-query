@@ -2,7 +2,11 @@ import { createApi, skipToken } from "@reduxjs/toolkit/query/react";
 import { createTRPCProxyClient } from "@trpc/client";
 import { describe, expectTypeOf, it } from "vitest";
 
-import { createTRPCApi, injectTRPCEndpointsToApi } from "../src/create-trpc-api";
+import {
+  createTRPCApi,
+  createTRPCApiWithRTKQueryApiOptions,
+  injectTRPCEndpointsToApi,
+} from "../src/create-trpc-api";
 import { type AppRouter, testClientOptions } from "./fixtures";
 
 // Tests each scenery with one query and one mutation
@@ -505,7 +509,7 @@ describe("create-trpc-api", () => {
       clientOptions: testClientOptions,
     });
     // @ts-expect-error Should not be possible to pass both client and getClient
-    createTRPCApi<AppRouter>({
+    createTRPCApi({
       client: createTRPCProxyClient<AppRouter>(testClientOptions),
       getClient: async () => createTRPCProxyClient<AppRouter>(testClientOptions),
     });
@@ -514,5 +518,25 @@ describe("create-trpc-api", () => {
       clientOptions: testClientOptions,
       getClient: async () => createTRPCProxyClient<AppRouter>(testClientOptions),
     });
+  });
+
+  it("allows passing api options when creating new api", () => {
+    const api = createTRPCApiWithRTKQueryApiOptions({
+      reducerPath: "jeeApi",
+      tagTypes: ["User"],
+    })<AppRouter>({ clientOptions: testClientOptions });
+    expectTypeOf(api["reducerPath"]).toMatchTypeOf<"jeeApi">();
+  });
+
+  it("prevents passing api options that are injected by this library when creating new api", () => {
+    createTRPCApiWithRTKQueryApiOptions({
+      //@ts-expect-error shouldn't be possible to pass baseQuery
+      baseQuery: (() => {}) as any,
+    })<AppRouter>({ clientOptions: testClientOptions });
+
+    createTRPCApiWithRTKQueryApiOptions({
+      //@ts-expect-error shouldn't be possible to pass endpoints
+      endpoints: {} as any,
+    })<AppRouter>({ clientOptions: testClientOptions });
   });
 });
