@@ -1,4 +1,6 @@
 {
-  "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node20/tsconfig"],
-  "exclude": ["node_modules", "dist"]
+  "extends": ["./tsconfig.base.json"],
+  "compilerOptions": {
+    "jsx": "react"
+  }
 }
