@@ -6,7 +6,6 @@ export default defineConfig({
     typecheck: {
       exclude: ["dist/**/*"],
       ignoreSourceErrors: true, // these are checked during build
-      tsconfig: "./tsconfig.test.json",
     },
   },
 });
