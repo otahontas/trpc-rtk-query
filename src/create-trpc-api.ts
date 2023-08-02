@@ -1,5 +1,10 @@
 import { type ApiEndpointQuery } from "@reduxjs/toolkit/dist/query/core/module"; // TODO: don't import from dist
-import { type Api, type BaseQueryFn, createApi } from "@reduxjs/toolkit/query/react";
+import {
+  type Api,
+  type BaseQueryFn,
+  type CreateApiOptions,
+  createApi,
+} from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
 import {
@@ -17,6 +22,49 @@ type EndpointsObject = {
   endpoints: Record<string, any>;
 };
 
+// TODO: combine createTRPCApiWithRTKQueryApiOptions and createApi with function
+// overloads?
+
+type NonAllowedApiOptions = Extract<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  keyof CreateApiOptions<any, any, any, any>,
+  "baseQuery" | "endpoints"
+>;
+
+/*
+ * Creates a new api, but allows passing in options for rtk query api.
+ * Unfortunately this must be done via currying to allow partial inferring of type
+ * arguments (i.e. you can pass AppRouter, but nothing else).
+ * TODO: Fix when typescript supports partial type infering
+ */
+export const createTRPCApiWithRTKQueryApiOptions =
+  <ReducerPath extends string, TagTypes extends string>(
+    createApiOptions: Omit<
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      CreateApiOptions<BaseQueryForTRPCClient, any, ReducerPath, TagTypes>,
+      NonAllowedApiOptions
+    >,
+  ) =>
+  <TRouter extends AnyRouter>(options: CreateTRPCApiClientOptions<TRouter>) => {
+    const nonProxyApi = createApi({
+      ...createApiOptions,
+      baseQuery: createBaseQueryForTRPCClient(options),
+      // We're injecting endpoints later with proxy, but need to cast them
+      // beforehand for proper typings to be exposed to users
+      endpoints: () =>
+        ({}) as CreateEndpointDefinitionsFromTRPCRouter<
+          TRouter,
+          BaseQueryForTRPCClient,
+          "api",
+          never
+        >,
+    });
+    return wrapApiToProxy({
+      nonProxyApi: nonProxyApi as typeof nonProxyApi & EndpointsObject, // TODO: fix endpoints cast
+      useQueryFunction: false,
+    });
+  };
+
 /*
  * Creates a new api using trpc under the hood
  */
@@ -31,7 +79,7 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
       ({}) as CreateEndpointDefinitionsFromTRPCRouter<
         TRouter,
         BaseQueryForTRPCClient,
-        "api", // Reducer path.
+        "api",
         never
       >,
   });
