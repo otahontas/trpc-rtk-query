@@ -99,20 +99,6 @@ describe("create-trpc-api", () => {
     describe.each([
       {
         getApi: () => {
-          const base = { clientOptions: testClientOptions };
-          if (apiForCreateApiOptions?.createApiLazily) {
-            const existingApi = createApiLazily();
-            return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
-              ...base,
-              existingApi,
-            });
-          }
-          return createTRPCApi<AppRouter>(base);
-        },
-        testCase: "creating client from clientOptions",
-      },
-      {
-        getApi: () => {
           const base = {
             client: createTRPCProxyClient<AppRouter>(testClientOptions),
           };
@@ -447,10 +433,10 @@ describe("create-trpc-api", () => {
   });
 
   it("doesn't replace previous hooks when passing in and existing api", () => {
-    const base = { clientOptions: testClientOptions };
     const existingApi = createApiLazily();
-    const api = injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
-      ...base,
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const api = injectTRPCEndpointsToApi({
+      client,
       existingApi,
     });
     const { useListUsersQuery } = api;
