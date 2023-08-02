@@ -37,4 +37,13 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      ## TODO: e2e against builded package
+  automerge:
+    needs: pr
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3
