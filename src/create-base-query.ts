@@ -3,7 +3,6 @@ import {
   TRPCClientError,
   type TRPCRequestOptions,
   TRPCUntypedClient,
-  createTRPCUntypedClient,
   getUntypedClient,
 } from "@trpc/client";
 import { type AnyRouter, TRPCError } from "@trpc/server";
@@ -74,18 +73,13 @@ const resolveClientStatus = <TRouter extends AnyRouter>(
       client: getUntypedClient<TRouter>(createTRPCApiClientOptions.client),
       ready: true,
     };
-  } else if ("clientOptions" in createTRPCApiClientOptions) {
+  } else if ("getClient" in createTRPCApiClientOptions) {
     return {
-      client: createTRPCUntypedClient<TRouter>(
-        createTRPCApiClientOptions.clientOptions,
-      ),
-      ready: true,
+      getClient: createTRPCApiClientOptions.getClient,
+      ready: false,
     };
   }
-  return {
-    getClient: createTRPCApiClientOptions.getClient,
-    ready: false,
-  };
+  throw new Error("No client or getClient specified in options!");
 };
 
 /** Typings for base query that (not previously existing) api created with
