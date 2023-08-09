@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  assertPropertyIsString,
+  assertIsString,
   createRecursiveProtectiveProxy,
   deCapitalize,
-  isObject,
+  isPlainObject,
   isString,
 } from "../src/wrap-api-to-proxy";
 
@@ -24,21 +24,21 @@ describe("deCapitalize", () => {
 
 describe("isObject", () => {
   it("should return true if the value is an object", () => {
-    expect(isObject({})).toBe(true);
-    expect(isObject(Object.assign({}))).toBe(true);
+    expect(isPlainObject({})).toBe(true);
+    expect(isPlainObject(Object.assign({}))).toBe(true);
   });
 
   it("should return false if the value is null", () => {
-    expect(isObject(null)).toBe(false);
+    expect(isPlainObject(null)).toBe(false);
   });
 
   it("should return false if the value is not an object", () => {
-    expect(isObject("string")).toBe(false);
-    expect(isObject(123)).toBe(false);
-    expect(isObject(true)).toBe(false);
-    expect(isObject(undefined)).toBe(false);
-    expect(isObject([])).toBe(false);
-    expect(isObject(() => {})).toBe(false);
+    expect(isPlainObject("string")).toBe(false);
+    expect(isPlainObject(123)).toBe(false);
+    expect(isPlainObject(true)).toBe(false);
+    expect(isPlainObject(undefined)).toBe(false);
+    expect(isPlainObject([])).toBe(false);
+    expect(isPlainObject(() => {})).toBe(false);
   });
 });
 
@@ -52,19 +52,19 @@ describe("isString", () => {
     expect(isString({})).toBe(false);
     expect(isString(123)).toBe(false);
     expect(isString(true)).toBe(false);
-    expect(isObject(undefined)).toBe(false);
-    expect(isObject([])).toBe(false);
-    expect(isObject(() => {})).toBe(false);
+    expect(isPlainObject(undefined)).toBe(false);
+    expect(isPlainObject([])).toBe(false);
+    expect(isPlainObject(() => {})).toBe(false);
   });
 });
 
 describe("assertPropertyIsString", () => {
   it("should not throw an error if the property is a string", () => {
-    expect(() => assertPropertyIsString("string")).not.toThrow();
+    expect(() => assertIsString("string")).not.toThrow();
   });
 
   it("should throw an error if the property is a symbol", () => {
-    expect(() => assertPropertyIsString(Symbol())).toThrow(
+    expect(() => assertIsString(Symbol())).toThrow(
       "Calling api with new symbol properties is not supported",
     );
   });

@@ -1,4 +1,5 @@
 import { type AnyRouter } from "@trpc/server";
+import { isPlainObject, isString } from "is-what";
 
 import { createTRPCBaseQuery } from "./create-trpc-base-query";
 import { AnyApi } from "./rtk-types";
@@ -13,28 +14,12 @@ export const deCapitalize = (string_: string) => {
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
 };
 
-/**
- * Check if value is actual object
- * TODO: maybe get from some other lib?
- **/
-export const isObject = (value: unknown): value is Record<PropertyKey, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
 /*
- * Check if value is string
- * TODO: maybe get from some other lib?
- */
-export const isString = (value: unknown): value is string => typeof value === "string";
-
-/*
- * Assert property is string (can be symbol too)
+ * Helper wrapper for is-what's isString that can be used as assertion.
  * Assertions can't be declared with arrow functions, so we need to use function
- * TODO: maybe get from some other lib?
  */
-export function assertPropertyIsString(
-  property: string | symbol,
-): asserts property is string {
-  if (typeof property === "symbol") {
+export function assertIsString(property: unknown): asserts property is string {
+  if (!isString(property)) {
     throw new TypeError("Calling api with new symbol properties is not supported");
   }
 }
@@ -134,7 +119,7 @@ export const createRecursiveProtectiveProxy = ({
       if (Reflect.has(target, property)) {
         return Reflect.get(target, property, receiver);
       }
-      assertPropertyIsString(property);
+      assertIsString(property);
       const newPropertyList = [...propertyList, property];
       return recursionLevels > 1
         ? createRecursiveProtectiveProxy({
@@ -180,7 +165,7 @@ export const wrapApiToProxy = <Api extends Injectable, TRouter extends AnyRouter
   new Proxy(nonProxyApi, {
     get(target, property, receiver) {
       // Validate endpoints target, since it is needed in multiple places
-      if (!("endpoints" in target) || !isObject(target["endpoints"])) {
+      if (!("endpoints" in target) || !isPlainObject(target["endpoints"])) {
         throw new Error("Library error: Can't get endpoints from rtk api!");
       }
       const { endpoints } = target;
@@ -258,7 +243,7 @@ export const wrapApiToProxy = <Api extends Injectable, TRouter extends AnyRouter
       if (Reflect.has(target, property)) {
         return Reflect.get(target, property, receiver);
       }
-      assertPropertyIsString(property);
+      assertIsString(property);
 
       for (const { procedureType, regex } of regexesWithProcedureType) {
         const match = regex.exec(property);
@@ -289,3 +274,6 @@ export const wrapApiToProxy = <Api extends Injectable, TRouter extends AnyRouter
       );
     },
   });
+
+export { isString } from "is-what";
+export { isPlainObject } from "is-what";

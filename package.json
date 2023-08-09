@@ -54,5 +54,8 @@
     "@reduxjs/toolkit": "^1.9.5",
     "@trpc/client": "^10.31.0",
     "@trpc/server": "^10.31.0"
+  },
+  "dependencies": {
+    "is-what": "^4.1.15"
   }
 }
