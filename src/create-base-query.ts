@@ -70,7 +70,7 @@ const resolveClientStatus = <TRouter extends AnyRouter>(
 ): ClientStatus<TRouter> => {
   if ("client" in createTRPCApiClientOptions) {
     return {
-      client: getUntypedClient<TRouter>(createTRPCApiClientOptions.client),
+      client: getUntypedClient(createTRPCApiClientOptions.client),
       ready: true,
     };
   } else if ("getClient" in createTRPCApiClientOptions) {
@@ -113,9 +113,11 @@ export const createBaseQueryForTRPCClient = <TRouter extends AnyRouter>(
   return async (baseQueryArguments, baseQueryApi, extraOptions) => {
     try {
       const { procedureArguments, procedurePath, procedureType } = baseQueryArguments;
+
       const resolvedClient = clientStatus.ready
         ? clientStatus.client
-        : getUntypedClient<TRouter>(await clientStatus.getClient(baseQueryApi));
+        : getUntypedClient(await clientStatus.getClient(baseQueryApi));
+
       return {
         data: await resolvedClient[procedureType](
           procedurePath,
