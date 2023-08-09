@@ -66,7 +66,7 @@ type EndpointProcedurePair = [string, AnyProcedure];
 /** Create endpoint definitions from TRPC Router for RTK query api
  * @internal
  **/
-export type CreateEndpointDefinitionsFromTRPCRouter<
+export type CreateEndpointDefinitions<
   TRouter extends AnyRouter,
   BaseQuery extends BaseQueryFn,
   ReducerPath extends string,

@@ -4,8 +4,8 @@ import { type ReactHooksModule } from "@reduxjs/toolkit/dist/query/react/module"
 import { type Api } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
-import { createBaseQueryForTRPCClient } from "./create-base-query";
-import { type CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
+import { createTRPCBaseQuery } from "./create-trpc-base-query";
+import { type TRPCClientOptions } from "./trpc-client-options";
 export type SupportedModule = CoreModule | ReactHooksModule;
 
 // Helpers
@@ -46,7 +46,7 @@ type FormatEndpointToProcedurePathAndInjectToApiOptions<
   proxyedApi: ProxyedApi;
 } & (
   | {
-      createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
+      createTrpcApiClientOptions: TRPCClientOptions<TRouter>;
       useQueryFunction: true;
     }
   | {
@@ -74,7 +74,7 @@ const formatEndpointToProcedurePathAndInjectToApi = <
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         queryFn: (procedureArguments: unknown, api: any, extraOptions: any) =>
           // eslint-disable-next-line unicorn/consistent-destructuring
-          createBaseQueryForTRPCClient(options.createTrpcApiClientOptions)(
+          createTRPCBaseQuery(options.createTrpcApiClientOptions)(
             {
               procedureArguments,
               procedurePath,
@@ -157,7 +157,7 @@ export const wrapApiToProxy = <
   nonProxyApi: NonProxyApi;
 } & (
   | {
-      createTrpcApiClientOptions: CreateTRPCApiClientOptions<TRouter>;
+      createTrpcApiClientOptions: TRPCClientOptions<TRouter>;
       useQueryFunction: true;
     }
   | {
