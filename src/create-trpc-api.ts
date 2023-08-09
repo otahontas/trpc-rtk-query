@@ -8,7 +8,7 @@ import {
 import { type AnyRouter } from "@trpc/server";
 
 import { type CreateEndpointDefinitions } from "./create-endpoint-definitions";
-import { type BaseQuery, createTRPCBaseQuery } from "./create-trpc-base-query";
+import { type TRPCBaseQuery, createTRPCBaseQuery } from "./create-trpc-base-query";
 import { type TRPCClientOptions } from "./trpc-client-options";
 import {
   type Injectable,
@@ -33,7 +33,7 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
     // We're injecting endpoints later with proxy, but need to cast them
     // beforehand for proper typings to be exposed to users
     endpoints: () =>
-      ({}) as CreateEndpointDefinitions<TRouter, BaseQuery, "api", never>,
+      ({}) as CreateEndpointDefinitions<TRouter, TRPCBaseQuery, "api", never>,
   });
   return wrapApiToProxy({
     nonProxyApi,
@@ -80,7 +80,7 @@ export const injectTRPCEndpointsToApi = <
 >(
   options: InjectTRPCEndpointsToApiOptions<TRouter, ExistingApi>,
 ) => {
-  const nonProxyApi = options.existingApi as unknown as Api<
+  const nonProxyApi = options.existingApi as Api<
     BaseQuery,
     Endpoints & CreateEndpointDefinitions<TRouter, BaseQuery, ReducerPath, TagTypes>,
     ReducerPath,

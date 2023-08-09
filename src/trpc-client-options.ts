@@ -14,13 +14,7 @@ export type TRPCClientOptions<TRouter extends AnyRouter> =
     }
   | {
       client?: never;
-      getClient: GetClient<TRouter>;
+      getClient: (
+        baseQueryApi: BaseQueryApi,
+      ) => Promise<CreateTRPCProxyClient<TRouter>>;
     };
-
-/**
- * Extracted type of GetClient callback to be more easily shared between files.
- * @internal
- */
-export type GetClient<TRouter extends AnyRouter> = (
-  baseQueryApi: BaseQueryApi,
-) => Promise<CreateTRPCProxyClient<TRouter>>;
