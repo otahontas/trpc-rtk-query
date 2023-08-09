@@ -1,25 +1,36 @@
-// TODO: don't import from dist
-import { type CoreModule } from "@reduxjs/toolkit/dist/query/core/module";
-import { type ReactHooksModule } from "@reduxjs/toolkit/dist/query/react/module";
-import { type Api } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
 import { createTRPCBaseQuery } from "./create-trpc-base-query";
+import { AnyApi } from "./rtk-types";
 import { type TRPCClientOptions } from "./trpc-client-options";
-export type SupportedModule = CoreModule | ReactHooksModule;
 
-// Helpers
+/**
+ * For decapitalizing endpoint name parts
+ * TODO: maybe get from some other lib?
+ **/
 export const deCapitalize = (string_: string) => {
   const firstChar = string_[0];
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
 };
 
+/**
+ * Check if value is actual object
+ * TODO: maybe get from some other lib?
+ **/
 export const isObject = (value: unknown): value is Record<PropertyKey, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+/*
+ * Check if value is string
+ * TODO: maybe get from some other lib?
+ */
 export const isString = (value: unknown): value is string => typeof value === "string";
 
-// assertions can't be declared with arrow functions, so we need to use function
+/*
+ * Assert property is string (can be symbol too)
+ * Assertions can't be declared with arrow functions, so we need to use function
+ * TODO: maybe get from some other lib?
+ */
 export function assertPropertyIsString(
   property: string | symbol,
 ): asserts property is string {
@@ -28,39 +39,41 @@ export function assertPropertyIsString(
   }
 }
 
-/*
- * Api that has injectEndpoint method for run time injection of endpoints.
- */
-export type Injectable = Pick<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Api<any, Record<string, any>, any, any, SupportedModule>,
-  "injectEndpoints"
->;
+/**
+ * Generic type for api that has injectEndpoint method for run time injection.
+ * @internal
+ **/
+export type Injectable = Pick<AnyApi, "injectEndpoints">;
 
-type FormatEndpointToProcedurePathAndInjectToApiOptions<
-  ProxyedApi extends Injectable,
-  TRouter extends AnyRouter,
-> = {
-  endpoint: string;
-  procedureType: "mutation" | "query";
-  proxyedApi: ProxyedApi;
-} & (
+/**
+ * Options to decide whether to use queryFn or baseQuery. If using queryFn,
+ * client options must be provided.
+ * @internal
+ */
+type QueryOptions<TRouter extends AnyRouter> =
   | {
-      createTrpcApiClientOptions: TRPCClientOptions<TRouter>;
+      tRPCClientOptions: TRPCClientOptions<TRouter>;
       useQueryFunction: true;
     }
   | {
+      tRPCClientOptions?: never;
       useQueryFunction: false;
-    }
-);
+    };
 
-const formatEndpointToProcedurePathAndInjectToApi = <
-  ProxyedApi extends Injectable,
-  TRouter extends AnyRouter,
->(
-  options: FormatEndpointToProcedurePathAndInjectToApiOptions<ProxyedApi, TRouter>,
+/**
+ * Used for run time injection of endpoints to api. Formats rtk endpoint to trpc
+ * procedure path, resolved which query style to use and injects the result to api
+ * object.
+ * @internal
+ */
+const injectEndpointToApi = <Api extends Injectable, TRouter extends AnyRouter>(
+  options: {
+    api: Api;
+    endpoint: string;
+    procedureType: "mutation" | "query";
+  } & QueryOptions<TRouter>,
 ) => {
-  const { endpoint, procedureType, proxyedApi, useQueryFunction } = options;
+  const { api, endpoint, procedureType, useQueryFunction } = options;
   const procedurePath = endpoint.includes("_")
     ? endpoint
         .split("_")
@@ -74,7 +87,7 @@ const formatEndpointToProcedurePathAndInjectToApi = <
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         queryFn: (procedureArguments: unknown, api: any, extraOptions: any) =>
           // eslint-disable-next-line unicorn/consistent-destructuring
-          createTRPCBaseQuery(options.createTrpcApiClientOptions)(
+          createTRPCBaseQuery(options.tRPCClientOptions)(
             {
               procedureArguments,
               procedurePath,
@@ -92,28 +105,30 @@ const formatEndpointToProcedurePathAndInjectToApi = <
         }),
       };
 
-  proxyedApi.injectEndpoints({
+  api.injectEndpoints({
     endpoints: (builder) => ({
       [endpoint]: builder[procedureType](builderArguments),
     }),
   });
 };
 
-// Helper function that creates proxy which validates incoming properties on each level
-// before calling callback on final level. Defaults to empty object if target is not available
-type CreateRecursiveProtectiveProxyOptions = {
-  callback: (handledProperties: string[]) => unknown;
-  propertyList?: string[];
-  proxyTarget: object;
-  recursionLevels: number;
-};
-
+/**
+ * Helper function that creates proxy which validates incoming properties on each level
+ * before calling callback on final level. Defaults to empty object if target is
+ * not available.
+ * @internal
+ **/
 export const createRecursiveProtectiveProxy = ({
   callback,
   propertyList = [],
   proxyTarget,
   recursionLevels,
-}: CreateRecursiveProtectiveProxyOptions): unknown =>
+}: {
+  callback: (handledProperties: string[]) => unknown;
+  propertyList?: string[];
+  proxyTarget: object;
+  recursionLevels: number;
+}): unknown =>
   new Proxy(proxyTarget, {
     get(target, property, receiver) {
       if (Reflect.has(target, property)) {
@@ -132,6 +147,10 @@ export const createRecursiveProtectiveProxy = ({
     },
   });
 
+/**
+ * Regexes for matching procedure types
+ * @internal
+ **/
 const regexesWithProcedureType = [
   {
     procedureType: "query",
@@ -147,23 +166,17 @@ const regexesWithProcedureType = [
   },
 ] as const;
 
-export const wrapApiToProxy = <
-  NonProxyApi extends Injectable,
-  TRouter extends AnyRouter,
->({
-  nonProxyApi,
-  ...queryFunctionProperties
+/**
+ * Takes in api object and wraps it to proxy that listens for calls to different
+ * methods. If method needs an endpoint, it is generated and injected to api object.
+ * @internal
+ */
+export const wrapApiToProxy = <Api extends Injectable, TRouter extends AnyRouter>({
+  api: nonProxyApi,
+  ...queryOptions // grab rest, so it's easier to pass them forwards
 }: {
-  nonProxyApi: NonProxyApi;
-} & (
-  | {
-      createTrpcApiClientOptions: TRPCClientOptions<TRouter>;
-      useQueryFunction: true;
-    }
-  | {
-      useQueryFunction: false;
-    }
-)) =>
+  api: Api;
+} & QueryOptions<TRouter>) =>
   new Proxy(nonProxyApi, {
     get(target, property, receiver) {
       // Validate endpoints target, since it is needed in multiple places
@@ -202,11 +215,11 @@ export const wrapApiToProxy = <
                 `Input error: Property ${property}.${endpoint}.${operation} is not defined and could not be generated`,
               );
             }
-            formatEndpointToProcedurePathAndInjectToApi({
+            injectEndpointToApi({
+              api: target,
               endpoint,
               procedureType,
-              proxyedApi: target,
-              ...queryFunctionProperties,
+              ...queryOptions,
             });
             // Any is ok, we know endpoint will have this endpoint
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -228,11 +241,11 @@ export const wrapApiToProxy = <
             );
           }
           if (!endpoints[endpoint]) {
-            formatEndpointToProcedurePathAndInjectToApi({
+            injectEndpointToApi({
+              api: target,
               endpoint,
               procedureType: "query",
-              proxyedApi: target,
-              ...queryFunctionProperties,
+              ...queryOptions,
             });
           }
           // any is okay, we know usePrefetch hook is at least now generated
@@ -260,11 +273,11 @@ export const wrapApiToProxy = <
         }
         const endpoint = deCapitalize(capitalizedEndpoint);
         // check if it is actually deeper path for trpc, handle replacements correctly
-        formatEndpointToProcedurePathAndInjectToApi({
+        injectEndpointToApi({
+          api: target,
           endpoint,
           procedureType,
-          proxyedApi: target,
-          ...queryFunctionProperties,
+          ...queryOptions,
         });
 
         // Return newly generated property

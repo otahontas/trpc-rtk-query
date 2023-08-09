@@ -1,4 +1,7 @@
-import { createApi, skipToken } from "@reduxjs/toolkit/query/react";
+import {
+  createApi as createRTKQueryApi,
+  skipToken,
+} from "@reduxjs/toolkit/query/react";
 import { createTRPCProxyClient } from "@trpc/client";
 import { describe, expectTypeOf, it } from "vitest";
 
@@ -147,7 +150,7 @@ describe("create-trpc-api", () => {
 
   it("allows injecting trpc api to existing api while infering types from client and api", () => {
     const client = createTRPCProxyClient<AppRouter>(testClientOptions);
-    const existingApi = createApi({
+    const existingApi = createRTKQueryApi({
       baseQuery: (string_: string) => {
         return {
           data: {
@@ -245,7 +248,7 @@ describe("create-trpc-api", () => {
   it("allows injecting trpc api to existing api infering types from getclient", () => {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const getClient = async () => createTRPCProxyClient<AppRouter>(testClientOptions);
-    const existingApi = createApi({
+    const existingApi = createRTKQueryApi({
       baseQuery: (string_: string) => {
         return {
           data: {
