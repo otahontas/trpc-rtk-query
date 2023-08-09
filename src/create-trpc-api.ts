@@ -3,19 +3,19 @@ import {
   type Api,
   type BaseQueryFn,
   // type CreateApiOptions,
-  createApi,
+  createApi as createRTKQueryApi,
 } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
 import { type CreateEndpointDefinitions } from "./create-endpoint-definitions";
 import { type TRPCBaseQuery, createTRPCBaseQuery } from "./create-trpc-base-query";
+import { type AnyApi, type SupportedModule } from "./rtk-types";
 import { type TRPCClientOptions } from "./trpc-client-options";
-import {
-  type Injectable,
-  type SupportedModule,
-  wrapApiToProxy,
-} from "./wrap-api-to-proxy";
+import { wrapApiToProxy } from "./wrap-api-to-proxy";
 
+// TODO: Allow passing in partial endpoint object that can be used for e.g. optimistic
+// queries
+// TODO: Allow passing in settings for api (reducerpath, tagtypes etc)
 // type NonAllowedApiOptions = Extract<
 //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 //   keyof CreateApiOptions<any, any, any, any>,
@@ -23,37 +23,33 @@ import {
 // >;
 
 /*
- * Creates a new api using trpc under the hood
+ * Creates a new rtk api that exposes endpoints and react hooks generated from trpc
+ * types.
  */
 export const createTRPCApi = <TRouter extends AnyRouter>(
   options: TRPCClientOptions<TRouter>,
-) => {
-  const nonProxyApi = createApi({
-    baseQuery: createTRPCBaseQuery(options),
-    // We're injecting endpoints later with proxy, but need to cast them
-    // beforehand for proper typings to be exposed to users
-    endpoints: () =>
-      ({}) as CreateEndpointDefinitions<TRouter, TRPCBaseQuery, "api", never>,
-  });
-  return wrapApiToProxy({
-    nonProxyApi,
+) =>
+  wrapApiToProxy({
+    api: createRTKQueryApi({
+      baseQuery: createTRPCBaseQuery(options),
+      // We're injecting endpoints later with proxy, but need to cast them
+      // beforehand for proper typings to be exposed to users
+      endpoints: () =>
+        ({}) as CreateEndpointDefinitions<TRouter, TRPCBaseQuery, "api", never>,
+    }),
     useQueryFunction: false,
   });
-};
 
-type InjectableWithEndpoints = Injectable & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  endpoints: Record<string, ApiEndpointQuery<any, any>>;
-};
+/**
+ * Generic type for api that has injectEndpoint method for run time injection and
+ * endpoints for reading previously generated definitions.
+ * @internal
+ **/
+type InjectableWithEndpoints = Pick<AnyApi, "endpoints" | "injectEndpoints">;
 
-// TODO: Allow passing in settings for api (reducerpath, tagtypes etc)
-export type InjectTRPCEndpointsToApiOptions<
-  TRouter extends AnyRouter,
-  ExistingApi extends InjectableWithEndpoints,
-> = TRPCClientOptions<TRouter> & {
-  existingApi: ExistingApi;
-};
-
+/*
+ * Injects
+ */
 export const injectTRPCEndpointsToApi = <
   TRouter extends AnyRouter,
   ExistingApi extends InjectableWithEndpoints,
@@ -78,19 +74,18 @@ export const injectTRPCEndpointsToApi = <
   TagTypes extends
     string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["TagTypes"],
 >(
-  options: InjectTRPCEndpointsToApiOptions<TRouter, ExistingApi>,
-) => {
-  const nonProxyApi = options.existingApi as Api<
-    BaseQuery,
-    Endpoints & CreateEndpointDefinitions<TRouter, BaseQuery, ReducerPath, TagTypes>,
-    ReducerPath,
-    TagTypes,
-    SupportedModule
-  >;
-
-  return wrapApiToProxy({
-    createTrpcApiClientOptions: options,
-    nonProxyApi,
+  options: TRPCClientOptions<TRouter> & {
+    existingApi: ExistingApi;
+  },
+) =>
+  wrapApiToProxy({
+    api: options.existingApi as Api<
+      BaseQuery,
+      Endpoints & CreateEndpointDefinitions<TRouter, BaseQuery, ReducerPath, TagTypes>,
+      ReducerPath,
+      TagTypes,
+      SupportedModule
+    >,
+    tRPCClientOptions: options,
     useQueryFunction: true,
   });
-};

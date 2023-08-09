@@ -1,5 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { type BaseQueryApi, createApi } from "@reduxjs/toolkit/query/react";
+import {
+  type BaseQueryApi,
+  createApi as createRTKQueryApi,
+} from "@reduxjs/toolkit/query/react";
 import { createTRPCProxyClient } from "@trpc/client";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { setTimeout } from "node:timers/promises";
@@ -65,8 +68,8 @@ const existingApiTestQueryFailureResponse = {
 };
 
 // helper that allows creating new api instances when needed
-const createApiLazily = () =>
-  createApi({
+const createRTKQueryApiLazily = () =>
+  createRTKQueryApi({
     baseQuery: (baseQueryArguments: { getResponseArgument: string }) => {
       if (baseQueryArguments.getResponseArgument !== existingApiTestQueryArgument) {
         return existingApiTestQueryFailureResponse;
@@ -91,7 +94,7 @@ describe("create-trpc-api", () => {
     },
     {
       apiForCreateApiOptions: {
-        createApiLazily,
+        createRTKQueryApiLazily,
       },
       testCase: "using pre made api",
     },
@@ -102,8 +105,8 @@ describe("create-trpc-api", () => {
           const base = {
             client: createTRPCProxyClient<AppRouter>(testClientOptions),
           };
-          if (apiForCreateApiOptions?.createApiLazily) {
-            const existingApi = createApiLazily();
+          if (apiForCreateApiOptions?.createRTKQueryApiLazily) {
+            const existingApi = createRTKQueryApiLazily();
             return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
               ...base,
               existingApi,
@@ -125,8 +128,8 @@ describe("create-trpc-api", () => {
               return createTRPCProxyClient<AppRouter>(testClientOptions);
             },
           };
-          if (apiForCreateApiOptions?.createApiLazily) {
-            const existingApi = createApiLazily();
+          if (apiForCreateApiOptions?.createRTKQueryApiLazily) {
+            const existingApi = createRTKQueryApiLazily();
             return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
               ...base,
               existingApi,
@@ -433,7 +436,7 @@ describe("create-trpc-api", () => {
   });
 
   it("doesn't replace previous hooks when passing in and existing api", () => {
-    const existingApi = createApiLazily();
+    const existingApi = createRTKQueryApiLazily();
     const client = createTRPCProxyClient<AppRouter>(testClientOptions);
     const api = injectTRPCEndpointsToApi({
       client,

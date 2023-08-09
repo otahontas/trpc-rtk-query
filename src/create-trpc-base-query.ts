@@ -59,8 +59,8 @@ export type TRPCBaseQuery = BaseQueryFn<
     procedurePath: string;
     procedureType: "mutation" | "query";
   },
-  // Result type. TODO: Should this be union of all possible types that trpc backend can
-  // return?
+  // Result type from backend. Since query / mutation responses
+  // from are typed at endpoint level, this can be unknown.
   unknown,
   // Typed errors
   TRPCBaseQueryError,
