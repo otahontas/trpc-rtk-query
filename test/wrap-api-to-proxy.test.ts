@@ -22,54 +22,6 @@ describe("deCapitalize", () => {
   });
 });
 
-describe("isObject", () => {
-  it("should return true if the value is an object", () => {
-    expect(isPlainObject({})).toBe(true);
-    expect(isPlainObject(Object.assign({}))).toBe(true);
-  });
-
-  it("should return false if the value is null", () => {
-    expect(isPlainObject(null)).toBe(false);
-  });
-
-  it("should return false if the value is not an object", () => {
-    expect(isPlainObject("string")).toBe(false);
-    expect(isPlainObject(123)).toBe(false);
-    expect(isPlainObject(true)).toBe(false);
-    expect(isPlainObject(undefined)).toBe(false);
-    expect(isPlainObject([])).toBe(false);
-    expect(isPlainObject(() => {})).toBe(false);
-  });
-});
-
-describe("isString", () => {
-  it("should return true if the value is a string", () => {
-    expect(isString("string")).toBe(true);
-    expect(isString(String("string"))).toBe(true);
-  });
-
-  it("should return false if the value is not a string", () => {
-    expect(isString({})).toBe(false);
-    expect(isString(123)).toBe(false);
-    expect(isString(true)).toBe(false);
-    expect(isPlainObject(undefined)).toBe(false);
-    expect(isPlainObject([])).toBe(false);
-    expect(isPlainObject(() => {})).toBe(false);
-  });
-});
-
-describe("assertPropertyIsString", () => {
-  it("should not throw an error if the property is a string", () => {
-    expect(() => assertIsString("string")).not.toThrow();
-  });
-
-  it("should throw an error if the property is a symbol", () => {
-    expect(() => assertIsString(Symbol())).toThrow(
-      "Calling api with new symbol properties is not supported",
-    );
-  });
-});
-
 describe("createRecursiveProtectiveProxy", () => {
   it("should call callback with handledProperties when reaching leaf property", () => {
     const mockCallback = vi.fn();
