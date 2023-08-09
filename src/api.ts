@@ -26,7 +26,7 @@ import { wrapApiToProxy } from "./wrap-api-to-proxy";
  * Creates a new rtk api that exposes endpoints and react hooks generated from trpc
  * types.
  */
-export const createTRPCApi = <TRouter extends AnyRouter>(
+export const createApi = <TRouter extends AnyRouter>(
   options: TRPCClientOptions<TRouter>,
 ) =>
   wrapApiToProxy({
@@ -48,16 +48,16 @@ export const createTRPCApi = <TRouter extends AnyRouter>(
 type InjectableWithEndpoints = Pick<AnyApi, "endpoints" | "injectEndpoints">;
 
 /*
- * Injects
+ * Enhances existing api with endpoints and react hooks generated from trpc types.
  */
-export const injectTRPCEndpointsToApi = <
+export const enhanceApi = <
   TRouter extends AnyRouter,
   ExistingApi extends InjectableWithEndpoints,
   // == "Save" the types needed to build up proper new api type to type variables ==
-  // Current baseQuery from existing api
+  // 1. Current baseQuery from existing api
   BaseQuery extends
     BaseQueryFn = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["BaseQuery"],
-  // Endpoints record values mapped to their inner definitions
+  // 2. Endpoints record values mapped to their inner definitions
   Endpoints = {
     [Endpoint in keyof ExistingApi["endpoints"]]: ExistingApi["endpoints"][Endpoint] extends ApiEndpointQuery<
       infer EndpointDefinition,
@@ -67,10 +67,10 @@ export const injectTRPCEndpointsToApi = <
       ? EndpointDefinition
       : never;
   },
-  // Reducer path
+  // 3. Reducer path
   ReducerPath extends
     string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["ReducerPath"],
-  // Tag types
+  // 4. Tag types
   TagTypes extends
     string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["TagTypes"],
 >(

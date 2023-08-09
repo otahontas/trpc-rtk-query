@@ -5,11 +5,7 @@ import {
 import { createTRPCProxyClient } from "@trpc/client";
 import { describe, expectTypeOf, it } from "vitest";
 
-import {
-  createTRPCApi,
-  // createTRPCApiWithRTKQueryApiOptions,
-  injectTRPCEndpointsToApi,
-} from "../src/create-trpc-api";
+import { createApi, enhanceApi } from "../src";
 import { type AppRouter, testClientOptions } from "./fixtures";
 
 // Tests each scenery with one query and one mutation
@@ -19,7 +15,7 @@ describe("create-trpc-api", () => {
   it("allows creating api while infering type from client", () => {
     const client = createTRPCProxyClient<AppRouter>(testClientOptions);
 
-    const api = createTRPCApi({
+    const api = createApi({
       client,
     });
 
@@ -86,7 +82,7 @@ describe("create-trpc-api", () => {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const getClient = async () => createTRPCProxyClient<AppRouter>(testClientOptions);
 
-    const api = createTRPCApi({
+    const api = createApi({
       getClient,
     });
 
@@ -166,7 +162,7 @@ describe("create-trpc-api", () => {
       reducerPath: "premadeApi",
     });
 
-    const api = injectTRPCEndpointsToApi({
+    const api = enhanceApi({
       client,
       existingApi,
     });
@@ -264,7 +260,7 @@ describe("create-trpc-api", () => {
       reducerPath: "premadeApi",
     });
 
-    const api = injectTRPCEndpointsToApi({
+    const api = enhanceApi({
       existingApi,
       getClient,
     });
@@ -344,7 +340,7 @@ describe("create-trpc-api", () => {
 
   it("prevents passing in mutually exclusive args", () => {
     // @ts-expect-error Should not be possible to pass both client and getClient
-    createTRPCApi({
+    createApi({
       client: createTRPCProxyClient<AppRouter>(testClientOptions),
       getClient: async () => createTRPCProxyClient<AppRouter>(testClientOptions),
     });

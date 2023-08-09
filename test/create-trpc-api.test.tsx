@@ -11,7 +11,7 @@ import { Provider } from "react-redux";
 import renderer from "react-test-renderer";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { createTRPCApi, injectTRPCEndpointsToApi } from "../src/create-trpc-api";
+import { createApi, enhanceApi } from "../src";
 import {
   type AppRouter,
   appRouter,
@@ -107,12 +107,12 @@ describe("create-trpc-api", () => {
           };
           if (apiForCreateApiOptions?.createRTKQueryApiLazily) {
             const existingApi = createRTKQueryApiLazily();
-            return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
+            return enhanceApi<AppRouter, typeof existingApi>({
               ...base,
               existingApi,
             });
           }
-          return createTRPCApi(base);
+          return createApi(base);
         },
         testCase: "using passed client",
       },
@@ -130,12 +130,12 @@ describe("create-trpc-api", () => {
           };
           if (apiForCreateApiOptions?.createRTKQueryApiLazily) {
             const existingApi = createRTKQueryApiLazily();
-            return injectTRPCEndpointsToApi<AppRouter, typeof existingApi>({
+            return enhanceApi<AppRouter, typeof existingApi>({
               ...base,
               existingApi,
             });
           }
-          return createTRPCApi(base);
+          return createApi(base);
         },
         testCase: "using getClient to get the client",
       },
@@ -438,7 +438,7 @@ describe("create-trpc-api", () => {
   it("doesn't replace previous hooks when passing in and existing api", () => {
     const existingApi = createRTKQueryApiLazily();
     const client = createTRPCProxyClient<AppRouter>(testClientOptions);
-    const api = injectTRPCEndpointsToApi({
+    const api = enhanceApi({
       client,
       existingApi,
     });
