@@ -1,4 +1,4 @@
-// TODO: don't import from dist
+// TODO: https://github.com/otahontas/trpc-rtk-query/issues/39
 import { type CoreModule } from "@reduxjs/toolkit/dist/query/core/module";
 import { type ReactHooksModule } from "@reduxjs/toolkit/dist/query/react/module";
 import { type Api } from "@reduxjs/toolkit/query/react";
