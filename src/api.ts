@@ -1,4 +1,4 @@
-import { type ApiEndpointQuery } from "@reduxjs/toolkit/dist/query/core/module"; // TODO: don't import from dist
+import { type ApiEndpointQuery } from "@reduxjs/toolkit/dist/query/core/module"; // TODO: https://github.com/otahontas/trpc-rtk-query/issues/39
 import {
   type Api,
   type BaseQueryFn,
@@ -13,9 +13,6 @@ import { type TRPCBaseQuery, createTRPCBaseQuery } from "./create-trpc-base-quer
 import { type AnyApi, type SupportedModule } from "./rtk-types";
 import { type TRPCClientOptions } from "./trpc-client-options";
 import { wrapApiToProxy } from "./wrap-api-to-proxy";
-
-// TODO: Allow passing in partial endpoint object that can be used for e.g. optimistic
-// queries
 
 /*
  * Creates a new rtk api that exposes endpoints and react hooks generated from trpc

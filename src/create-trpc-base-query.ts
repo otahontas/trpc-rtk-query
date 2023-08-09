@@ -61,7 +61,7 @@ export type TRPCBaseQuery = BaseQueryFn<
   },
   // Result type from backend. Since query / mutation responses
   // from are typed at endpoint level, this can be unknown.
-  unknown,
+  unknown, // TODO: https://github.com/otahontas/trpc-rtk-query/issues/40
   // Typed errors
   TRPCBaseQueryError,
   // Allow request options (e.g context and signal) to be passed in via extra options

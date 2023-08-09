@@ -221,7 +221,6 @@ describe("create-trpc-api", () => {
         };
 
         // how much to wait for loading state to resolve
-        // TODO: migrate to waitFor when adding react testing library
         const msToWaitBeforeRenderingWithoutLoadingState = 150;
 
         beforeAll(async () => {
@@ -267,7 +266,6 @@ describe("create-trpc-api", () => {
           const Component = () => {
             const { useGetUserByIdQuery } = api;
             const userId = 4;
-            // TODO: errors should be properly typed from basequery!
             const { data, error, isLoading } = useGetUserByIdQuery(userId);
             if (isLoading) {
               return <div>Loading...</div>;
