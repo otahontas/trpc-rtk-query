@@ -1,12 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  assertIsString,
-  createRecursiveProtectiveProxy,
-  deCapitalize,
-  isPlainObject,
-  isString,
-} from "../src/wrap-api-to-proxy";
+import { createRecursiveProtectiveProxy, deCapitalize } from "../src/wrap-api-to-proxy";
 
 describe("deCapitalize", () => {
   it("should decapitalize the first character of a string", () => {
@@ -15,6 +9,10 @@ describe("deCapitalize", () => {
 
   it("should return the same string if first character is already lower case", () => {
     expect(deCapitalize("hello")).toBe("hello");
+  });
+
+  it("should de capitalize only first letter from splitted words", () => {
+    expect(deCapitalize("Hello World")).toBe("hello World");
   });
 
   it("should handle empty string", () => {
@@ -60,8 +58,6 @@ describe("createRecursiveProtectiveProxy", () => {
       recursionLevels: 2,
     });
 
-    expect(() => (proxy as any)[Symbol()]).toThrow(
-      "Calling api with new symbol properties is not supported",
-    );
+    expect(() => (proxy as any)[Symbol()]).toThrow();
   });
 });

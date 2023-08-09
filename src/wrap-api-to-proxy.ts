@@ -7,20 +7,21 @@ import { type TRPCClientOptions } from "./trpc-client-options";
 
 /**
  * For decapitalizing endpoint name parts
- * TODO: maybe get from some other lib?
+ * @internal
  **/
 export const deCapitalize = (string_: string) => {
   const firstChar = string_[0];
   return firstChar ? string_.replace(firstChar, firstChar?.toLowerCase()) : string_;
 };
 
-/*
+/**
  * Helper wrapper for is-what's isString that can be used as assertion.
- * Assertions can't be declared with arrow functions, so we need to use function
- */
+ * Assertions can't be declared with arrow functions, so we need to use function.
+ * @internal
+ **/
 export function assertIsString(property: unknown): asserts property is string {
   if (!isString(property)) {
-    throw new TypeError("Calling api with new symbol properties is not supported");
+    throw new TypeError("Calling api with non string properties is not supported");
   }
 }
 
@@ -274,6 +275,3 @@ export const wrapApiToProxy = <Api extends Injectable, TRouter extends AnyRouter
       );
     },
   });
-
-export { isString } from "is-what";
-export { isPlainObject } from "is-what";
