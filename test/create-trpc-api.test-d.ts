@@ -346,23 +346,38 @@ describe("create-trpc-api", () => {
     });
   });
 
-  // it("allows passing api options when creating new api", () => {
-  //   const api = createTRPCApiWithRTKQueryApiOptions({
-  //     reducerPath: "jeeApi",
-  //     tagTypes: ["User"],
-  //   })<AppRouter>({ clientOptions: testClientOptions });
-  //   expectTypeOf(api["reducerPath"]).toMatchTypeOf<"jeeApi">();
-  // });
+  it("allows passing api options when creating new api", () => {
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const api = createApi({
+      client,
+      reducerPath: "jeeApi",
+      tagTypes: ["User"],
+    });
+    api.injectEndpoints({
+      endpoints: (builder) => ({
+        getUserById: builder.query<string, number>({
+          providesTags: ["User"], // can provide tag
+          queryFn: async (id) => {
+            return { data: `user ${id}` };
+          },
+        }),
+      }),
+    });
+    expectTypeOf(api["reducerPath"]).toMatchTypeOf<"jeeApi">();
+  });
 
-  // it("prevents passing api options that are injected by this library when creating new api", () => {
-  //   createTRPCApiWithRTKQueryApiOptions({
-  //     //@ts-expect-error shouldn't be possible to pass baseQuery
-  //     baseQuery: (() => {}) as any,
-  //   })<AppRouter>({ clientOptions: testClientOptions });
+  it("prevents passing api options that are injected by this library when creating new api", () => {
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    createApi({
+      //@ts-expect-error shouldn't be possible to pass baseQuery
+      baseQuery: (() => {}) as any,
+      client,
+    });
 
-  //   createTRPCApiWithRTKQueryApiOptions({
-  //     //@ts-expect-error shouldn't be possible to pass endpoints
-  //     endpoints: {} as any,
-  //   })<AppRouter>({ clientOptions: testClientOptions });
-  // });
+    createApi({
+      client,
+      //@ts-expect-error shouldn't be possible to pass endpoints
+      endpoints: {} as any,
+    });
+  });
 });

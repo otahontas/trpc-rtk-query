@@ -2,7 +2,8 @@ import { type ApiEndpointQuery } from "@reduxjs/toolkit/dist/query/core/module";
 import {
   type Api,
   type BaseQueryFn,
-  // type CreateApiOptions,
+  type CreateApiOptions,
+  type EndpointDefinitions,
   createApi as createRTKQueryApi,
 } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
@@ -15,27 +16,35 @@ import { wrapApiToProxy } from "./wrap-api-to-proxy";
 
 // TODO: Allow passing in partial endpoint object that can be used for e.g. optimistic
 // queries
-// TODO: Allow passing in settings for api (reducerpath, tagtypes etc)
-// type NonAllowedApiOptions = Extract<
-//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   keyof CreateApiOptions<any, any, any, any>,
-//   "baseQuery" | "endpoints"
-// >;
 
 /*
  * Creates a new rtk api that exposes endpoints and react hooks generated from trpc
  * types.
  */
-export const createApi = <TRouter extends AnyRouter>(
-  options: TRPCClientOptions<TRouter>,
+export const createApi = <
+  TRouter extends AnyRouter,
+  ReducerPath extends string = "api",
+  TagTypes extends string = never,
+  Definitions extends EndpointDefinitions = CreateEndpointDefinitions<
+    TRouter,
+    TRPCBaseQuery,
+    ReducerPath,
+    TagTypes
+  >,
+>(
+  options: TRPCClientOptions<TRouter> &
+    Omit<
+      CreateApiOptions<TRPCBaseQuery, Definitions, ReducerPath, TagTypes>,
+      "baseQuery" | "endpoints" // endpoints and baseQuery are generated and injected by this library "endpoints"
+    >,
 ) =>
   wrapApiToProxy({
     api: createRTKQueryApi({
+      ...options,
       baseQuery: createTRPCBaseQuery(options),
       // We're injecting endpoints later with proxy, but need to cast them
       // beforehand for proper typings to be exposed to users
-      endpoints: () =>
-        ({}) as CreateEndpointDefinitions<TRouter, TRPCBaseQuery, "api", never>,
+      endpoints: () => ({}) as Definitions,
     }),
     useQueryFunction: false,
   });
