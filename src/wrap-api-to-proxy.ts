@@ -5,7 +5,7 @@ import { type Api } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
 import { createBaseQueryForTRPCClient } from "./create-base-query";
-import { CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
+import { type CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
 export type SupportedModule = CoreModule | ReactHooksModule;
 
 // Helpers
