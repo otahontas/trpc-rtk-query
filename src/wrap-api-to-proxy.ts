@@ -28,11 +28,13 @@ export function assertPropertyIsString(
   }
 }
 
+/*
+ * Api that has injectEndpoint method for run time injection of endpoints.
+ */
 export type Injectable = Pick<
-  // Pick the fields we need to inject trpc endpoints properly on type level
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Api<any, Record<string, any>, any, any, SupportedModule>,
-  "endpoints" | "injectEndpoints"
+  "injectEndpoints"
 >;
 
 type FormatEndpointToProcedurePathAndInjectToApiOptions<
