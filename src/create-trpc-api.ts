@@ -13,7 +13,11 @@ import {
 } from "./create-base-query";
 import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoint-definitions";
 import { type CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
-import { Injectable, SupportedModule, wrapApiToProxy } from "./wrap-api-to-proxy";
+import {
+  type Injectable,
+  type SupportedModule,
+  wrapApiToProxy,
+} from "./wrap-api-to-proxy";
 
 // TODO: investigate why we need to use casting with { endpoints: Record... } here
 type EndpointsObject = {
