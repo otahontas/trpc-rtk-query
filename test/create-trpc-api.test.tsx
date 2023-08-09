@@ -105,14 +105,12 @@ describe("create-trpc-api", () => {
           const base = {
             client: createTRPCProxyClient<AppRouter>(testClientOptions),
           };
-          if (apiForCreateApiOptions?.createRTKQueryApiLazily) {
-            const existingApi = createRTKQueryApiLazily();
-            return enhanceApi<AppRouter, typeof existingApi>({
-              ...base,
-              existingApi,
-            });
-          }
-          return createApi(base);
+          return apiForCreateApiOptions?.createRTKQueryApiLazily
+            ? enhanceApi({
+                ...base,
+                api: createRTKQueryApiLazily(),
+              })
+            : createApi(base);
         },
         testCase: "using passed client",
       },
@@ -128,14 +126,12 @@ describe("create-trpc-api", () => {
               return createTRPCProxyClient<AppRouter>(testClientOptions);
             },
           };
-          if (apiForCreateApiOptions?.createRTKQueryApiLazily) {
-            const existingApi = createRTKQueryApiLazily();
-            return enhanceApi<AppRouter, typeof existingApi>({
-              ...base,
-              existingApi,
-            });
-          }
-          return createApi(base);
+          return apiForCreateApiOptions?.createRTKQueryApiLazily
+            ? enhanceApi({
+                ...base,
+                api: createRTKQueryApiLazily(),
+              })
+            : createApi(base);
         },
         testCase: "using getClient to get the client",
       },
@@ -434,11 +430,10 @@ describe("create-trpc-api", () => {
   });
 
   it("doesn't replace previous hooks when passing in and existing api", () => {
-    const existingApi = createRTKQueryApiLazily();
     const client = createTRPCProxyClient<AppRouter>(testClientOptions);
     const api = enhanceApi({
+      api: createRTKQueryApiLazily(),
       client,
-      existingApi,
     });
     const { useListUsersQuery } = api;
     expect(useListUsersQuery).toBeDefined();

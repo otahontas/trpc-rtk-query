@@ -146,25 +146,25 @@ describe("create-trpc-api", () => {
 
   it("allows injecting trpc api to existing api while infering types from client and api", () => {
     const client = createTRPCProxyClient<AppRouter>(testClientOptions);
-    const existingApi = createRTKQueryApi({
-      baseQuery: (string_: string) => {
-        return {
-          data: {
-            string_,
-          },
-        };
-      },
-      endpoints: (builder) => ({
-        getResponse: builder.query<string, string>({
-          query: (string_: string) => string_,
-        }),
-      }),
-      reducerPath: "premadeApi",
-    });
 
     const api = enhanceApi({
+      api: createRTKQueryApi({
+        baseQuery: (string_: string) => {
+          return {
+            data: {
+              string_,
+            },
+          };
+        },
+        endpoints: (builder) => ({
+          getResponse: builder.query<string, string>({
+            query: (string_: string) => string_,
+          }),
+        }),
+        reducerPath: "premadeApi",
+      }),
+
       client,
-      existingApi,
     });
 
     const {
@@ -244,24 +244,23 @@ describe("create-trpc-api", () => {
   it("allows injecting trpc api to existing api infering types from getclient", () => {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const getClient = async () => createTRPCProxyClient<AppRouter>(testClientOptions);
-    const existingApi = createRTKQueryApi({
-      baseQuery: (string_: string) => {
-        return {
-          data: {
-            string_,
-          },
-        };
-      },
-      endpoints: (builder) => ({
-        getResponse: builder.query<string, string>({
-          query: (string_: string) => string_,
-        }),
-      }),
-      reducerPath: "premadeApi",
-    });
 
     const api = enhanceApi({
-      existingApi,
+      api: createRTKQueryApi({
+        baseQuery: (string_: string) => {
+          return {
+            data: {
+              string_,
+            },
+          };
+        },
+        endpoints: (builder) => ({
+          getResponse: builder.query<string, string>({
+            query: (string_: string) => string_,
+          }),
+        }),
+        reducerPath: "premadeApi",
+      }),
       getClient,
     });
     const {
