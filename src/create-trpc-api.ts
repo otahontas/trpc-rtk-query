@@ -7,12 +7,9 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
-import {
-  type BaseQueryForTRPCClient,
-  createBaseQueryForTRPCClient,
-} from "./create-base-query";
-import { type CreateEndpointDefinitionsFromTRPCRouter } from "./create-endpoint-definitions";
-import { type CreateTRPCApiClientOptions } from "./create-trpc-api-client-options";
+import { type CreateEndpointDefinitions } from "./create-endpoint-definitions";
+import { type BaseQuery, createTRPCBaseQuery } from "./create-trpc-base-query";
+import { type TRPCClientOptions } from "./trpc-client-options";
 import {
   type Injectable,
   type SupportedModule,
@@ -29,19 +26,14 @@ import {
  * Creates a new api using trpc under the hood
  */
 export const createTRPCApi = <TRouter extends AnyRouter>(
-  options: CreateTRPCApiClientOptions<TRouter>,
+  options: TRPCClientOptions<TRouter>,
 ) => {
   const nonProxyApi = createApi({
-    baseQuery: createBaseQueryForTRPCClient(options),
+    baseQuery: createTRPCBaseQuery(options),
     // We're injecting endpoints later with proxy, but need to cast them
     // beforehand for proper typings to be exposed to users
     endpoints: () =>
-      ({}) as CreateEndpointDefinitionsFromTRPCRouter<
-        TRouter,
-        BaseQueryForTRPCClient,
-        "api",
-        never
-      >,
+      ({}) as CreateEndpointDefinitions<TRouter, BaseQuery, "api", never>,
   });
   return wrapApiToProxy({
     nonProxyApi,
@@ -58,7 +50,7 @@ type InjectableWithEndpoints = Injectable & {
 export type InjectTRPCEndpointsToApiOptions<
   TRouter extends AnyRouter,
   ExistingApi extends InjectableWithEndpoints,
-> = CreateTRPCApiClientOptions<TRouter> & {
+> = TRPCClientOptions<TRouter> & {
   existingApi: ExistingApi;
 };
 
@@ -90,13 +82,7 @@ export const injectTRPCEndpointsToApi = <
 ) => {
   const nonProxyApi = options.existingApi as unknown as Api<
     BaseQuery,
-    Endpoints &
-      CreateEndpointDefinitionsFromTRPCRouter<
-        TRouter,
-        BaseQuery,
-        ReducerPath,
-        TagTypes
-      >,
+    Endpoints & CreateEndpointDefinitions<TRouter, BaseQuery, ReducerPath, TagTypes>,
     ReducerPath,
     TagTypes,
     SupportedModule
