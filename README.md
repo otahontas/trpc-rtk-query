@@ -2,14 +2,27 @@
 
 Generate rtk query api endpoints automatically from your trpc setup!
 
-This is very much work in progress -project, but when ready, my goal is to provide [react-query like tRPC experience](https://trpc.io/docs/client/react) for Redux toolkit users. Here are some usage patterns I'm planning to support:
+## Development status
 
-## Create new api
+This library is currently in the alpha stage. 0.0.x versions are being published to npm for people to try this out, but you shouldn't consider it ready for production anytime soon. See the [0.1.0 project](https://github.com/users/otahontas/projects/2) for what's under development and planned to be done before 0.1.0 can be released.
+
+Any feedback, issues, or pull requests are highly appreciated, so here's a short usage guide if you want to try this out:
+
+## Usage
+
+### Installation
+
+Install the library and peer dependencies:
+
+```sh
+npm install trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
+```
+
+### Creating new api
+
+Using the following tRPC router as an example:
 
 ```ts
-// file: api.ts
-import type { AppRouter } from '../server/router'; // <- types from your server,
-// let's say for a router like this:
 // const appRouter = router({
 //   userList: publicProcedure
 //     .input(z.object({ showAll: z.boolean() })) // <- type is { showAll: boolean }
@@ -17,30 +30,50 @@ import type { AppRouter } from '../server/router'; // <- types from your server,
 //       return await db.user.findMany(); // <- returns type User[]
 //     }),
 // });
+// export type AppRouter = typeof appRouter
+```
 
-export const api = createTRPCApi<AppRouter>({ clientOptions: {
-// ^ takes in the same options as createTRPCProxyClient and sets up api like
-// createApi would do
+Create your api like this:
+
+```ts
+// 1. create your client according to: https://trpc.io/docs/client/vanilla
+const client = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-    url: 'http://localhost:3000/trpc',
-    async headers() {
-      return {
-        authorization: getAuthCookie(),
-      };
-    },
+      url: 'http://localhost:3000/trpc',
+      // You can pass any HTTP headers you wish here
+      async headers() {
+        return {
+          authorization: getAuthCookie(),
+        };
+      },
     }),
   ],
-}}):
+});
 
-export { useUserListQuery } from api; // <- Export your typed hooks
+// 2. create your api by passing in client and possibly some options:
+// (you can alternatively pass in getClient function that returns a promise with typed 
+// trpcproxyclient)
+export const api = createApi({
+  client, // <- your typed client from step 1
+  // pass in any api options you want, such as tagTypes or reducerPath
+  tagTypes: ["User"],
+  reducerPath: "trpcApi"
+  // pass in any endpoint specific options, such as providesTags or onQueryStarted for optimistic updates
+  endpointOptions: {
+    userList: {
+      providesTags: ["User"]
+    }
+  }
+});
 
-// file: store.ts
+export { useUserListQuery } from api; // <- then export your typed hooks!
+
+// 3. Add api to store like you would normally do with rtk query: https://redux-toolkit.js.org/rtk-query/overview
 import { configureStore } from '@reduxjs/toolkit'
 import { api } from './api.ts'
 
 export const store = configureStore({
-// ^ Setup store with api like you would  according to rtk query docs
   reducer: {
     [api.reducerPath]: api.reducer,
   },
@@ -48,23 +81,9 @@ export const store = configureStore({
     getDefaultMiddleware().concat(api.middleware),
 })
 
+// 4. Use your typed hooks
 
-
-// file: index.ts
-import { store } from './app/store'
-import { Provider } from 'react-redux'
-import ReactDOM from 'react-dom'
-import App from './App'
-
-ReactDOM.render(
-  <Provider store={store}> // Setup provider like you would according to rtk query docs
-    <App />
-  </Provider>,
-  document.getElementById('root')
-)
-
-// file: App.ts
-import { useUserListQuery } from "./api"
+import { useUserListQuery } from "your-api-file"
 const App = () => {
   const { data, isLoading } = useUserListQuery({ showAll: true })
   // ^ Use your generated hooks! They are fully typed based on your trpc router.
@@ -75,64 +94,24 @@ const App = () => {
 }
 ```
 
-I'm planning to also support following approaches:
+### Using existing api
 
-## Premade client
-
-```ts
-
-// file: api.ts
-import { trpcClient } from "clien-from-your-own-package"
-// ^ maybe from your monorepo package or private npm library
-
-export const api = createTRPCApi({ client: trpcClient });
-// ^ infers types directly from client, you don't have to pass in AppRouter type
-
-export { useUserListQuery } from api;
-
-// Otherwise same setup
-```
-
-## Premade api
+You might already have an RTK query API instance for a non-tRPC backend. In this case, you can pass the previous API in with the tRPC client, and new endpoints will be generated similarly as above.
 
 ```ts
-// file: api.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-
-const api = createApi({
-  reducerPath: 'pokemonApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://pokeapi.co/api/v2/' }),
-  endpoints: (builder) => ({
-    getPokemonByName: builder.query<Pokemon, string>({
-      query: (name) => `pokemon/${name}`,
-    }),
-  }),
-})
-
-
-// tprcApi.ts
-import { api } from "./api.ts"
-
-const clientOptions = {
-  links: [
-    httpBatchLink({
-    url: 'http://localhost:3000/trpc',
-    async headers() {
-      return {
-        authorization: getAuthCookie(),
-      };
-    },
-    }),
-  ],
-}
-
-
-export const trpcApi = createTRPCApi<AppRouter>({
-  api,
-  clientOptions
+// 2. use enhanceApi instead of createApi to generate new hooks
+export const api = enhanceApi({
+  client, // <- your typed client from step 1
+  api: existingApi // <- your existing api
+  // pass in any endpoint specific options, such as providesTags or onQueryStarted for optimistic updates
+  endpointOptions: {
+    userList: {
+      providesTags: ["User"]
+    }
+  }
 });
 
-export { useUserListQuery } from api;
-
-// Again, otherwise the same setup
+export { useUserListQuery } from api; // <- export your typed hooks
 ```
+
+Here you should skip the step since your API should already be added to the store. This works similarly to code splitting with RTK query's injectEndpoints (<https://redux-toolkit.js.org/rtk-query/usage/code-splitting>).
