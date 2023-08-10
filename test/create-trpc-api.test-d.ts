@@ -379,4 +379,48 @@ describe("create-trpc-api", () => {
       endpoints: {} as any,
     });
   });
+
+  it("allows passing options for endpoints when enhancing api", () => {
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const existingApi = createRTKQueryApi({
+      baseQuery: (string_: string) => {
+        return {
+          data: {
+            string_,
+          },
+        };
+      },
+      endpoints: (builder) => ({
+        getResponse: builder.query<string, string>({
+          query: (string_: string) => string_,
+        }),
+      }),
+      reducerPath: "premadeApi",
+      tagTypes: ["User"],
+    });
+
+    const api = enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        getUserById: {
+          providesTags: (result) => ["User", { id: result?.id }],
+        },
+        updateName: {
+          async onQueryStarted({ id, name }, { dispatch, queryFulfilled }) {
+            const patchResult = dispatch(
+              api.util.updateQueryData("getUserById", id, (draft) => {
+                Object.assign(draft, { name });
+              }),
+            );
+            try {
+              await queryFulfilled;
+            } catch {
+              patchResult.undo();
+            }
+          },
+        },
+      },
+    });
+  });
 });
