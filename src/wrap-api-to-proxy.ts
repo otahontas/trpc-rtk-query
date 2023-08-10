@@ -1,3 +1,4 @@
+import { type EndpointDefinitions } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 import { isPlainObject, isString } from "is-what";
 
@@ -32,16 +33,41 @@ export function assertIsString(property: unknown): asserts property is string {
 export type Injectable = Pick<AnyApi, "injectEndpoints">;
 
 /**
+ * Options for endpoints (https://redux-toolkit.js.org/rtk-query/api/createApi#anatomy-of-an-endpoint) that users are allowed to pass. Some options are disabled since they're generated.
+ * @internal
+ */
+export type DisabledEndpointOptions =
+  | "extraOptions" // TODO: https://github.com/otahontas/trpc-rtk-query/issues/38
+  | "query" // query is not allowed to be passed in as it's generated
+  | "queryFn" // queryFn is not allowed to be passed in as it's generated
+  | "transformErrorResponse" // TODO: https://github.com/otahontas/trpc-rtk-query/issues/38
+  | "transformResponse" // TODO: https://github.com/otahontas/trpc-rtk-query/issues/38
+  | "type"; // type is a typescript only internal type for rtk, not needed here.
+
+/**
+ * Generic type to match against endpoint options that users are allowed to pass.
+ * @internal
+ */
+type AnyEndpointOptions = {
+  [K in keyof EndpointDefinitions]?: Omit<
+    EndpointDefinitions[K],
+    DisabledEndpointOptions
+  >;
+};
+
+/**
  * Options to decide whether to use queryFn or baseQuery. If using queryFn,
  * client options must be provided.
  * @internal
  */
 type QueryOptions<TRouter extends AnyRouter> =
   | {
+      endpointOptions?: AnyEndpointOptions | undefined;
       tRPCClientOptions: TRPCClientOptions<TRouter>;
       useQueryFunction: true;
     }
   | {
+      endpointOptions?: AnyEndpointOptions | undefined;
       tRPCClientOptions?: never;
       useQueryFunction: false;
     };
@@ -59,7 +85,7 @@ const injectEndpointToApi = <Api extends Injectable, TRouter extends AnyRouter>(
     procedureType: "mutation" | "query";
   } & QueryOptions<TRouter>,
 ) => {
-  const { api, endpoint, procedureType, useQueryFunction } = options;
+  const { api, endpoint, endpointOptions, procedureType, useQueryFunction } = options;
   const procedurePath = endpoint.includes("_")
     ? endpoint
         .split("_")
@@ -93,7 +119,10 @@ const injectEndpointToApi = <Api extends Injectable, TRouter extends AnyRouter>(
 
   api.injectEndpoints({
     endpoints: (builder) => ({
-      [endpoint]: builder[procedureType](builderArguments),
+      [endpoint]: builder[procedureType]({
+        ...builderArguments,
+        ...(endpointOptions?.[endpoint] as EndpointDefinitions), // TODO: https://github.com/otahontas/trpc-rtk-query/issues/47
+      }),
     }),
   });
 };

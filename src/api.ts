@@ -12,7 +12,7 @@ import { type CreateEndpointDefinitions } from "./create-endpoint-definitions";
 import { type TRPCBaseQuery, createTRPCBaseQuery } from "./create-trpc-base-query";
 import { type AnyApi, type SupportedModule } from "./rtk-types";
 import { type TRPCClientOptions } from "./trpc-client-options";
-import { wrapApiToProxy } from "./wrap-api-to-proxy";
+import { type DisabledEndpointOptions, wrapApiToProxy } from "./wrap-api-to-proxy";
 
 /*
  * Creates a new rtk api that exposes endpoints and react hooks generated from trpc
@@ -33,7 +33,11 @@ export const createApi = <
     Omit<
       CreateApiOptions<TRPCBaseQuery, Definitions, ReducerPath, TagTypes>,
       "baseQuery" | "endpoints" // endpoints and baseQuery are generated and injected by this library "endpoints"
-    >,
+    > & {
+      endpointOptions?: {
+        [K in keyof Definitions]?: Omit<Definitions[K], DisabledEndpointOptions>;
+      };
+    },
 ) =>
   wrapApiToProxy({
     api: createRTKQueryApi({
@@ -43,6 +47,7 @@ export const createApi = <
       // beforehand for proper typings to be exposed to users
       endpoints: () => ({}) as Definitions,
     }),
+    endpointOptions: options.endpointOptions,
     useQueryFunction: false,
   });
 
@@ -79,9 +84,20 @@ export const enhanceApi = <
   // 4. Tag types
   TagTypes extends
     string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["TagTypes"],
+  // New definitions
+  NewDefinitions extends EndpointDefinitions = CreateEndpointDefinitions<
+    TRouter,
+    BaseQuery,
+    ReducerPath,
+    TagTypes
+  >,
 >(
   options: TRPCClientOptions<TRouter> & {
     api: ExistingApi;
+  } & {
+    endpointOptions?: {
+      [K in keyof NewDefinitions]?: Omit<NewDefinitions[K], DisabledEndpointOptions>;
+    };
   },
 ) =>
   wrapApiToProxy({
@@ -92,6 +108,7 @@ export const enhanceApi = <
       TagTypes,
       SupportedModule
     >,
+    endpointOptions: options.endpointOptions,
     tRPCClientOptions: options,
     useQueryFunction: true,
   });
