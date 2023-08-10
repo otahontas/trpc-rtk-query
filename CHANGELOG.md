@@ -1,5 +1,21 @@
 # trpc-rtk-query
 
+## 0.0.3
+
+### Patch Changes
+
+- [#36](https://github.com/otahontas/trpc-rtk-query/pull/36) [`d75d397`](https://github.com/otahontas/trpc-rtk-query/commit/d75d397b5698ce6478eb6baec6da1f49d582a001) Thanks [@otahontas](https://github.com/otahontas)! - Make it possible to pass in rtk query api options when creating new api
+
+- [#49](https://github.com/otahontas/trpc-rtk-query/pull/49) [`be05b59`](https://github.com/otahontas/trpc-rtk-query/commit/be05b59ee4d347ec733e57598cb39cc6ffc2dd62) Thanks [@otahontas](https://github.com/otahontas)! - Add initial docs aimed for users (in readme)
+
+- [#37](https://github.com/otahontas/trpc-rtk-query/pull/37) [`db71bbe`](https://github.com/otahontas/trpc-rtk-query/commit/db71bbeb960ae2c3b83dd1556064ac9db256e312) Thanks [@otahontas](https://github.com/otahontas)! - Replace homebrew assertion and typeguard funcs with is-what
+
+- [#25](https://github.com/otahontas/trpc-rtk-query/pull/25) [`bd50030`](https://github.com/otahontas/trpc-rtk-query/commit/bd5003046bb807ef2147b72329acdce6b6c647b0) Thanks [@otahontas](https://github.com/otahontas)! - Force users to pass in typed client or getClient func
+
+- [#28](https://github.com/otahontas/trpc-rtk-query/pull/28) [`e99a24b`](https://github.com/otahontas/trpc-rtk-query/commit/e99a24bc2366ccac5e32e5649b9b200c8075d978) Thanks [@otahontas](https://github.com/otahontas)! - Simplify type and function names and make them resemble rtk query
+
+- [#48](https://github.com/otahontas/trpc-rtk-query/pull/48) [`6dcf7b4`](https://github.com/otahontas/trpc-rtk-query/commit/6dcf7b45e3d9a950ef0adba618c943a81efc102f) Thanks [@otahontas](https://github.com/otahontas)! - Allow passing endpoint options (e.g.providesTags, onQueryStarted) for each generated trpc endpoint
+
 ## 0.0.2
 
 ### Patch Changes
