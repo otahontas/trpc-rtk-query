@@ -1,42 +1,78 @@
-# tRPC - RTK Query -bindings
+![trpc-rtk-query](assets/logo.png)
 
-Generate rtk query api endpoints automatically from your trpc setup!
+<div align="center">
+  <h1>trpc-rtk-query</h1>
+  <a href="https://www.npmjs.com/package/trpc-rtk-query"><img src="https://img.shields.io/npm/v/trpc-rtk-query.svg?style=flat&color=brightgreen" target="_blank" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" /></a>
+  <br />
+</div>
 
-## Development status
+#### `trpc-rtk-query` is the tool for automatically generating RTK Query api endpoints from your tRPC setup!
 
-This library is currently in the alpha stage. 0.0.x versions are being published to npm for people to try this out, but you shouldn't consider it ready for production anytime soon. See the [0.1.0 project](https://github.com/users/otahontas/projects/2) for what's under development and planned to be done before 0.1.0 can be released.
 
-Any feedback, issues, or pull requests are highly appreciated, so here's a short usage guide if you want to try this out:
+---
+
+## **[RTK Query](https://redux-toolkit.js.org/rtk-query/overview) support for [tRPC](https://trpc.io/)** 🧩
+
+- Automatically generate **typesafe** `RTK Query hooks` from your `tRPC` procedures.
+- Perfect for incremental adoption.
+- Any feedback, issues, or pull requests are highly appreciated
+
+```typescript
+
+import { createApi } from "trpc-rtk-query";
+
+const api = createApi({
+  client: trpcClient, /* 👈 This is the magic */
+  /* ⬇️  You can still pass all the RTK config properties */
+  tagTypes: ["User"],
+  reducerPath: "trpcApi"
+});
+
+export { useUserListQuery } from api; // Automatically typed hooks thanks to the power of tRPC + RTK!
+```
 
 ## Usage
 
 ### Installation
 
-Install the library and peer dependencies:
+**1. Install `trpc-rtk-query` and peer dependencies.**
 
-```sh
-npm install trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
+```bash
+# npm
+npm install trpc-rtk-query @reduxjs/toolkit @trpc/client
+# yarn
+yarn add trpc-rtk-query @reduxjs/toolkit @trpc/client
 ```
 
-### Creating new api
+**2. Initialize the `tRPC router`.**
 
-Using the following tRPC router as an example:
+```typescript
+/* server.ts */
+import { initTRPC } from "@trpc/server";
+import { z } from "zod";
 
-```ts
-// const appRouter = router({
-//   userList: publicProcedure
-//     .input(z.object({ showAll: z.boolean() })) // <- type is { showAll: boolean }
-//     .query(async () => {
-//       return await db.user.findMany(); // <- returns type User[]
-//     }),
-// });
-// export type AppRouter = typeof appRouter
+import { db as database } from "./db";
+
+const t = initTRPC.create();
+export const publicProcedure = t.procedure;
+const appRouter = t.router({
+  userList: publicProcedure
+    .input(z.object({ showAll: z.boolean() })) // <- type is { showAll: boolean }
+    .query(async () => {
+      // Retrieve users from a datasource, this is an imaginary database
+      return await database.user.findMany(); // <- returns type User[]
+    }),
+});
+export type AppRouter = typeof appRouter
 ```
 
-Create your api like this:
+**3. Create a new tRPC Client.**
 
-```ts
-// 1. create your client according to: https://trpc.io/docs/client/vanilla
+Create your api [like normal](https://trpc.io/docs/client/vanilla):
+
+```typescript
+// client.ts
 const client = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
@@ -51,25 +87,29 @@ const client = createTRPCProxyClient<AppRouter>({
   ],
 });
 
-// 2. create your api by passing in client and possibly some options:
-// (you can alternatively pass in getClient function that returns a promise with typed 
-// trpcproxyclient)
-export const api = createApi({
-  client, // <- your typed client from step 1
-  // pass in any api options you want, such as tagTypes or reducerPath
+```
+
+**4. Create a new automatically typed API.**
+
+```typescript
+// api.ts
+import { createApi } from "trpc-rtk-query";
+
+const api = createApi({
+  client, /* 👈 This is the magic */
+  /* ⬇️  You can still pass all the RTK config properties */
   tagTypes: ["User"],
   reducerPath: "trpcApi"
-  // pass in any endpoint specific options, such as providesTags or onQueryStarted for optimistic updates
-  endpointOptions: {
-    userList: {
-      providesTags: ["User"]
-    }
-  }
 });
 
-export { useUserListQuery } from api; // <- then export your typed hooks!
+export { useUserListQuery } from api; // Automatically typed hooks thanks to the power of tRPC + RTK!
+```
 
-// 3. Add api to store like you would normally do with rtk query: https://redux-toolkit.js.org/rtk-query/overview
+**5. Add the typesafe API to the store.**
+This is the same step as you would [normally do](https://redux-toolkit.js.org/rtk-query/overview).
+
+```typescript
+// store.ts
 import { configureStore } from '@reduxjs/toolkit'
 import { api } from './api.ts'
 
@@ -81,9 +121,10 @@ export const store = configureStore({
     getDefaultMiddleware().concat(api.middleware),
 })
 
+**6. Enjoy type-safe hooks.**
 // 4. Use your typed hooks
 
-import { useUserListQuery } from "your-api-file"
+import { useUserListQuery } from "./api.ts"
 const App = () => {
   const { data, isLoading } = useUserListQuery({ showAll: true })
   // ^ Use your generated hooks! They are fully typed based on your trpc router.
@@ -98,8 +139,8 @@ const App = () => {
 
 You might already have an RTK query API instance for a non-tRPC backend. In this case, you can pass the previous API in with the tRPC client, and new endpoints will be generated similarly as above.
 
-```ts
-// 2. use enhanceApi instead of createApi to generate new hooks
+```typescript
+import { enhanceApi } from "trpc-rtk-query";
 export const api = enhanceApi({
   client, // <- your typed client from step 1
   api: existingApi // <- your existing api
@@ -114,4 +155,6 @@ export const api = enhanceApi({
 export { useUserListQuery } from api; // <- export your typed hooks
 ```
 
-Here you should skip the step since your API should already be added to the store. This works similarly to code splitting with RTK query's injectEndpoints (<https://redux-toolkit.js.org/rtk-query/usage/code-splitting>).
+# Development status
+
+This library is currently in the alpha stage. 0.0.x versions are being published to npm for people to try this out, but you shouldn't consider it ready for production anytime soon. See the [0.1.0 project](https://github.com/users/otahontas/projects/2) for what's under development and planned to be done before 0.1.0 can be released.
