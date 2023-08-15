@@ -40,9 +40,9 @@ export { useUserListQuery } from api; // Automatically typed hooks thanks to the
 
 ```bash
 # npm
-npm install trpc-rtk-query @reduxjs/toolkit @trpc/client
+npm install trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 # yarn
-yarn add trpc-rtk-query @reduxjs/toolkit @trpc/client
+yarn add trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 ```
 
 **2. Initialize the `tRPC router`.**
@@ -120,10 +120,11 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),
 })
+```
 
 **6. Enjoy type-safe hooks.**
-// 4. Use your typed hooks
-
+```typescript
+// app.ts
 import { useUserListQuery } from "./api.ts"
 const App = () => {
   const { data, isLoading } = useUserListQuery({ showAll: true })
