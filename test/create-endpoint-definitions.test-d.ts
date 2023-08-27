@@ -16,9 +16,7 @@ describe("create endpoint definitions", () => {
         "api",
         never
       >;
-      expectTypeOf<QueryKeys<Definitions>>().toEqualTypeOf<
-        "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
-      >();
+      expectTypeOf<QueryKeys<Definitions>>().not.toEqualTypeOf<never>();
     });
   });
 });

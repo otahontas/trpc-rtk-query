@@ -8,6 +8,20 @@ import { describe, expectTypeOf, it } from "vitest";
 import { createApi, enhanceApi } from "../src";
 import { type AppRouter, testClientOptions } from "./fixtures";
 
+type QueryRoutes =
+  | "extraProcedure1"
+  | "extraProcedure2"
+  | "extraProcedure3"
+  | "extraProcedure4"
+  | "extraProcedure5"
+  | "extraProcedure6"
+  | "extraProcedure7"
+  | "extraProcedure8"
+  | "extraProcedure9"
+  | "extraProcedure10"
+  | "getUserById"
+  | "listUsers"
+  | "nested_Deep_GetVeryNestedMessage";
 // Tests each scenery with one query and one mutation
 // This can't be really parametrized since these are statically checked, so we need
 // to copypaste each test case.
@@ -71,11 +85,7 @@ describe("create-trpc-api", () => {
     // use prefetch
 
     expectTypeOf(usePrefetch).toBeFunction();
-    expectTypeOf(usePrefetch)
-      .parameter(0)
-      .toMatchTypeOf<
-        "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
-      >();
+    expectTypeOf(usePrefetch).parameter(0).toMatchTypeOf<QueryRoutes>();
   });
 
   it("allows creating api with get client while infering types from getClient func", () => {
@@ -137,11 +147,7 @@ describe("create-trpc-api", () => {
 
     // use prefetch
     expectTypeOf(usePrefetch).toBeFunction();
-    expectTypeOf(usePrefetch)
-      .parameter(0)
-      .toMatchTypeOf<
-        "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
-      >();
+    expectTypeOf(usePrefetch).parameter(0).toMatchTypeOf<QueryRoutes>();
   });
 
   it("allows injecting trpc api to existing api while infering types from client and api", () => {
@@ -218,11 +224,7 @@ describe("create-trpc-api", () => {
 
     // use prefetch should have types from both previous and trpc endpoints
     expectTypeOf(usePrefetch).toBeFunction();
-    expectTypeOf(usePrefetch)
-      .parameter(0)
-      .toMatchTypeOf<
-        "getResponse" | "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
-      >();
+    expectTypeOf(usePrefetch).parameter(0).toMatchTypeOf<"getResponse" | QueryRoutes>();
 
     // existing query through api & endpoints.getResponse
     const {
@@ -314,11 +316,7 @@ describe("create-trpc-api", () => {
 
     // use prefetch should have types from both previous and trpc endpoints
     expectTypeOf(usePrefetch).toBeFunction();
-    expectTypeOf(usePrefetch)
-      .parameter(0)
-      .toMatchTypeOf<
-        "getResponse" | "getUserById" | "listUsers" | "nested_Deep_GetVeryNestedMessage"
-      >();
+    expectTypeOf(usePrefetch).parameter(0).toMatchTypeOf<"getResponse" | QueryRoutes>();
 
     // existing query through api & endpoints.getResponse
     const {

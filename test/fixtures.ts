@@ -39,6 +39,15 @@ const veryDeepRouter = router({
   }),
 });
 
+const extraProcedureInputSchema = z.object({
+  bar: z.number(),
+  foo: z.string(),
+  nested: z.object({
+    bar: z.number(),
+    foo: z.string(),
+  }),
+});
+
 export const appRouter = router({
   createUser: procedure.input(z.string()).mutation(async (options) => {
     const { input } = options;
@@ -48,6 +57,37 @@ export const appRouter = router({
       name: input,
     };
   }),
+  // Some extra procedures to see if stuff fails with bigger routers
+  extraProcedure1: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure2: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure3: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure4: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure5: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure6: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure7: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure8: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure9: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
+  extraProcedure10: procedure
+    .input(extraProcedureInputSchema)
+    .query(async ({ input }) => input),
   getUserById: procedure.input(z.number()).query(async (options) => {
     const { input } = options;
     // Retrieve the user with the given ID
