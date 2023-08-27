@@ -45,6 +45,11 @@ npm install trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 yarn add trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 ```
 
+Note the minimum versions for packages:
+
+- @reduxjs/toolkit: `1.9.5`
+- @trpc/client & @trpc/server `10.31.0`
+
 **2. Initialize the `tRPC router`.**
 
 ```typescript
@@ -123,6 +128,7 @@ export const store = configureStore({
 ```
 
 **6. Enjoy type-safe hooks.**
+
 ```typescript
 // app.ts
 import { useUserListQuery } from "./api.ts"
