@@ -422,5 +422,21 @@ describe("create-trpc-api", () => {
         },
       },
     });
+    // Check that types for queries are still correct
+    const { useGetResponseQuery, useGetUserByIdQuery } = api;
+
+    // existing query through api & endpoints.getResponse
+    expectTypeOf(useGetResponseQuery).toBeFunction();
+    expectTypeOf(useGetResponseQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<string>();
+
+    // Basic queries
+    expectTypeOf(useGetUserByIdQuery).toBeFunction();
+    expectTypeOf(useGetUserByIdQuery)
+      .parameter(0)
+      .exclude<typeof skipToken>()
+      .toMatchTypeOf<number>();
   });
 });
