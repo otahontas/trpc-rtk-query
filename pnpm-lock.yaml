@@ -27,7 +27,7 @@ devDependencies:
     version: 10.31.0
   '@tsconfig/node20':
     specifier: ^20.1.0
-    version: 20.1.1
+    version: 20.1.2
   '@tsconfig/strictest':
     specifier: ^2.0.1
     version: 2.0.1
@@ -730,8 +730,8 @@ packages:
     resolution: {integrity: sha512-9EnRTSDE9nF11LZsvSOqNKqkRYzHqFX4ch5AJ6VIu8uta2vxVTN4FxxsNRSOluTzVYZDeaCISbwmOJ5iihCCIg==}
     dev: true
 
-  /@tsconfig/node20@20.1.1:
-    resolution: {integrity: sha512-7AuWv3hETpJGJegd0bTdnHIrdT/WuR3UUScGRemxhmH0vhbTTGKFZvY8DHZOqIECNdiIy6iFLh52E6Op9YrFiA==}
+  /@tsconfig/node20@20.1.2:
+    resolution: {integrity: sha512-madaWq2k+LYMEhmcp0fs+OGaLFk0OenpHa4gmI4VEmCKX4PJntQ6fnnGADVFrVkBj0wIdAlQnK/MrlYTHsa1gQ==}
     dev: true
 
   /@tsconfig/strictest@2.0.1:
