@@ -62,8 +62,8 @@ devDependencies:
     specifier: ^48.0.0
     version: 48.0.1(eslint@8.49.0)
   happy-dom:
-    specifier: ^10.5.2
-    version: 10.11.2
+    specifier: ^12.0.1
+    version: 12.0.1
   jsdom:
     specifier: ^22.1.0
     version: 22.1.0
@@ -93,7 +93,7 @@ devDependencies:
     version: 4.4.9(@types/node@20.4.0)
   vitest:
     specifier: ^0.34.1
-    version: 0.34.4(happy-dom@10.11.2)(jsdom@22.1.0)
+    version: 0.34.4(happy-dom@12.0.1)(jsdom@22.1.0)
   zod:
     specifier: ^3.21.4
     version: 3.22.2
@@ -962,7 +962,7 @@ packages:
       std-env: 3.3.3
       test-exclude: 6.0.0
       v8-to-istanbul: 9.1.0
-      vitest: 0.34.4(happy-dom@10.11.2)(jsdom@22.1.0)
+      vitest: 0.34.4(happy-dom@12.0.1)(jsdom@22.1.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2084,8 +2084,8 @@ packages:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: true
 
-  /happy-dom@10.11.2:
-    resolution: {integrity: sha512-rzgmLjLkhyaOdFEyU8CWXzbgyCyM7wJHLqhaoeEVSTyur1fjcUaiNTHx+D4CPaLvx16tGy+SBPd9TVnP/kzL3w==}
+  /happy-dom@12.0.1:
+    resolution: {integrity: sha512-kBH54b92GFP3pn9tdMBAtjNHoddE4om6vfFoTme2PCG6u/YYiYKas2yxJCd5MAINX+pYfalfpUKQHVQDTljLnw==}
     dependencies:
       css.escape: 1.5.1
       entities: 4.5.0
@@ -3949,7 +3949,7 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vitest@0.34.4(happy-dom@10.11.2)(jsdom@22.1.0):
+  /vitest@0.34.4(happy-dom@12.0.1)(jsdom@22.1.0):
     resolution: {integrity: sha512-SE/laOsB6995QlbSE6BtkpXDeVNLJc1u2LHRG/OpnN4RsRzM3GQm4nm3PQCK5OBtrsUqnhzLdnT7se3aeNGdlw==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -3993,7 +3993,7 @@ packages:
       cac: 6.7.14
       chai: 4.3.7
       debug: 4.3.4
-      happy-dom: 10.11.2
+      happy-dom: 12.0.1
       jsdom: 22.1.0
       local-pkg: 0.4.3
       magic-string: 0.30.1
