@@ -1,12 +1,10 @@
-// TODO: https://github.com/otahontas/trpc-rtk-query/issues/39
-import { type CoreModule } from "@reduxjs/toolkit/dist/query/core/module";
-import { type ReactHooksModule } from "@reduxjs/toolkit/dist/query/react/module";
-import { type Api } from "@reduxjs/toolkit/query/react";
+import { type CoreModule } from "@reduxjs/toolkit/query";
+import { type Api, reactHooksModuleName } from "@reduxjs/toolkit/query/react";
 
 /**
  * RTK modules that are supported. Passed api needs to support these
  */
-export type SupportedModule = CoreModule | ReactHooksModule;
+export type SupportedModule = CoreModule | typeof reactHooksModuleName;
 
 /**
  * Generic api type that can be used as type constrain
