@@ -1,4 +1,4 @@
-import { type ApiEndpointQuery } from "@reduxjs/toolkit/dist/query/core/module"; // TODO: https://github.com/otahontas/trpc-rtk-query/issues/39
+import { type ApiEndpointQuery } from "@reduxjs/toolkit/query";
 import {
   type Api,
   type BaseQueryFn,

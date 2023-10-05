@@ -47,8 +47,8 @@ yarn add trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 
 Note the minimum versions for packages:
 
-- @reduxjs/toolkit: `1.9.5`
-- @trpc/client & @trpc/server `10.31.0`
+- @reduxjs/toolkit: `1.9.7`
+- @trpc/client & @trpc/server `10.38.5`
 
 **2. Initialize the `tRPC router`.**
 
