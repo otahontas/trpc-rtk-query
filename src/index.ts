@@ -1,1 +1,1 @@
-export { createApi, enhanceApi } from "./api";
+export { enhanceApi } from "./api";

@@ -1,4 +1,4 @@
-import type { QueryKeys } from "@reduxjs/toolkit/dist/query/core/apiState";
+import type { QueryKeys } from "@reduxjs/toolkit/query/react";
 
 import { describe, expectTypeOf, it } from "vitest";
 
