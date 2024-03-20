@@ -3,6 +3,7 @@ import {
   type Api,
   type BaseQueryFn,
   type EndpointDefinitions,
+  createApi,
 } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
@@ -70,4 +71,13 @@ export const enhanceApi = <
     >,
     endpointOptions: options.endpointOptions,
     tRPCClientOptions: options,
+  });
+
+/*
+ * Helper to create base api with no endpoints
+ */
+export const createEmptyApi = () =>
+  createApi({
+    baseQuery: () => ({ data: undefined }),
+    endpoints: () => ({}),
   });

@@ -14,19 +14,15 @@
 
 ## **[RTK Query](https://redux-toolkit.js.org/rtk-query/overview) support for [tRPC](https://trpc.io/)** 🧩
 
-- Automatically generate **typesafe** `RTK Query hooks` from your `tRPC` procedures.
+- Automatically generate **typesafe** `RTK Query hooks` (for react) from your `tRPC` procedures.
 - Perfect for incremental adoption.
 - Any feedback, issues, or pull requests are highly appreciated
 
 ```typescript
 
-import { createApi } from "trpc-rtk-query";
-
-const api = createApi({
-  client: trpcClient, /* 👈 This is the magic */
-  /* ⬇️  You can still pass all the RTK config properties */
-  tagTypes: ["User"],
-  reducerPath: "trpcApi"
+const api = enhanceApi({
+  api: rtkApi, /* Your api created with rtk query */
+  client: trpcClient, /* 👈 The trpc magic happens when passing in the typed client ✨ */
 });
 
 export { useUserListQuery } from api; // Automatically typed hooks thanks to the power of tRPC + RTK!
@@ -45,12 +41,9 @@ npm install trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 yarn add trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 ```
 
-Note the minimum versions for packages:
+Note the minimum versions for packages, we only support trpc v10 and rtk query v2.
 
-- @reduxjs/toolkit: `1.9.7`
-- @trpc/client & @trpc/server `10.38.5`
-
-**2. Initialize the `tRPC router`.**
+**2. Use your `tRPC router`.**
 
 ```typescript
 /* server.ts */
@@ -94,21 +87,53 @@ const client = createTRPCProxyClient<AppRouter>({
 
 ```
 
-**4. Create a new automatically typed API.**
+**4. Create a trpc-rtk query api.**
 
 ```typescript
 // api.ts
-import { createApi } from "trpc-rtk-query";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { enhanceApi } from "trpc-rtk-query";
 
-const api = createApi({
-  client, /* 👈 This is the magic */
-  /* ⬇️  You can still pass all the RTK config properties */
-  tagTypes: ["User"],
-  reducerPath: "trpcApi"
+// Use function provided by rtk to create your api
+const rtkApi = createApi({
+  baseQuery: fetchBaseQuery({ baseUrl: "/" }),
+  endpoints: () => ({}),
+})
+
+// Enhance the api with hooks
+export const api = enhanceApi({
+  client, // <- typed client from step 3
+  api: rtkApi // <- api from rtk
+  // pass in any endpoint specific options, such as providesTags or onQueryStarted for optimistic updates
+  endpointOptions: {
+    userList: {
+      providesTags: ["User"]
+    }
+  }
 });
 
-export { useUserListQuery } from api; // Automatically typed hooks thanks to the power of tRPC + RTK!
+export { useUserListQuery } from api; // <- export your typed hooks!
 ```
+
+You can also use `createEmptyApi` helper function as follows:
+
+```typescript
+// api.ts
+import { createEmptyApi, enhanceApi } from "trpc-rtk-query";
+
+// Enhance an empty api with hooks
+export const api = enhanceApi({
+  client, // <- typed client from step 3
+  api: createEmptyApi(), // <- createEmptyApi generates base api without any endpoints.
+  // pass in any endpoint specific options, such as providesTags or onQueryStarted for optimistic updates
+  endpointOptions: {
+    userList: {
+      providesTags: ["User"]
+    }
+  }
+});
+
+export { useUserListQuery } from api; // <- export your typed hooks!
 
 **5. Add the typesafe API to the store.**
 This is the same step as you would [normally do](https://redux-toolkit.js.org/rtk-query/overview).
@@ -142,26 +167,6 @@ const App = () => {
 }
 ```
 
-### Using existing api
-
-You might already have an RTK query API instance for a non-tRPC backend. In this case, you can pass the previous API in with the tRPC client, and new endpoints will be generated similarly as above.
-
-```typescript
-import { enhanceApi } from "trpc-rtk-query";
-export const api = enhanceApi({
-  client, // <- your typed client from step 1
-  api: existingApi // <- your existing api
-  // pass in any endpoint specific options, such as providesTags or onQueryStarted for optimistic updates
-  endpointOptions: {
-    userList: {
-      providesTags: ["User"]
-    }
-  }
-});
-
-export { useUserListQuery } from api; // <- export your typed hooks
-```
-
 # Development status
 
-This library is currently in the alpha stage. 0.0.x versions are being published to npm for people to try this out, but you shouldn't consider it ready for production anytime soon. See the [0.1.0 project](https://github.com/users/otahontas/projects/2) for what's under development and planned to be done before 0.1.0 can be released.
+This library is currently in the alpha stage. 0.x.x versions are being published to npm for people to try this out, but you shouldn't consider it ready for production anytime soon. See the [project status](https://github.com/users/otahontas/projects/2) for what's under development and planned to be done before first major 1.0.0 will be released.
