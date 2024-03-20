@@ -14,7 +14,7 @@
     "lint": "eslint . && prettier --check .",
     "test": "vitest test/",
     "coverage": "vitest run --coverage test/",
-    "typecheck": "vitest typecheck test/",
+    "typecheck": "vitest run --typecheck.only test/",
     "build": "tsup src/ && tsc --emitDeclarationOnly --declaration --project tsconfig.build.json",
     "changeset": "changeset",
     "release": "pnpm run build && changeset publish"
