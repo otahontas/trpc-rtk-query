@@ -1,5 +1,19 @@
 # trpc-rtk-query
 
+## 0.1.0
+
+### Minor Changes
+
+- [#214](https://github.com/otahontas/trpc-rtk-query/pull/214) [`e3f6bd1`](https://github.com/otahontas/trpc-rtk-query/commit/e3f6bd106c88d6c52fd49c0301437913dab88699) Thanks [@otahontas](https://github.com/otahontas)! - Remove createApi function and support only enhancing existing apis. This way we have to support only
+  one method of generating hooks for apis. There's now a `createEmptyApi` helper to make it easier to
+  create a base api without any endpoints, which can be then passed to api.
+
+### Patch Changes
+
+- [#65](https://github.com/otahontas/trpc-rtk-query/pull/65) [`09c91b1`](https://github.com/otahontas/trpc-rtk-query/commit/09c91b16a7798b6774bebfadc60f5e38f7d77032) Thanks [@otahontas](https://github.com/otahontas)! - Add tests for bigger router and queries after adding endpointoptions
+
+- [#103](https://github.com/otahontas/trpc-rtk-query/pull/103) [`6284625`](https://github.com/otahontas/trpc-rtk-query/commit/6284625b49c5a500ef54a8c4e8cc32fca1355035) Thanks [@bryan-hunter](https://github.com/bryan-hunter)! - update peer deps and stop using internal dist imports from redux toolkit
+
 ## 0.0.3
 
 ### Patch Changes
