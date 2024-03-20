@@ -15,14 +15,15 @@ import {
  * "subscription" type, so it's dropped here
  * @internal
  **/
-type inferProcedureType<TProcedure extends AnyProcedure> = TProcedure extends Procedure<
-  infer ProcedureType,
-  // we don't care about the second param, so it can be any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any
->
-  ? Exclude<ProcedureType, "subscription">
-  : never;
+type inferProcedureType<TProcedure extends AnyProcedure> =
+  TProcedure extends Procedure<
+    infer ProcedureType,
+    // we don't care about the second param, so it can be any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >
+    ? Exclude<ProcedureType, "subscription">
+    : never;
 
 /** Formatter for path and endpoint. If the path is empty, just return the endpoint
  * name. Otherwise, concat the endpoint name with the path, separated by an underscore.
@@ -49,12 +50,12 @@ type FlattenToEndpointProcedurePairs<MaybeProcedureRecord, EndpointPath = ""> = 
       MaybeProcedureRecord[MaybeEndpointName] extends AnyProcedure
       ? [FormattedPath, MaybeProcedureRecord[MaybeEndpointName]]
       : // If this is router, recursively flatten the router
-      MaybeProcedureRecord[MaybeEndpointName] extends AnyRouter
-      ? FlattenToEndpointProcedurePairs<
-          MaybeProcedureRecord[MaybeEndpointName],
-          FormattedPath
-        >
-      : never // This was not procedure or router
+        MaybeProcedureRecord[MaybeEndpointName] extends AnyRouter
+        ? FlattenToEndpointProcedurePairs<
+            MaybeProcedureRecord[MaybeEndpointName],
+            FormattedPath
+          >
+        : never // This was not procedure or router
     : never; // Will never happen, but must be here for the extends infer -pattern
 }[keyof MaybeProcedureRecord];
 
@@ -88,14 +89,14 @@ export type CreateEndpointDefinitions<
               ReducerPath
             >
           : ProcedureType extends "mutation"
-          ? MutationDefinition<
-              inferProcedureInput<Pair[1]>,
-              BaseQuery,
-              TagTypes,
-              inferProcedureOutput<Pair[1]>,
-              ReducerPath
-            >
-          : never
+            ? MutationDefinition<
+                inferProcedureInput<Pair[1]>,
+                BaseQuery,
+                TagTypes,
+                inferProcedureOutput<Pair[1]>,
+                ReducerPath
+              >
+            : never
         : never
       : never
     : never;
