@@ -27,6 +27,7 @@
     "@trpc/server": "^10.45.2",
     "@tsconfig/node20": "^20.1.2",
     "@tsconfig/strictest": "^2.0.3",
+    "@types/node": "^20.11.30",
     "@types/react": "^18.2.67",
     "@types/react-redux": "^7.1.33",
     "@types/react-test-renderer": "^18.0.7",
