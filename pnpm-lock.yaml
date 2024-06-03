@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   is-what:
-    specifier: ^4.1.16
-    version: 4.1.16
+    specifier: ^5.0.0
+    version: 5.0.0
 
 devDependencies:
   '@changesets/changelog-github':
@@ -3125,9 +3125,9 @@ packages:
       call-bind: 1.0.7
     dev: true
 
-  /is-what@4.1.16:
-    resolution: {integrity: sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A==}
-    engines: {node: '>=12.13'}
+  /is-what@5.0.0:
+    resolution: {integrity: sha512-VL5lWxTzHZEWRGuws5wvNC5A+JweaiIweYffx4WozVY8aiGhedO3wqzOwGK2gLFrNRA0uGEVKIWnMMNdRz6IoQ==}
+    engines: {node: '>=18'}
     dev: false
 
   /is-windows@1.0.2:
