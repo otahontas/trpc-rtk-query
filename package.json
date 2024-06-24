@@ -57,6 +57,6 @@
     "@trpc/server": "^10.45.2"
   },
   "dependencies": {
-    "is-what": "^4.1.16"
+    "is-what": "^5.0.2"
   }
 }
