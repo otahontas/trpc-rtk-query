@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  assertIsString,
   createRecursiveProtectiveProxy,
   deCapitalize,
 } from "../src/wrap-api-to-proxy.js";
@@ -62,5 +63,15 @@ describe("createRecursiveProtectiveProxy", () => {
     });
 
     expect(() => (proxy as any)[Symbol()]).toThrow();
+  });
+});
+
+describe("assertIsString", () => {
+  it("should not throw an error if value is a string", () => {
+    expect(() => assertIsString("hello")).not.toThrow();
+  });
+
+  it("should throw an error if value is not a string", () => {
+    expect(() => assertIsString(Symbol())).toThrow();
   });
 });
