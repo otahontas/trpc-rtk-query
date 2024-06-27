@@ -69,5 +69,9 @@
   },
   "dependencies": {
     "is-what": "^4.1.16"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
   }
 }
