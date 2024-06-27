@@ -1,5 +1,17 @@
 # trpc-rtk-query
 
+## 0.1.1
+
+### Patch Changes
+
+- [#301](https://github.com/otahontas/trpc-rtk-query/pull/301) [`4796015`](https://github.com/otahontas/trpc-rtk-query/commit/479601509bb9856074e9aefe58036dbc66f73f10) Thanks [@otahontas](https://github.com/otahontas)! - Migrate eslint config to flat config
+
+- [#291](https://github.com/otahontas/trpc-rtk-query/pull/291) [`1755b5a`](https://github.com/otahontas/trpc-rtk-query/commit/1755b5abd2219003992adfbc0a745619b3a930f3) Thanks [@otahontas](https://github.com/otahontas)! - Use correct pnpm version in release workflow
+
+- [#300](https://github.com/otahontas/trpc-rtk-query/pull/300) [`16f19eb`](https://github.com/otahontas/trpc-rtk-query/commit/16f19eb403ce0593e3cfe060d57398c1a5b5c883) Thanks [@otahontas](https://github.com/otahontas)! - Add knip, fix createEmptyApi export and remove unused exports
+
+- [#289](https://github.com/otahontas/trpc-rtk-query/pull/289) [`d487523`](https://github.com/otahontas/trpc-rtk-query/commit/d487523d5ff2872d299110333a9b3435110aa65c) Thanks [@otahontas](https://github.com/otahontas)! - Update build setup for better support of dual types
+
 ## 0.1.0
 
 ### Minor Changes
