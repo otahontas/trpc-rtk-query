@@ -15,7 +15,7 @@
     "test": "vitest test/",
     "coverage": "vitest run --coverage test/",
     "typecheck": "vitest run --typecheck.only test/",
-    "build": "tsup src/ && tsc --emitDeclarationOnly --declaration --project tsconfig.build.json",
+    "build": "tsup src/",
     "changeset": "changeset",
     "release": "pnpm run build && changeset publish"
   },
