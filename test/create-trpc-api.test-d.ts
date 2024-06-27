@@ -2,8 +2,8 @@ import { createApi, skipToken } from "@reduxjs/toolkit/query/react";
 import { createTRPCProxyClient } from "@trpc/client";
 import { describe, expectTypeOf, it } from "vitest";
 
-import { enhanceApi } from "../src";
-import { type AppRouter, testClientOptions } from "./fixtures";
+import { enhanceApi } from "../src/index.js";
+import { type AppRouter, testClientOptions } from "./fixtures.js";
 
 type QueryRoutes =
   | "extraProcedure1"

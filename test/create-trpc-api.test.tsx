@@ -8,14 +8,14 @@ import { Provider } from "react-redux";
 import renderer from "react-test-renderer";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import { enhanceApi } from "../src";
+import { enhanceApi } from "../src/index.js";
 import {
   type AppRouter,
   appRouter,
   testClientOptions,
   testPort,
   userFixtures,
-} from "./fixtures";
+} from "./fixtures.js";
 
 type TestServer = {
   close: () => Promise<void>;
