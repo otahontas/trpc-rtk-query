@@ -8,41 +8,46 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
-    allConfig: js.configs.all,
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended
+  allConfig: js.configs.all,
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
 });
 
-export default [{
+export default [
+  {
     ignores: ["**/dist/", "**/node_modules/", "**/.git/", "**/pnpm-lock.yaml"],
-}, ...compat.extends(
+  },
+  ...compat.extends(
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier",
     "plugin:unicorn/recommended",
     "plugin:perfectionist/recommended-natural",
-), {
+  ),
+  {
     languageOptions: {
-        parser: tsParser,
+      parser: tsParser,
     },
 
     plugins: {
-        "@typescript-eslint": typescriptEslint,
+      "@typescript-eslint": typescriptEslint,
     },
 
     rules: {
-        "no-console": "error",
+      "no-console": "error",
     },
-}, {
+  },
+  {
     files: ["**/test/**/*.ts", "**/test/**/*.tsx"],
 
     rules: {
-        "@typescript-eslint/no-empty-function": "off",
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-non-null-assertion": "off",
-        "no-console": "off",
-        "unicorn/consistent-function-scoping": "off",
-        "unicorn/no-null": "off",
-        "unicorn/no-useless-undefined": "off",
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "no-console": "off",
+      "unicorn/consistent-function-scoping": "off",
+      "unicorn/no-null": "off",
+      "unicorn/no-useless-undefined": "off",
     },
-}];
+  },
+];

@@ -84,7 +84,6 @@ describe("create-trpc-api", () => {
       .exclude<typeof skipToken>()
       .toMatchTypeOf<{ deepInput: string }>();
     expectTypeOf(
-      // eslint-disable-next-line unicorn/consistent-destructuring
       api.endpoints.nested_Deep_GetVeryNestedMessage.useQuery,
     ).toBeFunction();
 
@@ -117,7 +116,6 @@ describe("create-trpc-api", () => {
   });
 
   it("allows injecting trpc api to existing api infering types from getclient", () => {
-    // eslint-disable-next-line unicorn/consistent-function-scoping
     const getClient = async () => createTRPCProxyClient<AppRouter>(testClientOptions);
 
     const api = enhanceApi({
@@ -176,7 +174,6 @@ describe("create-trpc-api", () => {
       .exclude<typeof skipToken>()
       .toMatchTypeOf<{ deepInput: string }>();
     expectTypeOf(
-      // eslint-disable-next-line unicorn/consistent-destructuring
       api.endpoints.nested_Deep_GetVeryNestedMessage.useQuery,
     ).toBeFunction();
 
