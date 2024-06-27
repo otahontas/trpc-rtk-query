@@ -30,7 +30,7 @@ export function assertIsString(property: unknown): asserts property is string {
  * Generic type for api that has injectEndpoint method for run time injection.
  * @internal
  **/
-export type Injectable = Pick<AnyApi, "injectEndpoints">;
+type Injectable = Pick<AnyApi, "injectEndpoints">;
 
 /**
  * Options for endpoints (https://redux-toolkit.js.org/rtk-query/api/createApi#anatomy-of-an-endpoint) that users are allowed to pass. Some options are disabled since they're generated.
