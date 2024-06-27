@@ -8,7 +8,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       # Update manually all the most important libraries, i.e. redux, trpc and their
       # peer deps. Lowest versions possible are installed for all of these to keep
