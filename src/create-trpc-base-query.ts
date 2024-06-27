@@ -12,7 +12,7 @@ import { type TRPCClientOptions } from "./trpc-client-options.js";
 /**
  * Errors baseQuery can return. Follows the conventions of RTK query's fetchBaseQuery
  **/
-export type TRPCBaseQueryError =
+type TRPCBaseQueryError =
   | {
       /**
        * * `"TRPC_CLIENT_ERROR"`:

@@ -4,14 +4,14 @@ import { z } from "zod";
 
 const t = initTRPC.create();
 
-export const { procedure, router } = t;
+const { procedure, router } = t;
 
 const userSchema = z.object({
   id: z.number(),
   name: z.string(),
 });
 
-export type User = { id: number; name: string };
+type User = { id: number; name: string };
 
 export const userFixtures: Record<User["id"], User> = {
   1: { id: 1, name: "John Johnny" },
