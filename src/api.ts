@@ -7,10 +7,10 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 
-import { type CreateEndpointDefinitions } from "./create-endpoint-definitions";
-import { type AnyApi, type SupportedModule } from "./rtk-types";
-import { type TRPCClientOptions } from "./trpc-client-options";
-import { type DisabledEndpointOptions, wrapApiToProxy } from "./wrap-api-to-proxy";
+import { type CreateEndpointDefinitions } from "./create-endpoint-definitions.js";
+import { type AnyApi, type SupportedModule } from "./rtk-types.js";
+import { type TRPCClientOptions } from "./trpc-client-options.js";
+import { type DisabledEndpointOptions, wrapApiToProxy } from "./wrap-api-to-proxy.js";
 
 /**
  * Generic type for api that has injectEndpoint method for run time injection and
