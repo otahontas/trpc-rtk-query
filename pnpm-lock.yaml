@@ -18,6 +18,12 @@ importers:
       '@changesets/cli':
         specifier: ^2.27.6
         version: 2.27.6
+      '@eslint/eslintrc':
+        specifier: ^3.1.0
+        version: 3.1.0
+      '@eslint/js':
+        specifier: ^9.5.0
+        version: 9.5.0
       '@reduxjs/toolkit':
         specifier: ^2.2.5
         version: 2.2.5(react-redux@9.1.2(@types/react@18.3.3)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
