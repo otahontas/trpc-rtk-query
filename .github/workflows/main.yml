@@ -40,6 +40,9 @@ jobs:
       - name: Check types and module resolution
         run: npx @arethetypeswrong/cli --pack
 
+      - name: Check for unused files, deps and exports
+        run: pnpm run knip
+
   automerge:
     needs: pr
     runs-on: ubuntu-latest
