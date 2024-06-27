@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createRecursiveProtectiveProxy, deCapitalize } from "../src/wrap-api-to-proxy";
+import {
+  createRecursiveProtectiveProxy,
+  deCapitalize,
+} from "../src/wrap-api-to-proxy.js";
 
 describe("deCapitalize", () => {
   it("should decapitalize the first character of a string", () => {
