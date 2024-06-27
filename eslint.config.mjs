@@ -1,45 +1,25 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import eslint from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier"; // TODO: add types
+import eslintPluginPerfectionistRecommendedNatural from "eslint-plugin-perfectionist/configs/recommended-natural"; // TODO: add types
+import eslintPluginUnicorn from "eslint-plugin-unicorn"; // TODO: add types (https://github.com/sindresorhus/eslint-plugin-unicorn/pull/2382)
+import typescriptEslint from "typescript-eslint";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  allConfig: js.configs.all,
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-});
-
-export default [
+export default typescriptEslint.config(
+  eslint.configs.recommended,
+  eslintConfigPrettier,
+  eslintPluginPerfectionistRecommendedNatural,
+  eslintPluginUnicorn.configs["flat/recommended"],
+  ...typescriptEslint.configs.recommended,
   {
-    ignores: ["**/dist/", "**/node_modules/", "**/.git/", "**/pnpm-lock.yaml"],
+    ignores: ["dist/*"],
   },
-  ...compat.extends(
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier",
-    "plugin:unicorn/recommended",
-    "plugin:perfectionist/recommended-natural",
-  ),
   {
-    languageOptions: {
-      parser: tsParser,
-    },
-
-    plugins: {
-      "@typescript-eslint": typescriptEslint,
-    },
-
     rules: {
       "no-console": "error",
     },
   },
   {
     files: ["**/test/**/*.ts", "**/test/**/*.tsx"],
-
     rules: {
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/no-explicit-any": "off",
@@ -50,4 +30,4 @@ export default [
       "unicorn/no-useless-undefined": "off",
     },
   },
-];
+);
