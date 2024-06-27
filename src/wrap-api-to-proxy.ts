@@ -2,9 +2,9 @@ import { type EndpointDefinitions } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 import { isPlainObject, isString } from "is-what";
 
-import { createTRPCBaseQuery } from "./create-trpc-base-query";
-import { AnyApi } from "./rtk-types";
-import { type TRPCClientOptions } from "./trpc-client-options";
+import { createTRPCBaseQuery } from "./create-trpc-base-query.js";
+import { AnyApi } from "./rtk-types.js";
+import { type TRPCClientOptions } from "./trpc-client-options.js";
 
 /**
  * For decapitalizing endpoint name parts

@@ -7,7 +7,7 @@ import {
 import { type AnyRouter, TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 
-import { type TRPCClientOptions } from "./trpc-client-options";
+import { type TRPCClientOptions } from "./trpc-client-options.js";
 
 /**
  * Errors baseQuery can return. Follows the conventions of RTK query's fetchBaseQuery
