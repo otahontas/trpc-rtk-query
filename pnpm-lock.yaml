@@ -20,7 +20,7 @@ importers:
         version: 2.27.6
       '@reduxjs/toolkit':
         specifier: ^2.2.1
-        version: 2.2.1(react-redux@9.1.0)(react@18.2.0)
+        version: 2.2.1(react-redux@9.1.0(@types/react@18.2.67)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
       '@trpc/client':
         specifier: ^10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -47,13 +47,13 @@ importers:
         version: 18.0.7
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.3.1
-        version: 7.13.0(@typescript-eslint/parser@7.13.1)(eslint@8.57.0)(typescript@5.4.5)
+        version: 7.13.0(@typescript-eslint/parser@7.13.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
       '@typescript-eslint/parser':
         specifier: ^7.3.1
         version: 7.13.1(eslint@8.57.0)(typescript@5.4.5)
       '@vitest/coverage-v8':
         specifier: ^1.4.0
-        version: 1.6.0(vitest@1.6.0)
+        version: 1.6.0(vitest@1.6.0(@types/node@20.14.8)(happy-dom@14.12.0)(jsdom@24.1.0))
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -89,7 +89,7 @@ importers:
         version: 18.2.0(react@18.2.0)
       tsup:
         specifier: ^8.0.2
-        version: 8.1.0(typescript@5.4.5)
+        version: 8.1.0(postcss@8.4.38)(typescript@5.4.5)
       typescript:
         specifier: ^5.4.2
         version: 5.4.5
@@ -2917,14 +2917,15 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@reduxjs/toolkit@2.2.1(react-redux@9.1.0)(react@18.2.0)':
+  '@reduxjs/toolkit@2.2.1(react-redux@9.1.0(@types/react@18.2.67)(react@18.2.0)(redux@5.0.1))(react@18.2.0)':
     dependencies:
       immer: 10.0.4
-      react: 18.2.0
-      react-redux: 9.1.0(@types/react@18.2.67)(react@18.2.0)(redux@5.0.1)
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
       reselect: 5.1.0
+    optionalDependencies:
+      react: 18.2.0
+      react-redux: 9.1.0(@types/react@18.2.67)(react@18.2.0)(redux@5.0.1)
 
   '@rollup/rollup-android-arm-eabi@4.13.0':
     optional: true
@@ -3019,7 +3020,7 @@ snapshots:
 
   '@types/use-sync-external-store@0.0.3': {}
 
-  '@typescript-eslint/eslint-plugin@7.13.0(@typescript-eslint/parser@7.13.1)(eslint@8.57.0)(typescript@5.4.5)':
+  '@typescript-eslint/eslint-plugin@7.13.0(@typescript-eslint/parser@7.13.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
       '@typescript-eslint/parser': 7.13.1(eslint@8.57.0)(typescript@5.4.5)
@@ -3032,6 +3033,7 @@ snapshots:
       ignore: 5.3.1
       natural-compare: 1.4.0
       ts-api-utils: 1.3.0(typescript@5.4.5)
+    optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
@@ -3044,6 +3046,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 7.13.1
       debug: 4.3.4
       eslint: 8.57.0
+    optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
@@ -3070,6 +3073,7 @@ snapshots:
       debug: 4.3.4
       eslint: 8.57.0
       ts-api-utils: 1.3.0(typescript@5.4.5)
+    optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
@@ -3090,6 +3094,7 @@ snapshots:
       minimatch: 9.0.3
       semver: 7.6.2
       ts-api-utils: 1.3.0(typescript@5.4.5)
+    optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
@@ -3104,6 +3109,7 @@ snapshots:
       minimatch: 9.0.4
       semver: 7.6.2
       ts-api-utils: 1.3.0(typescript@5.4.5)
+    optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
@@ -3118,6 +3124,7 @@ snapshots:
       minimatch: 9.0.4
       semver: 7.6.2
       ts-api-utils: 1.3.0(typescript@5.4.5)
+    optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
@@ -3164,7 +3171,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitest/coverage-v8@1.6.0(vitest@1.6.0)':
+  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@20.14.8)(happy-dom@14.12.0)(jsdom@24.1.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -4259,10 +4266,12 @@ snapshots:
 
   pluralize@8.0.0: {}
 
-  postcss-load-config@4.0.2:
+  postcss-load-config@4.0.2(postcss@8.4.38):
     dependencies:
       lilconfig: 3.1.1
       yaml: 2.4.1
+    optionalDependencies:
+      postcss: 8.4.38
 
   postcss@8.4.38:
     dependencies:
@@ -4311,11 +4320,12 @@ snapshots:
 
   react-redux@9.1.0(@types/react@18.2.67)(react@18.2.0)(redux@5.0.1):
     dependencies:
-      '@types/react': 18.2.67
       '@types/use-sync-external-store': 0.0.3
       react: 18.2.0
-      redux: 5.0.1
       use-sync-external-store: 1.2.0(react@18.2.0)
+    optionalDependencies:
+      '@types/react': 18.2.67
+      redux: 5.0.1
 
   react-shallow-renderer@16.15.0(react@18.2.0):
     dependencies:
@@ -4605,7 +4615,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  tsup@8.1.0(typescript@5.4.5):
+  tsup@8.1.0(postcss@8.4.38)(typescript@5.4.5):
     dependencies:
       bundle-require: 4.0.2(esbuild@0.21.5)
       cac: 6.7.14
@@ -4615,12 +4625,14 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.2
+      postcss-load-config: 4.0.2(postcss@8.4.38)
       resolve-from: 5.0.0
       rollup: 4.13.0
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tree-kill: 1.2.2
+    optionalDependencies:
+      postcss: 8.4.38
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
@@ -4691,16 +4703,15 @@ snapshots:
 
   vite@5.2.13(@types/node@20.14.8):
     dependencies:
-      '@types/node': 20.14.8
       esbuild: 0.20.2
       postcss: 8.4.38
       rollup: 4.13.0
     optionalDependencies:
+      '@types/node': 20.14.8
       fsevents: 2.3.3
 
   vitest@1.6.0(@types/node@20.14.8)(happy-dom@14.12.0)(jsdom@24.1.0):
     dependencies:
-      '@types/node': 20.14.8
       '@vitest/expect': 1.6.0
       '@vitest/runner': 1.6.0
       '@vitest/snapshot': 1.6.0
@@ -4710,8 +4721,6 @@ snapshots:
       chai: 4.4.1
       debug: 4.3.4
       execa: 8.0.1
-      happy-dom: 14.12.0
-      jsdom: 24.1.0
       local-pkg: 0.5.0
       magic-string: 0.30.8
       pathe: 1.1.2
@@ -4723,6 +4732,10 @@ snapshots:
       vite: 5.2.13(@types/node@20.14.8)
       vite-node: 1.6.0(@types/node@20.14.8)
       why-is-node-running: 2.2.2
+    optionalDependencies:
+      '@types/node': 20.14.8
+      happy-dom: 14.12.0
+      jsdom: 24.1.0
     transitivePeerDependencies:
       - less
       - lightningcss
