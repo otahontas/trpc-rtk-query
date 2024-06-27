@@ -90,7 +90,6 @@ const injectEndpointToApi = <Api extends Injectable, TRouter extends AnyRouter>(
     // TODO: https://github.com/otahontas/trpc-rtk-query/issues/41
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryFn: (procedureArguments: unknown, api: any, extraOptions: any) =>
-      // eslint-disable-next-line unicorn/consistent-destructuring
       createTRPCBaseQuery(options.tRPCClientOptions)(
         {
           procedureArguments,
