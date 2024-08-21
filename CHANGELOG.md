@@ -1,5 +1,11 @@
 # trpc-rtk-query
 
+## 0.2.0
+
+### Minor Changes
+
+- [#308](https://github.com/otahontas/trpc-rtk-query/pull/308) [`a270fef`](https://github.com/otahontas/trpc-rtk-query/commit/a270fef50977afda0ecd0604fe3a76099481b2a8) Thanks [@ianldgs](https://github.com/ianldgs)! - Set packageManager field instead of engines.pnpm
+
 ## 0.1.1
 
 ### Patch Changes
