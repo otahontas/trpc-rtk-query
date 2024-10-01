@@ -53,7 +53,7 @@ importers:
         version: 18.3.0
       '@vitest/coverage-v8':
         specifier: ^1.6.0
-        version: 1.6.0(vitest@1.6.0(@types/node@22.0.2)(happy-dom@15.7.2)(jsdom@25.0.0))
+        version: 1.6.0(vitest@1.6.0(@types/node@22.0.2)(happy-dom@15.7.4)(jsdom@25.0.0))
       eslint:
         specifier: ^9.5.0
         version: 9.9.1(jiti@1.21.6)
@@ -68,7 +68,7 @@ importers:
         version: 55.0.0(eslint@9.9.1(jiti@1.21.6))
       happy-dom:
         specifier: ^15.7.2
-        version: 15.7.2
+        version: 15.7.4
       jsdom:
         specifier: ^25.0.0
         version: 25.0.0
@@ -104,7 +104,7 @@ importers:
         version: 5.3.5(@types/node@22.0.2)
       vitest:
         specifier: ^1.6.0
-        version: 1.6.0(@types/node@22.0.2)(happy-dom@15.7.2)(jsdom@25.0.0)
+        version: 1.6.0(@types/node@22.0.2)(happy-dom@15.7.4)(jsdom@25.0.0)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -1210,8 +1210,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  happy-dom@15.7.2:
-    resolution: {integrity: sha512-ZU4a27Sj+J7fgd+Kx3PVZ5NbANQxQS4gGZ1SaNMA4zvSDB5ZNkXg4UHLCkMko0fogg9XowI4f51p5FzgDfhVeQ==}
+  happy-dom@15.7.4:
+    resolution: {integrity: sha512-r1vadDYGMtsHAAsqhDuk4IpPvr6N8MGKy5ntBo7tSdim+pWDxus2PNqOcOt8LuDZ4t3KJHE+gCuzupcx/GKnyQ==}
     engines: {node: '>=18.0.0'}
 
   has-flag@3.0.0:
@@ -3075,7 +3075,7 @@ snapshots:
       '@typescript-eslint/types': 7.14.1
       eslint-visitor-keys: 3.4.3
 
-  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@22.0.2)(happy-dom@15.7.2)(jsdom@25.0.0))':
+  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@22.0.2)(happy-dom@15.7.4)(jsdom@25.0.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -3090,7 +3090,7 @@ snapshots:
       std-env: 3.7.0
       strip-literal: 2.1.0
       test-exclude: 6.0.0
-      vitest: 1.6.0(@types/node@22.0.2)(happy-dom@15.7.2)(jsdom@25.0.0)
+      vitest: 1.6.0(@types/node@22.0.2)(happy-dom@15.7.4)(jsdom@25.0.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -3699,7 +3699,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  happy-dom@15.7.2:
+  happy-dom@15.7.4:
     dependencies:
       entities: 4.5.0
       webidl-conversions: 7.0.0
@@ -4710,7 +4710,7 @@ snapshots:
       '@types/node': 22.0.2
       fsevents: 2.3.3
 
-  vitest@1.6.0(@types/node@22.0.2)(happy-dom@15.7.2)(jsdom@25.0.0):
+  vitest@1.6.0(@types/node@22.0.2)(happy-dom@15.7.4)(jsdom@25.0.0):
     dependencies:
       '@vitest/expect': 1.6.0
       '@vitest/runner': 1.6.0
@@ -4734,7 +4734,7 @@ snapshots:
       why-is-node-running: 2.2.2
     optionalDependencies:
       '@types/node': 22.0.2
-      happy-dom: 15.7.2
+      happy-dom: 15.7.4
       jsdom: 25.0.0
     transitivePeerDependencies:
       - less
