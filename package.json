@@ -48,7 +48,7 @@
     "@vitest/coverage-v8": "^1.6.0",
     "eslint": "^9.5.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-perfectionist": "^2.11.0",
+    "eslint-plugin-perfectionist": "^4.3.0",
     "eslint-plugin-unicorn": "^56.0.0",
     "happy-dom": "^15.7.2",
     "jsdom": "^25.0.0",
