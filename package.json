@@ -50,7 +50,7 @@
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-perfectionist": "^2.11.0",
     "eslint-plugin-unicorn": "^56.0.0",
-    "happy-dom": "^15.7.2",
+    "happy-dom": "^16.8.1",
     "jsdom": "^26.0.0",
     "knip": "^5.23.0",
     "prettier": "^3.3.2",
