@@ -40,8 +40,8 @@ importers:
         specifier: ^8.42.3
         version: 8.42.3
       '@types/node':
-        specifier: ^22.0.2
-        version: 22.15.29
+        specifier: ^24.0.8
+        version: 24.0.8
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -53,7 +53,7 @@ importers:
         version: 18.3.0
       '@vitest/coverage-v8':
         specifier: ^3.1.4
-        version: 3.1.4(vitest@1.6.1(@types/node@22.15.29)(happy-dom@16.8.1)(jsdom@26.0.0))
+        version: 3.1.4(vitest@1.6.1(@types/node@24.0.8)(happy-dom@16.8.1)(jsdom@26.0.0))
       eslint:
         specifier: ^9.5.0
         version: 9.25.1(jiti@1.21.6)
@@ -74,7 +74,7 @@ importers:
         version: 26.0.0
       knip:
         specifier: ^5.23.0
-        version: 5.30.6(@types/node@22.15.29)(typescript@5.7.3)
+        version: 5.30.6(@types/node@24.0.8)(typescript@5.7.3)
       prettier:
         specifier: ^3.3.2
         version: 3.5.3
@@ -101,10 +101,10 @@ importers:
         version: 7.14.1(eslint@9.25.1(jiti@1.21.6))(typescript@5.7.3)
       vite:
         specifier: ^6.0.1
-        version: 6.3.4(@types/node@22.15.29)(jiti@1.21.6)(yaml@2.4.5)
+        version: 6.3.4(@types/node@24.0.8)(jiti@1.21.6)(yaml@2.4.5)
       vitest:
         specifier: ^1.6.0
-        version: 1.6.1(@types/node@22.15.29)(happy-dom@16.8.1)(jsdom@26.0.0)
+        version: 1.6.1(@types/node@24.0.8)(happy-dom@16.8.1)(jsdom@26.0.0)
       zod:
         specifier: ^3.23.8
         version: 3.24.2
@@ -1056,8 +1056,8 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@22.15.29':
-    resolution: {integrity: sha512-LNdjOkUDlU1RZb8e1kOIUpN1qQUlzGkEtbVNo53vbrwDg5om6oduhm4SiUaPW5ASTXhAiP0jInWG8Qx9fVlOeQ==}
+  '@types/node@24.0.8':
+    resolution: {integrity: sha512-WytNrFSgWO/esSH9NbpWUfTMGQwCGIKfCmNlmFDNiI5gGhgMmEA+V1AEvKLeBNvvtBnailJtkrEa2OIISwrVAA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2579,8 +2579,8 @@ packages:
   ufo@1.6.1:
     resolution: {integrity: sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==}
 
-  undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+  undici-types@7.8.0:
+    resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
   unicorn-magic@0.1.0:
     resolution: {integrity: sha512-lRfVq8fE8gz6QMBuDM6a+LO3IAzTi05H6gCVaUpir2E1Rwpo4ZUog45KpNXKC/Mn3Yb9UDuHumeFTo9iV/D9FQ==}
@@ -3549,9 +3549,9 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
-  '@types/node@22.15.29':
+  '@types/node@24.0.8':
     dependencies:
-      undici-types: 6.21.0
+      undici-types: 7.8.0
 
   '@types/normalize-package-data@2.4.4': {}
 
@@ -3656,7 +3656,7 @@ snapshots:
       '@typescript-eslint/types': 7.14.1
       eslint-visitor-keys: 3.4.3
 
-  '@vitest/coverage-v8@3.1.4(vitest@1.6.1(@types/node@22.15.29)(happy-dom@16.8.1)(jsdom@26.0.0))':
+  '@vitest/coverage-v8@3.1.4(vitest@1.6.1(@types/node@24.0.8)(happy-dom@16.8.1)(jsdom@26.0.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -3670,7 +3670,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 1.6.1(@types/node@22.15.29)(happy-dom@16.8.1)(jsdom@26.0.0)
+      vitest: 1.6.1(@types/node@24.0.8)(happy-dom@16.8.1)(jsdom@26.0.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4457,11 +4457,11 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.30.6(@types/node@22.15.29)(typescript@5.7.3):
+  knip@5.30.6(@types/node@24.0.8)(typescript@5.7.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@snyk/github-codeowners': 1.1.0
-      '@types/node': 22.15.29
+      '@types/node': 24.0.8
       easy-table: 1.2.0
       enhanced-resolve: 5.17.1
       fast-glob: 3.3.2
@@ -5135,7 +5135,7 @@ snapshots:
 
   ufo@1.6.1: {}
 
-  undici-types@6.21.0: {}
+  undici-types@7.8.0: {}
 
   unicorn-magic@0.1.0: {}
 
@@ -5160,13 +5160,13 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite-node@1.6.1(@types/node@22.15.29):
+  vite-node@1.6.1(@types/node@24.0.8):
     dependencies:
       cac: 6.7.14
       debug: 4.4.1
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.19(@types/node@22.15.29)
+      vite: 5.4.19(@types/node@24.0.8)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -5178,16 +5178,16 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.4.19(@types/node@22.15.29):
+  vite@5.4.19(@types/node@24.0.8):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.3
       rollup: 4.41.1
     optionalDependencies:
-      '@types/node': 22.15.29
+      '@types/node': 24.0.8
       fsevents: 2.3.3
 
-  vite@6.3.4(@types/node@22.15.29)(jiti@1.21.6)(yaml@2.4.5):
+  vite@6.3.4(@types/node@24.0.8)(jiti@1.21.6)(yaml@2.4.5):
     dependencies:
       esbuild: 0.25.3
       fdir: 6.4.4(picomatch@4.0.2)
@@ -5196,12 +5196,12 @@ snapshots:
       rollup: 4.40.1
       tinyglobby: 0.2.13
     optionalDependencies:
-      '@types/node': 22.15.29
+      '@types/node': 24.0.8
       fsevents: 2.3.3
       jiti: 1.21.6
       yaml: 2.4.5
 
-  vitest@1.6.1(@types/node@22.15.29)(happy-dom@16.8.1)(jsdom@26.0.0):
+  vitest@1.6.1(@types/node@24.0.8)(happy-dom@16.8.1)(jsdom@26.0.0):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -5220,11 +5220,11 @@ snapshots:
       strip-literal: 2.1.1
       tinybench: 2.9.0
       tinypool: 0.8.4
-      vite: 5.4.19(@types/node@22.15.29)
-      vite-node: 1.6.1(@types/node@22.15.29)
+      vite: 5.4.19(@types/node@24.0.8)
+      vite-node: 1.6.1(@types/node@24.0.8)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 22.15.29
+      '@types/node': 24.0.8
       happy-dom: 16.8.1
       jsdom: 26.0.0
     transitivePeerDependencies:
