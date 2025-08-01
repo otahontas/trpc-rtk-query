@@ -41,7 +41,7 @@
     "@tsconfig/node20": "^20.1.4",
     "@tsconfig/strictest": "^2.0.5",
     "@types/eslint__js": "^8.42.3",
-    "@types/node": "^22.0.2",
+    "@types/node": "^24.1.0",
     "@types/react": "^18.3.3",
     "@types/react-redux": "^7.1.33",
     "@types/react-test-renderer": "^18.3.0",
