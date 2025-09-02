@@ -106,8 +106,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@24.1.0)(happy-dom@16.8.1)(jsdom@26.1.0)
       zod:
-        specifier: ^3.23.8
-        version: 3.24.2
+        specifier: ^4.1.5
+        version: 4.1.5
 
 packages:
 
@@ -2785,8 +2785,11 @@ packages:
     peerDependencies:
       zod: ^3.18.0
 
-  zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.1.5:
+    resolution: {integrity: sha512-rcUUZqlLJgBC33IT3PNMgsCq6TzLQEG/Ei/KTCU0PedSWRMAXoOUN+4t/0H+Q8bdnLPdqUYnvboJT0bn/229qg==}
 
 snapshots:
 
@@ -4438,8 +4441,8 @@ snapshots:
       strip-json-comments: 5.0.1
       summary: 2.1.0
       typescript: 5.7.3
-      zod: 3.24.2
-      zod-validation-error: 3.3.0(zod@3.24.2)
+      zod: 3.25.76
+      zod-validation-error: 3.3.0(zod@3.25.76)
 
   levn@0.4.1:
     dependencies:
@@ -5269,8 +5272,10 @@ snapshots:
 
   yocto-queue@1.1.1: {}
 
-  zod-validation-error@3.3.0(zod@3.24.2):
+  zod-validation-error@3.3.0(zod@3.25.76):
     dependencies:
-      zod: 3.24.2
+      zod: 3.25.76
 
-  zod@3.24.2: {}
+  zod@3.25.76: {}
+
+  zod@4.1.5: {}
