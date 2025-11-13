@@ -1,58 +1,40 @@
+// Shared tRPC router for E2E tests
+// This file is in the same package as the client to ensure proper TypeScript type resolution
 import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
 
 const t = initTRPC.create();
 
-// Destructure to match test fixtures pattern - important for type inference
+// Destructure to match library test fixtures pattern
 const { procedure, router } = t;
 
-// Test data
-const users = new Map([
-  [1, { id: 1, name: 'Alice Johnson' }],
-  [2, { id: 2, name: 'Bob Smith' }],
-  [3, { id: 3, name: 'Charlie Brown' }],
-]);
-
-let nextId = 4;
-
 // Define the router with various types of procedures
-// Using similar patterns as library's test fixtures for best type inference
 export const appRouter = router({
   // Basic query - using primitive input like test fixtures
   getUserById: procedure
     .input(z.number())
     .query(({ input }) => {
-      const user = users.get(input);
-      if (!user) {
-        throw new Error(`User with id ${input} not found`);
-      }
-      return user;
+      // In real E2E tests, this would hit the actual server
+      return { id: input, name: `User ${input}` };
     }),
 
   // Query without input
   listUsers: procedure.query(() => {
-    return Array.from(users.values());
+    return [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }];
   }),
 
   // Mutation - using primitive input
   createUser: procedure
     .input(z.string().min(1))
     .mutation(({ input }) => {
-      const newUser = { id: nextId++, name: input };
-      users.set(newUser.id, newUser);
-      return newUser;
+      return { id: Date.now(), name: input };
     }),
 
   // Mutation with object input (matching test fixtures pattern)
   updateName: procedure
     .input(z.object({ id: z.number(), name: z.string().min(1) }))
     .mutation(({ input }) => {
-      const user = users.get(input.id);
-      if (!user) {
-        throw new Error(`User with id ${input.id} not found`);
-      }
-      user.name = input.name;
-      return user;
+      return { id: input.id, name: input.name };
     }),
 
   // Nested router (matching test fixtures structure)

@@ -3,7 +3,8 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 // Import from the built library tarball
 import { enhanceApi } from 'trpc-rtk-query';
-import type { AppRouter } from '../../server/router.js';
+// Import router from same package to ensure TypeScript can resolve complex generic types
+import type { AppRouter } from './shared-router.js';
 
 // Create an empty base API
 const baseApi = createApi({
