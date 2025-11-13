@@ -11,7 +11,7 @@ export default typescriptEslint.config(
   eslintPluginUnicorn.configs["flat/recommended"],
   ...typescriptEslint.configs.recommended,
   {
-    ignores: ["dist/*"],
+    ignores: ["dist/*", "e2e/packages/client/dist/*", "e2e/packages/*/node_modules/*"],
   },
   {
     rules: {
@@ -28,6 +28,23 @@ export default typescriptEslint.config(
       "unicorn/consistent-function-scoping": "off",
       "unicorn/no-null": "off",
       "unicorn/no-useless-undefined": "off",
+    },
+  },
+  {
+    files: ["e2e/**/*.ts", "e2e/**/*.tsx"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-console": "off",
+      "perfectionist/sort-imports": "off",
+      "perfectionist/sort-jsx-props": "off",
+      "perfectionist/sort-named-imports": "off",
+      "perfectionist/sort-objects": "off",
+      "unicorn/catch-error-name": "off",
+      "unicorn/filename-case": "off",
+      "unicorn/numeric-separators-style": "off",
+      "unicorn/prefer-query-selector": "off",
+      "unicorn/prefer-spread": "off",
+      "unicorn/prevent-abbreviations": "off",
     },
   },
 );

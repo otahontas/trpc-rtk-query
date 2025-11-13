@@ -1,5 +1,5 @@
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
-import { appRouter } from './router.js';
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { appRouter } from "./router.js";
 
 const PORT = 3456;
 
@@ -20,7 +20,7 @@ export function startServer() {
 export function stopServer() {
   return new Promise<void>((resolve) => {
     server.server.close(() => {
-      console.log('E2E tRPC server stopped');
+      console.log("E2E tRPC server stopped");
       resolve();
     });
   });

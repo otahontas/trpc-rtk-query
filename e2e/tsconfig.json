@@ -12,5 +12,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["server/**/*", "tests/**/*"]
+  "include": ["packages/server/**/*", "tests/**/*"]
 }

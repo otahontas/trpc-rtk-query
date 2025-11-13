@@ -1,14 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-// Import from the built library tarball
-import { enhanceApi } from 'trpc-rtk-query';
-// Import router from same package to ensure TypeScript can resolve complex generic types
-import type { AppRouter } from './shared-router.js';
+import { configureStore } from "@reduxjs/toolkit";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+// Import from the built library (installed via tarball for E2E testing)
+import { enhanceApi } from "trpc-rtk-query";
+// Import router type for E2E testing - see shared-router.ts for explanation (realistic monorepo consumer setup)
+import type { AppRouter } from "./shared-router.js";
 
 // Create an empty base API
 const baseApi = createApi({
-  reducerPath: 'trpcApi',
+  reducerPath: "trpcApi",
   baseQuery: () => ({ data: undefined }),
   endpoints: () => ({}),
 });
@@ -17,7 +17,7 @@ const baseApi = createApi({
 const trpcClient = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: 'http://localhost:3456',
+      url: "http://localhost:3456",
     }),
   ],
 });
@@ -34,8 +34,7 @@ export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

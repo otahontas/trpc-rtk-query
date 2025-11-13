@@ -1,38 +1,39 @@
-import { useState } from 'react';
-import { api } from './store.js';
+import { useState } from "react";
+import { api } from "./store.js";
 
 export function App() {
   const [userId, setUserId] = useState(1);
-  const [newUserName, setNewUserName] = useState('');
-  const [updateNameText, setUpdateNameText] = useState('');
+  const [newUserName, setNewUserName] = useState("");
+  const [updateNameText, setUpdateNameText] = useState("");
 
   // Test basic query with primitive input (matching test fixtures pattern)
-  const { data: user, isLoading: userLoading, error: userError } =
-    api.useGetUserByIdQuery(userId);
+  const {
+    data: user,
+    isLoading: userLoading,
+    error: userError,
+  } = api.useGetUserByIdQuery(userId);
 
   // Test query without input
-  const { data: users, isLoading: usersLoading } =
-    api.useListUsersQuery();
+  const { data: users, isLoading: usersLoading } = api.useListUsersQuery();
 
   // Test deeply nested query with input
-  const { data: deepMessage } =
-    api.useNested_Deep_GetVeryNestedMessageQuery({ deepInput: 'test' });
+  const { data: deepMessage } = api.useNested_Deep_GetVeryNestedMessageQuery({
+    deepInput: "test",
+  });
 
   // Test mutations
-  const [createUser, { isLoading: creating }] =
-    api.useCreateUserMutation();
+  const [createUser, { isLoading: creating }] = api.useCreateUserMutation();
 
-  const [updateName, { isLoading: updating }] =
-    api.useUpdateNameMutation();
+  const [updateName, { isLoading: updating }] = api.useUpdateNameMutation();
 
   const handleCreateUser = async () => {
     if (!newUserName.trim()) return;
     try {
       // Mutation with primitive string input
       await createUser(newUserName).unwrap();
-      setNewUserName('');
+      setNewUserName("");
     } catch (err) {
-      console.error('Failed to create user:', err);
+      console.error("Failed to create user:", err);
     }
   };
 
@@ -41,14 +42,14 @@ export function App() {
     try {
       // Mutation with object input
       await updateName({ id: userId, name: updateNameText }).unwrap();
-      setUpdateNameText('');
+      setUpdateNameText("");
     } catch (err) {
-      console.error('Failed to update user:', err);
+      console.error("Failed to update user:", err);
     }
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <h1 data-testid="app-title">tRPC RTK Query E2E Test</h1>
 
       {/* User Query Section */}
@@ -66,8 +67,12 @@ export function App() {
         {userError && <div data-testid="user-error">Error loading user</div>}
         {user && (
           <div data-testid="user-data">
-            <p>ID: <span data-testid="user-id">{user.id}</span></p>
-            <p>Name: <span data-testid="user-name">{user.name}</span></p>
+            <p>
+              ID: <span data-testid="user-id">{user.id}</span>
+            </p>
+            <p>
+              Name: <span data-testid="user-name">{user.name}</span>
+            </p>
           </div>
         )}
       </section>
@@ -102,7 +107,7 @@ export function App() {
           disabled={creating}
           data-testid="create-user-button"
         >
-          {creating ? 'Creating...' : 'Create User'}
+          {creating ? "Creating..." : "Create User"}
         </button>
       </section>
 
@@ -121,7 +126,7 @@ export function App() {
           disabled={updating}
           data-testid="update-user-button"
         >
-          {updating ? 'Updating...' : 'Update User'}
+          {updating ? "Updating..." : "Update User"}
         </button>
       </section>
 
