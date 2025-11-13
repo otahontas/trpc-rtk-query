@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { api } from './store';
 
-// Type assertions to work around known TypeScript limitations
-// See issues #64, #47, #46, #41, #42 in the library
-const enhancedApi = api as any;
-
 export function App() {
   const [userId, setUserId] = useState(1);
   const [newUserName, setNewUserName] = useState('');
@@ -12,37 +8,37 @@ export function App() {
 
   // Test basic query
   const { data: user, isLoading: userLoading, error: userError } =
-    enhancedApi.useGetUserByIdQuery({ id: userId });
+    api.useGetUserByIdQuery({ id: userId });
 
   // Test query without input
   const { data: users, isLoading: usersLoading } =
-    enhancedApi.useListUsersQuery();
+    api.useListUsersQuery();
 
   // Test nested query
   const { data: nestedMessage } =
-    enhancedApi.useNested_GetMessageQuery();
+    api.useNested_GetMessageQuery();
 
   // Test deeply nested query
   const { data: deepMessage } =
-    enhancedApi.useNested_Deep_GetVeryNestedMessageQuery();
+    api.useNested_Deep_GetVeryNestedMessageQuery();
 
   // Test nested query with input
   const { data: echoData } =
-    enhancedApi.useNested_Deep_EchoQuery({ text: 'Hello E2E' });
+    api.useNested_Deep_EchoQuery({ text: 'Hello E2E' });
 
   // Test post query
   const { data: post } =
-    enhancedApi.usePosts_GetByIdQuery({ id: 1 });
+    api.usePosts_GetByIdQuery({ id: 1 });
 
   // Test mutations
   const [createUser, { isLoading: creating }] =
-    enhancedApi.useCreateUserMutation();
+    api.useCreateUserMutation();
 
   const [updateUserName, { isLoading: updating }] =
-    enhancedApi.useUpdateUserNameMutation();
+    api.useUpdateUserNameMutation();
 
   const [createPost] =
-    enhancedApi.usePosts_CreateMutation();
+    api.usePosts_CreateMutation();
 
   const handleCreateUser = async () => {
     if (!newUserName.trim()) return;

@@ -12,10 +12,10 @@ importers:
         specifier: ^1.48.2
         version: 1.56.1
       '@trpc/client':
-        specifier: ^10.45.2
+        specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
-        specifier: ^10.45.2
+        specifier: 10.45.2
         version: 10.45.2
       '@types/node':
         specifier: ^24.1.0
@@ -27,14 +27,14 @@ importers:
         specifier: ^4.19.2
         version: 4.20.6
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: 5.5.2
+        version: 5.5.2
       vite:
         specifier: ^6.3.6
         version: 6.4.1(@types/node@24.10.1)(tsx@4.20.6)
       zod:
-        specifier: ^4.1.5
-        version: 4.1.12
+        specifier: 4.1.5
+        version: 4.1.5
 
 packages:
 
@@ -582,8 +582,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+  typescript@5.5.2:
+    resolution: {integrity: sha512-NcRtPEOsPFFWjobJEtfihkLCZCXZt/os3zf8nTxjVH3RvTSxjrCamJpbExGvYOF+tFHc3pA65qpdwPbzjohhew==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -639,8 +639,8 @@ packages:
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
-  zod@4.1.12:
-    resolution: {integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==}
+  zod@4.1.5:
+    resolution: {integrity: sha512-rcUUZqlLJgBC33IT3PNMgsCq6TzLQEG/Ei/KTCU0PedSWRMAXoOUN+4t/0H+Q8bdnLPdqUYnvboJT0bn/229qg==}
 
 snapshots:
 
@@ -1119,7 +1119,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  typescript@5.9.3: {}
+  typescript@5.5.2: {}
 
   undici-types@7.16.0: {}
 
@@ -1144,4 +1144,4 @@ snapshots:
 
   yallist@3.1.1: {}
 
-  zod@4.1.12: {}
+  zod@4.1.5: {}
