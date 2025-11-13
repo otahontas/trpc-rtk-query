@@ -35,6 +35,25 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Install E2E dependencies
+        run: |
+          cd e2e && pnpm install
+          cd client && pnpm install
+
+      - name: Install Playwright browsers
+        run: cd e2e && npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: cd e2e && pnpm test
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 30
+
       - name: Check types and module resolution
         run: npx @arethetypeswrong/cli --pack
 

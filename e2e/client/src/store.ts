@@ -1,0 +1,40 @@
+import { configureStore } from '@reduxjs/toolkit';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+import { enhanceApi } from 'trpc-rtk-query';
+import type { AppRouter } from '../../server/router.js';
+
+// Create an empty base API
+const baseApi = createApi({
+  reducerPath: 'trpcApi',
+  baseQuery: () => ({ data: undefined }),
+  endpoints: () => ({}),
+});
+
+// Create tRPC client
+const trpcClient = createTRPCProxyClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: 'http://localhost:3456',
+    }),
+  ],
+});
+
+// Create the enhanced API using the built library
+export const api = enhanceApi<AppRouter, typeof baseApi>({
+  api: baseApi,
+  client: trpcClient,
+});
+
+// Configure the store
+// Using type assertion to work around known TypeScript limitations
+export const store = configureStore({
+  reducer: {
+    [(api as any).reducerPath]: (api as any).reducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat((api as any).middleware),
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
