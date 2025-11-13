@@ -1,49 +1,35 @@
 import { useState } from 'react';
-import { api } from './store';
+import { api } from './store.js';
 
 export function App() {
   const [userId, setUserId] = useState(1);
   const [newUserName, setNewUserName] = useState('');
-  const [updateName, setUpdateName] = useState('');
+  const [updateNameText, setUpdateNameText] = useState('');
 
-  // Test basic query
+  // Test basic query with primitive input (matching test fixtures pattern)
   const { data: user, isLoading: userLoading, error: userError } =
-    api.useGetUserByIdQuery({ id: userId });
+    api.useGetUserByIdQuery(userId);
 
   // Test query without input
   const { data: users, isLoading: usersLoading } =
     api.useListUsersQuery();
 
-  // Test nested query
-  const { data: nestedMessage } =
-    api.useNested_GetMessageQuery();
-
-  // Test deeply nested query
+  // Test deeply nested query with input
   const { data: deepMessage } =
-    api.useNested_Deep_GetVeryNestedMessageQuery();
-
-  // Test nested query with input
-  const { data: echoData } =
-    api.useNested_Deep_EchoQuery({ text: 'Hello E2E' });
-
-  // Test post query
-  const { data: post } =
-    api.usePosts_GetByIdQuery({ id: 1 });
+    api.useNested_Deep_GetVeryNestedMessageQuery({ deepInput: 'test' });
 
   // Test mutations
   const [createUser, { isLoading: creating }] =
     api.useCreateUserMutation();
 
-  const [updateUserName, { isLoading: updating }] =
-    api.useUpdateUserNameMutation();
-
-  const [createPost] =
-    api.usePosts_CreateMutation();
+  const [updateName, { isLoading: updating }] =
+    api.useUpdateNameMutation();
 
   const handleCreateUser = async () => {
     if (!newUserName.trim()) return;
     try {
-      await createUser({ name: newUserName }).unwrap();
+      // Mutation with primitive string input
+      await createUser(newUserName).unwrap();
       setNewUserName('');
     } catch (err) {
       console.error('Failed to create user:', err);
@@ -51,20 +37,13 @@ export function App() {
   };
 
   const handleUpdateUser = async () => {
-    if (!updateName.trim()) return;
+    if (!updateNameText.trim()) return;
     try {
-      await updateUserName({ id: userId, name: updateName }).unwrap();
-      setUpdateName('');
+      // Mutation with object input
+      await updateName({ id: userId, name: updateNameText }).unwrap();
+      setUpdateNameText('');
     } catch (err) {
       console.error('Failed to update user:', err);
-    }
-  };
-
-  const handleCreatePost = async () => {
-    try {
-      await createPost({ title: 'Test Post', content: 'Test Content' }).unwrap();
-    } catch (err) {
-      console.error('Failed to create post:', err);
     }
   };
 
@@ -79,7 +58,7 @@ export function App() {
           <input
             type="number"
             value={userId}
-            onChange={(e) => setUserId(Number(e.target.value))}
+            onChange={(e) => setUserId(Number((e.target as HTMLInputElement).value))}
             data-testid="user-id-input"
           />
         </div>
@@ -114,7 +93,7 @@ export function App() {
         <input
           type="text"
           value={newUserName}
-          onChange={(e) => setNewUserName(e.target.value)}
+          onChange={(e) => setNewUserName((e.target as HTMLInputElement).value)}
           placeholder="New user name"
           data-testid="new-user-input"
         />
@@ -132,8 +111,8 @@ export function App() {
         <h2>Update User Name</h2>
         <input
           type="text"
-          value={updateName}
-          onChange={(e) => setUpdateName(e.target.value)}
+          value={updateNameText}
+          onChange={(e) => setUpdateNameText((e.target as HTMLInputElement).value)}
           placeholder="New name"
           data-testid="update-name-input"
         />
@@ -149,38 +128,11 @@ export function App() {
       {/* Nested Routes Section */}
       <section data-testid="nested-section">
         <h2>Nested Routes</h2>
-        {nestedMessage && (
-          <div data-testid="nested-message">
-            {nestedMessage.message}
-          </div>
-        )}
         {deepMessage && (
           <div data-testid="deep-message">
-            {deepMessage.message} (Level: {deepMessage.level})
+            {deepMessage.messageFromDeep} (Input: {deepMessage.inputBack})
           </div>
         )}
-        {echoData && (
-          <div data-testid="echo-message">
-            Echo: {echoData.echo}
-          </div>
-        )}
-      </section>
-
-      {/* Posts Section */}
-      <section data-testid="posts-section">
-        <h2>Posts</h2>
-        {post && (
-          <div data-testid="post-data">
-            <p>Post ID: <span data-testid="post-id">{post.id}</span></p>
-            <p>Title: <span data-testid="post-title">{post.title}</span></p>
-          </div>
-        )}
-        <button
-          onClick={handleCreatePost}
-          data-testid="create-post-button"
-        >
-          Create Post
-        </button>
       </section>
     </div>
   );

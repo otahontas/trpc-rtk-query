@@ -13,14 +13,15 @@ const users = new Map([
 let nextId = 4;
 
 // Define the router with various types of procedures
+// Using similar patterns as library's test fixtures for best type inference
 export const appRouter = t.router({
-  // Basic query
+  // Basic query - using primitive input like test fixtures
   getUserById: t.procedure
-    .input(z.object({ id: z.number() }))
+    .input(z.number())
     .query(({ input }) => {
-      const user = users.get(input.id);
+      const user = users.get(input);
       if (!user) {
-        throw new Error(`User with id ${input.id} not found`);
+        throw new Error(`User with id ${input} not found`);
       }
       return user;
     }),
@@ -30,17 +31,17 @@ export const appRouter = t.router({
     return Array.from(users.values());
   }),
 
-  // Mutation
+  // Mutation - using primitive input
   createUser: t.procedure
-    .input(z.object({ name: z.string().min(1) }))
+    .input(z.string().min(1))
     .mutation(({ input }) => {
-      const newUser = { id: nextId++, name: input.name };
+      const newUser = { id: nextId++, name: input };
       users.set(newUser.id, newUser);
       return newUser;
     }),
 
-  // Mutation with update
-  updateUserName: t.procedure
+  // Mutation with object input (matching test fixtures pattern)
+  updateName: t.procedure
     .input(z.object({ id: z.number(), name: z.string().min(1) }))
     .mutation(({ input }) => {
       const user = users.get(input.id);
@@ -51,38 +52,15 @@ export const appRouter = t.router({
       return user;
     }),
 
-  // Nested router
+  // Nested router (matching test fixtures structure)
   nested: t.router({
-    getMessage: t.procedure.query(() => {
-      return { message: 'Hello from nested route' };
-    }),
-
     deep: t.router({
-      getVeryNestedMessage: t.procedure.query(() => {
-        return { message: 'Hello from very nested route', level: 'deep' };
-      }),
-
-      echo: t.procedure
-        .input(z.object({ text: z.string() }))
+      getVeryNestedMessage: t.procedure
+        .input(z.object({ deepInput: z.string() }))
         .query(({ input }) => {
-          return { echo: input.text };
+          return { inputBack: input.deepInput, messageFromDeep: 'Hello from deep' };
         }),
     }),
-  }),
-
-  // Additional test procedures
-  posts: t.router({
-    getById: t.procedure
-      .input(z.object({ id: z.number() }))
-      .query(({ input }) => {
-        return { id: input.id, title: `Post ${input.id}`, content: 'Content' };
-      }),
-
-    create: t.procedure
-      .input(z.object({ title: z.string(), content: z.string() }))
-      .mutation(({ input }) => {
-        return { id: Math.floor(Math.random() * 1000), ...input };
-      }),
   }),
 });
 

@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+// Import from the built library tarball
 import { enhanceApi } from 'trpc-rtk-query';
 import type { AppRouter } from '../../server/router.js';
 
@@ -12,16 +13,12 @@ const baseApi = createApi({
 });
 
 // Create tRPC client
-// Note: TypeScript requires explicit transformer config due to strict type validation
-// This is a tRPC limitation, not a library issue - the library's types work perfectly
 const trpcClient = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
       url: 'http://localhost:3456',
     }),
   ],
-  // @ts-expect-error - tRPC v10 type system requires this due to cross-package inference
-  transformer: undefined,
 });
 
 // Create the enhanced API using the built library

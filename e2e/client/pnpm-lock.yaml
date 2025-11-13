@@ -24,8 +24,8 @@ importers:
         specifier: 9.1.2
         version: 9.1.2(@types/react@18.3.26)(react@18.3.1)(redux@5.0.1)
       trpc-rtk-query:
-        specifier: file:../..
-        version: file:../..(@reduxjs/toolkit@2.2.5(react-redux@9.1.2(@types/react@18.3.26)(react@18.3.1)(redux@5.0.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)
+        specifier: file:../../trpc-rtk-query-0.2.0.tgz
+        version: file:../../trpc-rtk-query-0.2.0.tgz(@reduxjs/toolkit@2.2.5(react-redux@9.1.2(@types/react@18.3.26)(react@18.3.1)(redux@5.0.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -629,8 +629,9 @@ packages:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
 
-  trpc-rtk-query@file:../..:
-    resolution: {directory: ../.., type: directory}
+  trpc-rtk-query@file:../../trpc-rtk-query-0.2.0.tgz:
+    resolution: {integrity: sha512-H0tHSxmQX2Tj137tN0BuLnL0k3yw5ZHYeFi7ecq07svV966Hl9dLKudD87s5BL7YN9T4fN8ie+8KqRSeTIO8nA==, tarball: file:../../trpc-rtk-query-0.2.0.tgz}
+    version: 0.2.0
     engines: {node: '>=20'}
     peerDependencies:
       '@reduxjs/toolkit': ^2.2.1
@@ -1205,7 +1206,7 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
-  trpc-rtk-query@file:../..(@reduxjs/toolkit@2.2.5(react-redux@9.1.2(@types/react@18.3.26)(react@18.3.1)(redux@5.0.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2):
+  trpc-rtk-query@file:../../trpc-rtk-query-0.2.0.tgz(@reduxjs/toolkit@2.2.5(react-redux@9.1.2(@types/react@18.3.26)(react@18.3.1)(redux@5.0.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2):
     dependencies:
       '@reduxjs/toolkit': 2.2.5(react-redux@9.1.2(@types/react@18.3.26)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
       '@trpc/client': 10.45.2(@trpc/server@10.45.2)
