@@ -1,7 +1,7 @@
 import eslint from "@eslint/js";
-import eslintConfigPrettier from "eslint-config-prettier"; // TODO: add types
-import eslintPluginPerfectionistRecommendedNatural from "eslint-plugin-perfectionist/configs/recommended-natural"; // TODO: add types
-import eslintPluginUnicorn from "eslint-plugin-unicorn"; // TODO: add types (https://github.com/sindresorhus/eslint-plugin-unicorn/pull/2382)
+import eslintConfigPrettier from "eslint-config-prettier";
+import eslintPluginPerfectionistRecommendedNatural from "eslint-plugin-perfectionist/configs/recommended-natural";
+import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import typescriptEslint from "typescript-eslint";
 
 export default typescriptEslint.config(

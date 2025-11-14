@@ -34,7 +34,7 @@ describe("createRecursiveProtectiveProxy", () => {
     });
 
     // Access property that doesn't exist
-    (proxy as any).a.b;
+    void (proxy as any).a.b;
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(["a", "b"]);
