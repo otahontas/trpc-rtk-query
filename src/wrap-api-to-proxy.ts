@@ -1,4 +1,8 @@
-import { type EndpointDefinitions } from "@reduxjs/toolkit/query/react";
+import {
+  type BaseQueryApi,
+  type EndpointDefinitions,
+} from "@reduxjs/toolkit/query/react";
+import { type TRPCRequestOptions } from "@trpc/client";
 import { type AnyRouter } from "@trpc/server";
 import { isPlainObject, isString } from "is-what";
 
@@ -87,9 +91,11 @@ const injectEndpointToApi = <Api extends Injectable, TRouter extends AnyRouter>(
     : endpoint;
 
   const builderArguments = {
-    // TODO: https://github.com/otahontas/trpc-rtk-query/issues/41
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    queryFn: (procedureArguments: unknown, api: any, extraOptions: any) =>
+    queryFn: (
+      procedureArguments: unknown,
+      api: BaseQueryApi,
+      extraOptions: TRPCRequestOptions,
+    ) =>
       createTRPCBaseQuery(options.tRPCClientOptions)(
         {
           procedureArguments,
