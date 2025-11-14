@@ -12,7 +12,7 @@ describe("create endpoint definitions", () => {
     it("generates properly shaped return type that can be passed to rtk QueryKeys type helper", () => {
       type Definitions = CreateEndpointDefinitions<
         AppRouter,
-        TRPCBaseQuery,
+        TRPCBaseQuery<AppRouter>,
         "api",
         never
       >;
