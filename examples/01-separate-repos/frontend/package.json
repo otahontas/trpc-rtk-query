@@ -1,0 +1,27 @@
+{
+  "name": "trpc-rtk-query-frontend-example",
+  "version": "1.0.0",
+  "description": "Frontend example for trpc-rtk-query with React and Vite",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.2.5",
+    "@trpc/client": "^10.45.2",
+    "@trpc/server": "^10.45.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.1.2",
+    "trpc-rtk-query": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4"
+  }
+}

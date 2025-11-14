@@ -1,0 +1,25 @@
+{
+  "name": "trpc-rtk-query-react-native-example",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.2.5",
+    "@trpc/client": "^10.45.2",
+    "@trpc/server": "^10.45.2",
+    "expo": "^50.0.0",
+    "expo-router": "^3.4.0",
+    "react": "^18.3.1",
+    "react-native": "^0.73.0",
+    "react-redux": "^9.1.2",
+    "trpc-rtk-query": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "typescript": "^5.3.3"
+  }
+}

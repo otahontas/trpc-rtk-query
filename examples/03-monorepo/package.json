@@ -1,0 +1,15 @@
+{
+  "name": "trpc-rtk-query-monorepo-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo example for trpc-rtk-query using pnpm workspaces",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./packages/**\" dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm --filter shared build && pnpm --filter backend build && pnpm --filter frontend build",
+    "clean": "pnpm --filter \"./packages/**\" exec rm -rf dist node_modules"
+  },
+  "keywords": ["trpc", "rtk-query", "monorepo", "pnpm"],
+  "packageManager": "pnpm@9.6.0"
+}
