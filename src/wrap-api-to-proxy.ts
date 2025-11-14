@@ -45,23 +45,22 @@ export type DisabledEndpointOptions =
   | "type"; // type is a typescript only internal type for rtk, not needed here.
 
 /**
- * Generic type to match against endpoint options that users are allowed to pass.
- * @internal
- */
-type AnyEndpointOptions = {
-  [K in keyof EndpointDefinitions]?: Omit<
-    EndpointDefinitions[K],
-    DisabledEndpointOptions
-  >;
-};
-
-/**
  * Options to decide whether to use queryFn or baseQuery. If using queryFn,
  * client options must be provided.
  * @internal
  */
-type QueryOptions<TRouter extends AnyRouter> = {
-  endpointOptions?: AnyEndpointOptions | undefined; // allow explicit undefined also, so we can just pass from enhanceApi
+type QueryOptions<
+  TRouter extends AnyRouter,
+  TEndpointDefinitions extends EndpointDefinitions = EndpointDefinitions,
+> = {
+  endpointOptions?:
+    | {
+        [K in keyof TEndpointDefinitions]?: Omit<
+          TEndpointDefinitions[K],
+          DisabledEndpointOptions
+        >;
+      }
+    | undefined; // allow explicit undefined also, so we can just pass from enhanceApi
   tRPCClientOptions: TRPCClientOptions<TRouter>;
 };
 
@@ -71,12 +70,16 @@ type QueryOptions<TRouter extends AnyRouter> = {
  * object.
  * @internal
  */
-const injectEndpointToApi = <Api extends Injectable, TRouter extends AnyRouter>(
+const injectEndpointToApi = <
+  Api extends Injectable,
+  TRouter extends AnyRouter,
+  TEndpointDefinitions extends EndpointDefinitions = EndpointDefinitions,
+>(
   options: {
     api: Api;
     endpoint: string;
     procedureType: "mutation" | "query";
-  } & QueryOptions<TRouter>,
+  } & QueryOptions<TRouter, TEndpointDefinitions>,
 ) => {
   const { api, endpoint, endpointOptions, procedureType } = options;
   const procedurePath = endpoint.includes("_")
@@ -105,7 +108,7 @@ const injectEndpointToApi = <Api extends Injectable, TRouter extends AnyRouter>(
     endpoints: (builder) => ({
       [endpoint]: builder[procedureType]({
         ...builderArguments,
-        ...(endpointOptions?.[endpoint] as EndpointDefinitions), // TODO: https://github.com/otahontas/trpc-rtk-query/issues/47
+        ...endpointOptions?.[endpoint],
       }),
     }),
   });
@@ -170,12 +173,16 @@ const regexesWithProcedureType = [
  * methods. If method needs an endpoint, it is generated and injected to api object.
  * @internal
  */
-export const wrapApiToProxy = <Api extends Injectable, TRouter extends AnyRouter>({
+export const wrapApiToProxy = <
+  Api extends Injectable,
+  TRouter extends AnyRouter,
+  TEndpointDefinitions extends EndpointDefinitions = EndpointDefinitions,
+>({
   api: nonProxyApi,
   ...queryOptions // grab rest, so it's easier to pass them forwards
 }: {
   api: Api;
-} & QueryOptions<TRouter>) =>
+} & QueryOptions<TRouter, TEndpointDefinitions>) =>
   new Proxy(nonProxyApi, {
     get(target, property, receiver) {
       // Validate endpoints target, since it is needed in multiple places

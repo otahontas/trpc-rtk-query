@@ -61,7 +61,17 @@ export const enhanceApi = <
     };
   } & TRPCClientOptions<TRouter>,
 ) =>
-  wrapApiToProxy({
+  wrapApiToProxy<
+    Api<
+      BaseQuery,
+      CreateEndpointDefinitions<TRouter, BaseQuery, ReducerPath, TagTypes> & Endpoints,
+      ReducerPath,
+      TagTypes,
+      SupportedModule
+    >,
+    TRouter,
+    NewDefinitions
+  >({
     api: options.api as Api<
       BaseQuery,
       CreateEndpointDefinitions<TRouter, BaseQuery, ReducerPath, TagTypes> & Endpoints,

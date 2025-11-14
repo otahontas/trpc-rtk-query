@@ -264,4 +264,73 @@ describe("create-trpc-api", () => {
       .exclude<typeof skipToken>()
       .toMatchTypeOf<number>();
   });
+
+  it("properly infers endpointOptions types without casting (issue #47)", () => {
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const existingApi = createApi({
+      baseQuery: (string_: string) => {
+        return {
+          data: {
+            string_,
+          },
+        };
+      },
+      endpoints: (builder) => ({
+        getResponse: builder.query<string, string>({
+          query: (string_: string) => string_,
+        }),
+      }),
+      reducerPath: "premadeApi",
+      tagTypes: ["User"],
+    });
+
+    // Test that endpoint options properly infer types from tRPC procedures
+    const api = enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        // getUserById should accept options compatible with the query endpoint
+        getUserById: {
+          // result type should be inferred as User (from tRPC procedure output)
+          providesTags: (result) => {
+            expectTypeOf(result).toEqualTypeOf<
+              { id: number; name: string } | undefined
+            >();
+            return ["User"];
+          },
+        },
+        // Nested routes should also work
+        nested_Deep_GetVeryNestedMessage: {
+          providesTags: (result) => {
+            expectTypeOf(result).toEqualTypeOf<
+              { inputBack: string; messageFromDeep: string } | undefined
+            >();
+            return ["User"];
+          },
+        },
+        // updateName should accept options compatible with the mutation endpoint
+        updateName: {
+          // argument type should be inferred as { id: number; name: string } (from tRPC procedure input)
+          async onQueryStarted(argument, { dispatch, queryFulfilled }) {
+            expectTypeOf(argument).toEqualTypeOf<{ id: number; name: string }>();
+            const patchResult = dispatch(
+              api.util.updateQueryData("getUserById", argument.id, (draft) => {
+                Object.assign(draft, { name: argument.name });
+              }),
+            );
+            try {
+              await queryFulfilled;
+            } catch {
+              patchResult.undo();
+            }
+          },
+        },
+      },
+    });
+
+    // Verify the API is properly typed
+    const { useGetUserByIdQuery, useUpdateNameMutation } = api;
+    expectTypeOf(useGetUserByIdQuery).toBeFunction();
+    expectTypeOf(useUpdateNameMutation).toBeFunction();
+  });
 });
