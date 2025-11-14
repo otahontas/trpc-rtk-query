@@ -1,13 +1,15 @@
+import type { Linter } from "eslint";
+
 import eslint from "@eslint/js";
-import eslintConfigPrettier from "eslint-config-prettier"; // TODO: add types
-import eslintPluginPerfectionistRecommendedNatural from "eslint-plugin-perfectionist/configs/recommended-natural"; // TODO: add types
-import eslintPluginUnicorn from "eslint-plugin-unicorn"; // TODO: add types (https://github.com/sindresorhus/eslint-plugin-unicorn/pull/2382)
+import eslintConfigPrettier from "eslint-config-prettier";
+import eslintPluginPerfectionistRecommendedNatural from "eslint-plugin-perfectionist/configs/recommended-natural";
+import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import typescriptEslint from "typescript-eslint";
 
 export default typescriptEslint.config(
   eslint.configs.recommended,
   eslintConfigPrettier,
-  eslintPluginPerfectionistRecommendedNatural,
+  eslintPluginPerfectionistRecommendedNatural as Linter.Config,
   eslintPluginUnicorn.configs["flat/recommended"],
   ...typescriptEslint.configs.recommended,
   {
@@ -24,10 +26,11 @@ export default typescriptEslint.config(
       "@typescript-eslint/no-empty-function": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
       "no-console": "off",
       "unicorn/consistent-function-scoping": "off",
       "unicorn/no-null": "off",
       "unicorn/no-useless-undefined": "off",
     },
   },
-);
+) as Linter.Config[];
