@@ -1,5 +1,5 @@
 import { createApi, skipToken } from "@reduxjs/toolkit/query/react";
-import { createTRPCProxyClient } from "@trpc/client";
+import { createTRPCClient } from "@trpc/client";
 import { describe, expectTypeOf, it } from "vitest";
 
 import { enhanceApi } from "../src/index.js";
@@ -24,7 +24,7 @@ type QueryRoutes =
 // to copypaste each test case.
 describe("create-trpc-api", () => {
   it("allows injecting trpc api to existing api while infering types from client and api", () => {
-    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const client = createTRPCClient<AppRouter>(testClientOptions);
 
     const api = enhanceApi({
       api: createApi({
@@ -116,7 +116,7 @@ describe("create-trpc-api", () => {
   });
 
   it("allows injecting trpc api to existing api infering types from getclient", () => {
-    const getClient = async () => createTRPCProxyClient<AppRouter>(testClientOptions);
+    const getClient = async () => createTRPCClient<AppRouter>(testClientOptions);
 
     const api = enhanceApi({
       api: createApi({
@@ -206,7 +206,7 @@ describe("create-trpc-api", () => {
   });
 
   it("allows passing options for endpoints when enhancing api", () => {
-    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const client = createTRPCClient<AppRouter>(testClientOptions);
     const existingApi = createApi({
       baseQuery: (string_: string) => {
         return {

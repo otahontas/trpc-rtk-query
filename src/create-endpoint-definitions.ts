@@ -6,7 +6,6 @@ import {
 import {
   type AnyProcedure,
   type AnyRouter,
-  type Procedure,
   type inferProcedureInput,
   type inferProcedureOutput,
 } from "@trpc/server";
@@ -16,12 +15,7 @@ import {
  * @internal
  **/
 type inferProcedureType<TProcedure extends AnyProcedure> =
-  TProcedure extends Procedure<
-    infer ProcedureType,
-    // we don't care about the second param, so it can be any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any
-  >
+  TProcedure extends { _def: { type: infer ProcedureType } }
     ? Exclude<ProcedureType, "subscription">
     : never;
 

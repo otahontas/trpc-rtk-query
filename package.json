@@ -36,8 +36,8 @@
     "@changesets/cli": "^2.27.6",
     "@eslint/js": "^9.5.0",
     "@reduxjs/toolkit": "^2.2.5",
-    "@trpc/client": "^10.45.2",
-    "@trpc/server": "^10.45.2",
+    "@trpc/client": "^11.0.0",
+    "@trpc/server": "^11.0.0",
     "@tsconfig/node20": "^20.1.4",
     "@tsconfig/strictest": "^2.0.5",
     "@types/eslint__js": "^8.42.3",
@@ -67,8 +67,8 @@
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^2.2.1",
-    "@trpc/client": "^10.45.2",
-    "@trpc/server": "^10.45.2"
+    "@trpc/client": "^11.0.0",
+    "@trpc/server": "^11.0.0"
   },
   "dependencies": {
     "is-what": "^5.2.0"

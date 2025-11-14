@@ -41,7 +41,7 @@ npm install trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 yarn add trpc-rtk-query @reduxjs/toolkit @trpc/client @trpc/server
 ```
 
-Note the minimum versions for packages, we only support trpc v10 and rtk query v2.
+Note the minimum versions for packages, we support trpc v11 and rtk query v2.
 
 **2. Use your `tRPC router`.**
 
@@ -71,7 +71,7 @@ Create your api [like normal](https://trpc.io/docs/client/vanilla):
 
 ```typescript
 // client.ts
-const client = createTRPCProxyClient<AppRouter>({
+const client = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       url: 'http://localhost:3000/trpc',

@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { type BaseQueryApi, createApi } from "@reduxjs/toolkit/query/react";
-import { createTRPCProxyClient } from "@trpc/client";
+import { createTRPCClient } from "@trpc/client";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { setTimeout } from "node:timers/promises";
 import React from "react";
@@ -23,7 +23,7 @@ type TestServer = {
 
 export const startTestServer = (): Promise<TestServer> =>
   new Promise((resolveCreate) => {
-    const { server } = createHTTPServer({
+    const server = createHTTPServer({
       router: appRouter,
     });
 
@@ -90,7 +90,7 @@ describe("create-trpc-api with pre made api ", () => {
       getApi: () =>
         enhanceApi({
           api: createRTKQueryApiLazily(),
-          client: createTRPCProxyClient<AppRouter>(testClientOptions),
+          client: createTRPCClient<AppRouter>(testClientOptions),
         }),
       testCase: "using passed client",
     },
@@ -103,8 +103,8 @@ describe("create-trpc-api with pre made api ", () => {
             expect(baseQueryApi.type).toBeDefined();
             expect(baseQueryApi.endpoint).toBeDefined();
 
-            // Return proxy client
-            return createTRPCProxyClient<AppRouter>(testClientOptions);
+            // Return client
+            return createTRPCClient<AppRouter>(testClientOptions);
           },
         }),
       testCase: "using getClient to get the client",
@@ -399,7 +399,7 @@ describe("create-trpc-api with pre made api ", () => {
   });
 
   it("doesn't replace previous hooks when passing in and existing api", () => {
-    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const client = createTRPCClient<AppRouter>(testClientOptions);
     const api = enhanceApi({
       api: createRTKQueryApiLazily(),
       client,
