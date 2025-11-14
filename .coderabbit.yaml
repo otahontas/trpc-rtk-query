@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+# CodeRabbit Configuration for trpc-rtk-query
+# AI-powered code reviews for pull requests
+
+language: "en-US"
+tone_instructions: "Be constructive and educational. Focus on TypeScript best practices, type safety, and library API design."
+
+reviews:
+  # Use assertive profile for thorough reviews (especially important for alpha-stage library)
+  profile: "assertive"
+
+  # Request high-level summary of changes
+  request_changes_workflow: false
+  high_level_summary: true
+
+  # Poem generation settings
+  poem: true
+
+  # Review settings
+  review_status: true
+
+  # Automatically review PRs
+  auto_review:
+    enabled: true
+    drafts: false  # Skip draft PRs
+    base_branches:
+      - main
+      - master
+
+  # Enable tools for code analysis
+  tools:
+    eslint:
+      enabled: true
+
+    # Security scanning
+    gitleaks:
+      enabled: true
+
+    # Additional linters/tools
+    biome:
+      enabled: false
+
+    ruff:
+      enabled: false
+
+  # Path-specific review instructions
+  path_instructions:
+    - path: "src/create-endpoint-definitions.ts"
+      instructions: |
+        This file contains complex TypeScript type transformations. Pay special attention to:
+        - Type safety and correctness
+        - Recursive type handling
+        - "Excessively deep instantiation" errors
+        - Edge cases in tRPC router structure transformation
+
+    - path: "src/**/*.ts"
+      instructions: |
+        Focus on:
+        - Type safety and proper TypeScript usage
+        - API design and public interfaces
+        - Breaking changes that affect library consumers
+        - Documentation completeness for public APIs
+
+    - path: "test/**/*.ts"
+      instructions: |
+        Review test coverage and quality:
+        - Test completeness and edge cases
+        - Type-level test correctness (for .test-d.ts files)
+        - Clear test descriptions and assertions
+
+    - path: "*.md"
+      instructions: |
+        Check documentation quality:
+        - Accuracy of examples and usage instructions
+        - Clarity for library users
+        - Up-to-date information about features and limitations
+
+# Chat settings
+chat:
+  auto_reply: true
+
+# Knowledge sharing
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: "auto"
+
+# Early access features
+early_access: false
+
+# Enable free tier features
+enable_free_tier: true
