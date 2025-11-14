@@ -3,6 +3,9 @@ import {
   type Api,
   type BaseQueryFn,
   type EndpointDefinitions,
+  type FullTagDescription,
+  type MutationDefinition,
+  type QueryDefinition,
   createApi,
 } from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
@@ -18,6 +21,70 @@ import { type DisabledEndpointOptions, wrapApiToProxy } from "./wrap-api-to-prox
  * @internal
  **/
 type InjectableWithEndpoints = Pick<AnyApi, "endpoints" | "injectEndpoints">;
+
+/**
+ * Extract TagTypes from an API's endpoint Types
+ * @internal
+ **/
+type ExtractTagTypes<TApi extends InjectableWithEndpoints> =
+  TApi["endpoints"] extends Record<string, { Types: { TagTypes: infer TTag extends string } }>
+    ? TTag
+    : never;
+
+/**
+ * Tag description type that can be either a string tag or an object with type and id.
+ * This is constrained to only allow tag types that are in the TagTypes union.
+ * @internal
+ **/
+type StrictTagDescription<TagTypes extends string> = TagTypes | { type: TagTypes; id?: number | string };
+
+/**
+ * Result description for query providesTags - either an array or a function returning an array.
+ * This enforces that all tags must be from the valid TagTypes union.
+ * @internal
+ **/
+type QueryProvidesTags<
+  TagTypes extends string,
+  ResultType,
+  QueryArg,
+> =
+  | ReadonlyArray<StrictTagDescription<TagTypes>>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | ((result: ResultType | undefined, error: any | undefined, arg: QueryArg) => ReadonlyArray<StrictTagDescription<TagTypes>>);
+
+/**
+ * Result description for mutation invalidatesTags - either an array or a function returning an array.
+ * This enforces that all tags must be from the valid TagTypes union.
+ * @internal
+ **/
+type MutationInvalidatesTags<
+  TagTypes extends string,
+  ResultType,
+  QueryArg,
+> =
+  | ReadonlyArray<StrictTagDescription<TagTypes>>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | ((result: ResultType | undefined, error: any | undefined, arg: QueryArg) => ReadonlyArray<StrictTagDescription<TagTypes>>);
+
+/**
+ * Helper type to constrain endpoint options to use valid tag types.
+ * This completely replaces providesTags/invalidatesTags with strictly typed versions.
+ * @internal
+ **/
+type ConstrainedEndpointOptions<
+  EndpointDef,
+  TagTypes extends string,
+> = EndpointDef extends QueryDefinition<infer QueryArg, infer BaseQuery, infer _OriginalTagTypes, infer ResultType, infer ReducerPath>
+  ? Omit<EndpointDef, DisabledEndpointOptions | "providesTags" | "invalidatesTags"> & {
+      providesTags?: QueryProvidesTags<TagTypes, ResultType, QueryArg>;
+      invalidatesTags?: never;
+    }
+  : EndpointDef extends MutationDefinition<infer QueryArg, infer BaseQuery, infer _OriginalTagTypes, infer ResultType, infer ReducerPath>
+    ? Omit<EndpointDef, DisabledEndpointOptions | "providesTags" | "invalidatesTags"> & {
+        invalidatesTags?: MutationInvalidatesTags<TagTypes, ResultType, QueryArg>;
+        providesTags?: never;
+      }
+    : Omit<EndpointDef, DisabledEndpointOptions>;
 
 /*
  * Enhances existing api with endpoints and react hooks generated from trpc types.
@@ -42,9 +109,8 @@ export const enhanceApi = <
   // 3. Reducer path
   ReducerPath extends
     string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["ReducerPath"],
-  // 4. Tag types
-  TagTypes extends
-    string = ExistingApi["endpoints"][keyof ExistingApi["endpoints"]]["Types"]["TagTypes"],
+  // 4. Tag types - use explicit extraction
+  TagTypes extends string = ExtractTagTypes<ExistingApi>,
   // New definitions
   NewDefinitions extends EndpointDefinitions = CreateEndpointDefinitions<
     TRouter,
@@ -57,7 +123,7 @@ export const enhanceApi = <
     api: ExistingApi;
   } & {
     endpointOptions?: {
-      [K in keyof NewDefinitions]?: Omit<NewDefinitions[K], DisabledEndpointOptions>;
+      [K in keyof NewDefinitions]?: ConstrainedEndpointOptions<NewDefinitions[K], TagTypes>;
     };
   } & TRPCClientOptions<TRouter>,
 ) =>

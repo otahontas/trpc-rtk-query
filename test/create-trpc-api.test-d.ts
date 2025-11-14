@@ -221,7 +221,7 @@ describe("create-trpc-api", () => {
         }),
       }),
       reducerPath: "premadeApi",
-      tagTypes: ["User"],
+      tagTypes: ["User"] as const,
     });
 
     const api = enhanceApi({
@@ -229,7 +229,8 @@ describe("create-trpc-api", () => {
       client,
       endpointOptions: {
         getUserById: {
-          providesTags: (result) => ["User", { id: result?.id }],
+          providesTags: (result) =>
+            result ? ["User", { type: "User", id: result.id }] : ["User"],
         },
         updateName: {
           async onQueryStarted({ id, name }, { dispatch, queryFulfilled }) {
@@ -263,5 +264,102 @@ describe("create-trpc-api", () => {
       .parameter(0)
       .exclude<typeof skipToken>()
       .toMatchTypeOf<number>();
+  });
+
+  it("validates providesTags and invalidatesTags against declared tagTypes", () => {
+    const client = createTRPCProxyClient<AppRouter>(testClientOptions);
+    const existingApi = createApi({
+      baseQuery: (string_: string) => {
+        return {
+          data: {
+            string_,
+          },
+        };
+      },
+      endpoints: (builder) => ({
+        getResponse: builder.query<string, string>({
+          query: (string_: string) => string_,
+        }),
+      }),
+      reducerPath: "premadeApi",
+      tagTypes: ["User", "Post"] as const,
+    });
+
+    // Valid tags should work
+    enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        getUserById: {
+          providesTags: ["User"],
+        },
+      },
+    });
+
+    enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        getUserById: {
+          providesTags: [{ type: "User", id: 1 }],
+        },
+      },
+    });
+
+    enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        getUserById: {
+          providesTags: (result) =>
+            result ? ["User", { type: "Post", id: result.id }] : ["User"],
+        },
+      },
+    });
+
+    // Invalid tags should error
+    enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        getUserById: {
+          // @ts-expect-error - "Userrr" is not in tagTypes
+          providesTags: ["Userrr"],
+        },
+      },
+    });
+
+    enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        getUserById: {
+          // @ts-expect-error - "InvalidTag" is not in tagTypes
+          providesTags: [{ type: "InvalidTag", id: 1 }],
+        },
+      },
+    });
+
+    enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        updateName: {
+          // @ts-expect-error - "NonExistent" is not in tagTypes
+          invalidatesTags: ["NonExistent"],
+        },
+      },
+    });
+
+    enhanceApi({
+      api: existingApi,
+      client,
+      endpointOptions: {
+        updateName: {
+          // @ts-expect-error - "BadTag" is not in tagTypes
+          invalidatesTags: (result) => [{ type: "BadTag" }],
+        },
+      },
+    });
   });
 });
