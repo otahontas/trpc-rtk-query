@@ -11,6 +11,26 @@ import {
   type inferProcedureOutput,
 } from "@trpc/server";
 
+import { type TRPCBaseQueryError } from "./create-trpc-base-query.js";
+
+/**
+ * Override the error type of a BaseQueryFn to use TRPCBaseQueryError.
+ * This ensures that tRPC endpoints always have the correct error type,
+ * regardless of the base query type of the API they're being added to.
+ * @internal
+ **/
+type BaseQueryWithTRPCError<TBaseQuery extends BaseQueryFn> =
+  TBaseQuery extends BaseQueryFn<
+    infer TArguments,
+    infer TResult,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    infer _TError, // Ignore the original error type
+    infer TExtraOptions,
+    infer TMeta
+  >
+    ? BaseQueryFn<TArguments, TResult, TRPCBaseQueryError, TExtraOptions, TMeta>
+    : never;
+
 /** Infer type of procedure ("query" or "mutation") from procedure. We don't support
  * "subscription" type, so it's dropped here
  * @internal
@@ -83,7 +103,7 @@ export type CreateEndpointDefinitions<
         ? ProcedureType extends "query"
           ? QueryDefinition<
               inferProcedureInput<Pair[1]>,
-              BaseQuery,
+              BaseQueryWithTRPCError<BaseQuery>,
               TagTypes,
               inferProcedureOutput<Pair[1]>,
               ReducerPath
@@ -91,7 +111,7 @@ export type CreateEndpointDefinitions<
           : ProcedureType extends "mutation"
             ? MutationDefinition<
                 inferProcedureInput<Pair[1]>,
-                BaseQuery,
+                BaseQueryWithTRPCError<BaseQuery>,
                 TagTypes,
                 inferProcedureOutput<Pair[1]>,
                 ReducerPath

@@ -10,9 +10,11 @@ import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 import { type TRPCClientOptions } from "./trpc-client-options.js";
 
 /**
- * Errors baseQuery can return. Follows the conventions of RTK query's fetchBaseQuery
+ * Errors that tRPC base query can return. Follows the conventions of RTK query's fetchBaseQuery.
+ * This type is used for all tRPC endpoints and provides proper TypeScript autocomplete
+ * and type checking when handling errors in components.
  **/
-type TRPCBaseQueryError =
+export type TRPCBaseQueryError =
   | {
       /**
        * * `"TRPC_CLIENT_ERROR"`:
