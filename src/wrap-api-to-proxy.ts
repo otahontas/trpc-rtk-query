@@ -1,4 +1,8 @@
-import { type EndpointDefinitions } from "@reduxjs/toolkit/query/react";
+import {
+  type EndpointDefinitions,
+  type MutationDefinition,
+  type QueryDefinition,
+} from "@reduxjs/toolkit/query/react";
 import { type AnyRouter } from "@trpc/server";
 import { isPlainObject, isString } from "is-what";
 
@@ -45,14 +49,52 @@ export type DisabledEndpointOptions =
   | "type"; // type is a typescript only internal type for rtk, not needed here.
 
 /**
- * Generic type to match against endpoint options that users are allowed to pass.
+ * Helper type to extract options from endpoint definitions while preserving
+ * the discriminated union between query and mutation options.
+ * This ensures queries can only have query-specific options (like providesTags)
+ * and mutations can only have mutation-specific options (like invalidatesTags).
+ *
+ * The key is that we preserve the `never` types that RTK Query uses for discrimination:
+ * - QueryDefinition has `invalidatesTags?: never`
+ * - MutationDefinition has `providesTags?: never`
+ *
  * @internal
  */
-type AnyEndpointOptions = {
-  [K in keyof EndpointDefinitions]?: Omit<
-    EndpointDefinitions[K],
-    DisabledEndpointOptions
-  >;
+/* eslint-disable unicorn/prevent-abbreviations */
+export type ExtractEndpointOptions<Definition> =
+  Definition extends QueryDefinition<
+    infer QueryArg,
+    infer BaseQuery,
+    infer TagTypes,
+    infer ResultType,
+    infer ReducerPath
+  >
+    ? Omit<
+        QueryDefinition<QueryArg, BaseQuery, TagTypes, ResultType, ReducerPath>,
+        DisabledEndpointOptions
+      >
+    : Definition extends MutationDefinition<
+          infer QueryArg,
+          infer BaseQuery,
+          infer TagTypes,
+          infer ResultType,
+          infer ReducerPath
+        >
+      ? Omit<
+          MutationDefinition<QueryArg, BaseQuery, TagTypes, ResultType, ReducerPath>,
+          DisabledEndpointOptions
+        >
+      : never;
+/* eslint-enable unicorn/prevent-abbreviations */
+
+/**
+ * Helper type that creates a properly discriminated endpoint options type.
+ * This uses a homomorphic mapped type to preserve the relationship between
+ * each endpoint name and its specific definition type.
+ * @internal
+ */
+export type EndpointOptions<Definitions extends EndpointDefinitions> = {
+  [K in keyof Definitions]?: ExtractEndpointOptions<Definitions[K]>;
 };
 
 /**
@@ -60,8 +102,11 @@ type AnyEndpointOptions = {
  * client options must be provided.
  * @internal
  */
-type QueryOptions<TRouter extends AnyRouter> = {
-  endpointOptions?: AnyEndpointOptions | undefined; // allow explicit undefined also, so we can just pass from enhanceApi
+type QueryOptions<
+  TRouter extends AnyRouter,
+  Definitions extends EndpointDefinitions = EndpointDefinitions,
+> = {
+  endpointOptions?: EndpointOptions<Definitions> | undefined; // allow explicit undefined also, so we can just pass from enhanceApi
   tRPCClientOptions: TRPCClientOptions<TRouter>;
 };
 

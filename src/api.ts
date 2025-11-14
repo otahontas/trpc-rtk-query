@@ -10,7 +10,7 @@ import { type AnyRouter } from "@trpc/server";
 import { type CreateEndpointDefinitions } from "./create-endpoint-definitions.js";
 import { type AnyApi, type SupportedModule } from "./rtk-types.js";
 import { type TRPCClientOptions } from "./trpc-client-options.js";
-import { type DisabledEndpointOptions, wrapApiToProxy } from "./wrap-api-to-proxy.js";
+import { type EndpointOptions, wrapApiToProxy } from "./wrap-api-to-proxy.js";
 
 /**
  * Generic type for api that has injectEndpoint method for run time injection and
@@ -55,10 +55,7 @@ export const enhanceApi = <
 >(
   options: {
     api: ExistingApi;
-  } & {
-    endpointOptions?: {
-      [K in keyof NewDefinitions]?: Omit<NewDefinitions[K], DisabledEndpointOptions>;
-    };
+    endpointOptions?: EndpointOptions<NewDefinitions>;
   } & TRPCClientOptions<TRouter>,
 ) =>
   wrapApiToProxy({
