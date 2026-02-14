@@ -12,11 +12,18 @@
 
 ---
 
+## Maintenance status
+
+> ⚠️ This repository is no longer maintained.
+>
+> I no longer use this library, so I archived the project and stopped active development.
+> If you want to take over maintenance, please contact me on GitHub.
+
 ## **[RTK Query](https://redux-toolkit.js.org/rtk-query/overview) support for [tRPC](https://trpc.io/)** 🧩
 
 - Automatically generate **typesafe** `RTK Query hooks` (for react) from your `tRPC` procedures.
 - Perfect for incremental adoption.
-- Any feedback, issues, or pull requests are highly appreciated
+- This repository is archived, so development support is no longer active.
 
 ```typescript
 
